@@ -15,6 +15,8 @@ echo
 
 echo "[1/3] 5090으로 전송 (rsync, 임시 images/ 제외)..."
 ssh 5090 'mkdir -p ~/gr00tn16_ws/sim_data/heongyu'
+# 이전 변환이 남긴 root 소유 결과 정리(rsync 덮어쓰기 Permission denied 방지)
+ssh 5090 'docker run --rm --entrypoint /bin/bash -v $HOME/gr00tn16_ws/sim_data:/d real-robot-train8 -c "rm -rf /d/heongyu/sim_so101_blocktask /d/heongyu/sim_so101_blocktask_v3.0"' 2>/dev/null || true
 # images/ = recorder 임시 PNG(mp4 인코딩 후 삭제) → 제외. 녹화 중 vanished(code 24)는 무시.
 rsync -a --delete --exclude='images/' "$LOCAL_DS/" \
   "5090:~/gr00tn16_ws/sim_data/heongyu/sim_so101_blocktask/" \
