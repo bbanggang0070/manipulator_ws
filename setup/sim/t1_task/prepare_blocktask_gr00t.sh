@@ -13,9 +13,12 @@ EP=$(python3 -c "import json;print(json.load(open('$LOCAL_DS/meta/info.json'))['
 echo "로컬 데이터셋: $LOCAL_DS (에피소드 $EP개)"
 echo
 
-echo "[1/3] 5090으로 전송 (rsync)..."
+echo "[1/3] 5090으로 전송 (rsync, 임시 images/ 제외)..."
 ssh 5090 'mkdir -p ~/gr00tn16_ws/sim_data/heongyu'
-rsync -a --delete "$LOCAL_DS/" "5090:~/gr00tn16_ws/sim_data/heongyu/sim_so101_blocktask/"
+# images/ = recorder 임시 PNG(mp4 인코딩 후 삭제) → 제외. 녹화 중 vanished(code 24)는 무시.
+rsync -a --delete --exclude='images/' "$LOCAL_DS/" \
+  "5090:~/gr00tn16_ws/sim_data/heongyu/sim_so101_blocktask/" \
+  || { rc=$?; [ "$rc" = 24 ] && echo "  (일부 임시파일 vanished — 무시)" || exit $rc; }
 scp -q blocktask_modality.json _blocktask_convert_inner.sh 5090:/tmp/
 
 echo "[2/3] 5090에서 변환 + modality + stats (real-robot-train8 컨테이너)..."
