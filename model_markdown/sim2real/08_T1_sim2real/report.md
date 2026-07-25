@@ -119,22 +119,27 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 
 ---
 
-## D. 학습 지표 (학습 완주 후 채움) 🔲
+## D. 학습 지표 ✅ (2026-07-25 완주)
 
 ### D.1 손실 함수 그래프
 
-<!-- 학습 완주 후: docker logs에서 loss 파싱 → assets/loss_curve.png 생성 후 아래에 삽입 -->
-> _학습 완주 후 손실 곡선 이미지를 여기에 삽입 (`assets/loss_curve.png`)_
+![블록 T1 GR00T N1.6 학습 손실 곡선](assets/loss_curve.svg)
+
+> 20k step에 걸쳐 loss가 1.14 → **0.0073**으로 안정적으로 수렴. 발산·정체 구간 없음.
+> (log scale, 이동평균 50. `trainer_state.json`의 log_history 2,000 포인트 기반)
 
 ### D.2 학습 지표 요약
 
 | 지표 | 값 |
 |---|---|
-| 최종 loss | _(채움, 목표 ~0.005)_ |
-| 총 step | 20,000 |
-| 학습 시간 | _(채움)_ |
-| 최대 GPU 사용 | _(채움, < 32GB)_ |
-| 체크포인트 | `checkpoint-20000/` 무결성 _(채움)_ |
+| 최종 loss | **0.0073** (마지막 10 로그 평균 0.0076, 최저 0.0048) |
+| 총 step / epoch | 20,000 / 1.0 |
+| 학습 시간 | 약 15시간 (RTX 5090 단일, ~2.7s/it) |
+| GPU 메모리 | OOM 없이 완주 (동일 구성 vials 기준 ~22.7GB, < 32GB) |
+| 체크포인트 | `checkpoint-20000/` (13GB) + 최종 `model-0000{1,2}-of-00002.safetensors` |
+| 무결성 | `optimizer.pt`·`scheduler.pt`·`trainer_state.json`·`statistics.json`·`experiment_cfg` 전부 존재 ✅ |
+
+> vials(sim SR 80%)와 **동일 하이퍼파라미터·파이프라인**으로 최종 loss도 동급 수준 도달.
 
 ---
 
