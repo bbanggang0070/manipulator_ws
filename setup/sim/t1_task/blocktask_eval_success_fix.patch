@@ -1,0 +1,137 @@
+diff --git a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
+index 170026d..1058f18 100644
+--- a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
++++ b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
+@@ -126,6 +126,25 @@ BOX_SIZE = (0.10, 0.20, 0.075)  # 100mm (x) x 200mm (y) x 75mm (z), baked into b
+ # itself (mat top, see BLOCK_SPAWN_Z), not a half-height offset.
+ BASKET_SPAWN_Z = 0.045  # mat top (0.035) + small clearance to avoid initial penetration
+ 
++# 블록-in-바스켓 성공 판정 파라미터 (vials 함수 재사용). 매 호출 새 dict/SceneEntityCfg 반환
++# (obs·termination이 SceneEntityCfg 인스턴스를 공유하면 인덱스 이중 해석 위험 → 원본 vials처럼 분리).
++# basket_box.usda 원점=바닥 중심(벽 x=±0.047, y=±0.097) → 대칭 경계. 블록은 방향 무관 → vertical_threshold=0.
++def _block_place_params():
++    return dict(
++        contact_sensor_cfg=SceneEntityCfg("contact_grasp"),
++        vials=["block_red"],
++        rack_name="basket_black",
++        warmup_steps=30,
++        grasp_history_window=20,
++        force_threshold=2,
++        rack_local_x_min=-0.05,
++        rack_local_x_max=0.05,
++        rack_local_y_min=-0.10,
++        rack_local_y_max=0.10,
++        rack_local_z_max=0.08,
++        vertical_threshold=0.0,
++    )
++
+ paper_box_base = RigidObjectCfg(
+     prim_path="{ENV_REGEX_NS}/Basket",
+     spawn=sim_utils.UsdFileCfg(
+@@ -165,6 +184,32 @@ class VialsToRackSceneCfg(SO101TaskSceneCfg):
+     basket_black.prim_path = "{ENV_REGEX_NS}/Basket_Black"
+     basket_black.init_state.pos = (0.10, -0.22, BASKET_SPAWN_Z)
+ 
++    # 그리퍼 jaw ↔ 블록 접촉 센서 (파지 감지) — 성공 판정용. (원본 vials엔 있었으나 블록 개조 시 누락됨)
++    contact_grasp = ContactSensorCfg(
++        prim_path="{ENV_REGEX_NS}/Robot/jaw",
++        update_period=0.0,
++        history_length=1,
++        debug_vis=False,
++        filter_prim_paths_expr=["{ENV_REGEX_NS}/Block_Red"],
++    )
++
++    # mat.usda(텍스처 매트) 제거 → 깔끔한 밝은 회색 평면 바닥으로 교체. 물체 높이 튜닝(top=0.035) 보존.
++    # ⚠️ 정적 AssetBaseCfg collision은 GPU 물리에서 미등록되어 물체가 통과·낙하함 → kinematic
++    # RigidObject로 확실한 collision 확보. reset_mat_rotation은 아래 이벤트에서 비활성화(prim_paths 불필요).
++    mat = RigidObjectCfg(
++        prim_path="{ENV_REGEX_NS}/Mat",
++        spawn=sim_utils.CuboidCfg(
++            size=(0.8, 1.0, 0.005),  # 넓게(전 영역 커버, 물체 안 떨어짐) + 얇게(5mm). kinematic이라 안정.
++            rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True),
++            collision_props=sim_utils.CollisionPropertiesCfg(),
++            physics_material=sim_utils.RigidBodyMaterialCfg(
++                static_friction=1.0, dynamic_friction=1.0
++            ),
++            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.85, 0.85, 0.85)),
++        ),
++        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.20, -0.05, 0.0325)),  # top=0.035 (얇아 center 0.0325)
++    )
++
+ 
+ @configclass
+ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
+@@ -187,6 +232,9 @@ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
+ class VialsToRackEventCfg(TaskEventCfg):
+     """Configuration for events."""
+ 
++    # mat이 kinematic RigidObject(평면 바닥)라 prim_paths 미보유 → mat 회전 DR 비활성화.
++    reset_mat_rotation = None
++
+     # Robot arm color for this task only (base EventCfg defaults to orange).
+     reset_set_robot_visual_material = EventTerm(
+         func=randomize_robot_color,
+@@ -227,7 +275,7 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+         func=randomize_robot_color,
+         mode="reset",
+         params={
+-            "color_names": list(ROBOT_COLORS.keys()),
++            "color_names": ["purple"],  # 색 고정(보라) — DR에서도 랜덤화 안 함
+         },
+     )
+ 
+@@ -242,14 +290,8 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+         },
+     )
+ 
+-    reset_mat_rotation = EventTerm(
+-        func=randomize_mat_rotation,
+-        mode="reset",
+-        params={
+-            "yaw_range": (-0.3, 0.3),  # ±17° rotation
+-            "asset_cfg": SceneEntityCfg("mat"),
+-        },
+-    )
++    # mat이 kinematic RigidObject(평면 바닥)라 prim_paths 미보유 → DR에서도 mat 회전 비활성화.
++    reset_mat_rotation = None
+ 
+ 
+ @configclass
+@@ -260,6 +302,22 @@ class VialsToRackObservationsCfg(TaskObservationsCfg):
+     class SubtaskCfg(ObsGroup):
+         """Observations for subtask tracking."""
+ 
++        block_grasped = ObsTerm(
++            func=any_vial_grasped,
++            params={
++                "contact_sensor_cfg": SceneEntityCfg("contact_grasp"),
++                "vials": ["block_red"],
++                "min_height": 0.06,  # 블록(mat top 0.035 + half 0.01)에서 들어올려진 판정 높이
++                "warmup_steps": 30,
++                "force_threshold": 2,
++            },
++        )
++
++        block_placed = ObsTerm(
++            func=vial_placed_on_rack,
++            params=_block_place_params(),
++        )
++
+         def __post_init__(self) -> None:
+             self.enable_corruption = False
+             self.concatenate_terms = False
+@@ -276,6 +334,14 @@ class VialsToRackTerminationsCfg:
+         time_out=True,
+     )
+ 
++    # 성공 = 블록이 바스켓 안에 놓이고 릴리스됨. lerobot_eval은 이 termination(=not truncated)으로 SR 집계.
++    # (원본 vials엔 있었으나 블록 개조 시 누락 → 그래서 SR이 구조적으로 0%였음)
++    success = DoneTerm(
++        func=vial_placed_on_rack_termination,
++        time_out=False,
++        params=_block_place_params(),
++    )
++
+ 
+ 
+ @configclass

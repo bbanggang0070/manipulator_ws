@@ -11,7 +11,7 @@ Phase가 끝날 때마다 한 파일씩 정리한다. 계획서는 "무엇을 �
 | **A** | T1 씬·에셋 제작 (빨간 큐브 → 오픈박스) | ✅ 완료 | [A_scene_asset.md](A_scene_asset.md) |
 | **B** | 리더암 teleop 데이터 수집 (75ep) | ✅ 완료 | [B_data_collection.md](B_data_collection.md) |
 | **C** | GR00T N1.6 8-bit 학습 (loss 0.0073) | ✅ 완료 | [C_training.md](C_training.md) |
-| **D** | sim 추론 확인 | 🔄 진행 중 | [report.md](report.md) E절 |
+| **D** | sim 추론 확인 (Eval 60% / DR-Eval 50%) | ✅ 완료 | [report.md](report.md) E절 |
 | **E** | sim-to-real 전이 (실기) | ⏳ 대기 | (D 후 작성) |
 | **F** | (성능 부족 시) 실기 co-training | ⏳ 대기 | (E 판단 후) |
 

@@ -143,19 +143,38 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 
 ---
 
-## E. 추론 결과 (Phase D — sim 평가 후 채움) 🔲
+## E. 추론 결과 (Phase D — sim 평가) ✅ (2026-07-27)
+
+### E.0 ⚠️ 먼저: 평가 환경의 성공 판정 버그 수정
+
+첫 평가에서 Eval·DR-Eval 모두 **0%**가 나왔으나, 이는 정책 실패가 아니라 **측정 버그**였다.
+- `lerobot_eval`은 `is_terminated and not is_truncated`(=성공 termination으로 종료)로 SR을 센다.
+- 그런데 coworker 블록 포크의 Eval 환경엔 **성공 판정기 전체가 누락**돼 있었다 —
+  `contact_grasp` 센서 · `success` termination(`vial_placed_on_rack_termination`) · subtask term.
+  (원본 vials엔 있으나 블록 씬 개조 중 빠짐.) → 모든 ep가 `time_out`(truncation)으로 끝나 **구조적 0%**.
+- 손목 관절 매핑은 eval에서도 정상(`_sim_obs_to_groot_inputs`가 state +1.6034, 액션 -1.6034 적용) — 문제 아님.
+- **수정**: 원본 vials 배선을 블록에 이식 — `contact_grasp`(Block_Red 필터) + `success` DoneTerm +
+  subtask. `block_red`→`basket_black`, `vertical_threshold=0`(블록 방향 무관),
+  basket_box 중심원점 대칭경계(x±0.05·y±0.10·z_max0.08). 정본: 포크 `vials_to_rack_env_cfg.py`.
 
 ### E.1 sim 성공률
 
 | 환경 | 시행 | 성공 | SR |
 |---|---|---|---|
-| T1-Eval (DR 없음) | 10 | | /10 |
-| T1-DR-Eval | 10 | | /10 |
+| T1-Eval (DR 없음) | 10 | 6 | **60%** |
+| T1-DR-Eval | 10 | 5 | **50%** |
+
+- T1-Eval 에피소드별: ✅✅❌✅✅❌❌✅✅❌ (6/10)
+- T1-DR-Eval 에피소드별: ❌❌✅✅❌❌✅✅❌✅ (5/10)
+- 판정 수정 후 **0% → 60%(Eval) / 50%(DR-Eval)**. DR이 더 어려워 소폭 하락(정상).
+  DR-Eval이 실기 전이 예측력이 높음. vials(80%)보다 낮으나 T1이 더 어렵고 75ep 규모 감안 시 양호.
+  closed-loop로 파지·이송·배치 수행 확인.
 
 ### E.2 추론 영상
 
-<!-- sim 평가 시 --rerun 화면 녹화 또는 뷰포트 캡처 → assets/inference_*.mp4 / .gif -->
-> _sim closed-loop 추론 영상(파지→이송→배치)을 여기에 삽입 (`assets/inference.gif` 등)_
+<!-- headless eval에 front 카메라 프레임 덤프(PyAV) 추가 → assets/inference.mp4 -->
+> _sim closed-loop 추론 영상(파지→이송→배치)을 여기에 삽입 (`assets/inference.mp4`). 현재 headless라
+> 프레임 덤프 추가 후 1개 에피소드 녹화 예정. (5090 모니터 GUI로도 직접 관찰 가능)_
 
 ---
 
