@@ -1,0 +1,90 @@
+diff --git a/source/sim_to_real_so101/scripts/lerobot_eval.py b/source/sim_to_real_so101/scripts/lerobot_eval.py
+index 349a4c0..54dbb6c 100644
+--- a/source/sim_to_real_so101/scripts/lerobot_eval.py
++++ b/source/sim_to_real_so101/scripts/lerobot_eval.py
+@@ -14,11 +14,33 @@
+ # limitations under the License.
+ import argparse
+ import json
++import os
+ import random
++import numpy as np
+ from tqdm import tqdm
+ 
+ from isaaclab.app import AppLauncher
+ 
++
++def _write_mp4(path, frames, fps=30):
++    """headless 평가에서 롤아웃 프레임을 mp4로 저장(PyAV, libx264). 실패해도 평가는 계속."""
++    try:
++        import av
++        container = av.open(path, mode="w")
++        stream = container.add_stream("libx264", rate=fps)
++        stream.height, stream.width = frames[0].shape[:2]
++        stream.pix_fmt = "yuv420p"
++        for f in frames:
++            vf = av.VideoFrame.from_ndarray(np.ascontiguousarray(f), format="rgb24")
++            for pkt in stream.encode(vf):
++                container.mux(pkt)
++        for pkt in stream.encode():
++            container.mux(pkt)
++        container.close()
++        print(f"[VIDEO] saved {path} ({len(frames)} frames)")
++    except Exception as e:
++        print(f"[VIDEO] failed to save {path}: {e}")
++
+ # add argparse arguments
+ parser = argparse.ArgumentParser(description="Isaac Lab SO-101 Eval Client (remote GR00T inference server).")
+ parser.add_argument(
+@@ -53,6 +75,7 @@ parser.add_argument(
+     help="Language instruction for the policy",
+ )
+ parser.add_argument("--rerun", action="store_true", default=False, help="Enable Rerun visualization")
++parser.add_argument("--save_video_dir", type=str, default=None, help="설정 시 에피소드별 front 카메라 롤아웃을 mp4로 저장(headless 검증용)")
+ 
+ # append AppLauncher cli args
+ AppLauncher.add_app_launcher_args(parser)
+@@ -168,10 +191,23 @@ def main():
+ 
+     pbar = None
+ 
++    save_video_dir = args_cli.save_video_dir
++    if save_video_dir:
++        os.makedirs(save_video_dir, exist_ok=True)
++    episode_frames = []
++
+     while simulation_app.is_running():
+         # run everything in inference mode
+         with torch.inference_mode():
+ 
++            if save_video_dir:
++                try:
++                    vkey = "rgb_external_D455" if "rgb_external_D455" in obs["visual"] else "rgb_ego"
++                    fr = obs["visual"][vkey][0].detach().cpu().numpy()
++                    episode_frames.append(np.clip(fr, 0, 255).astype(np.uint8))
++                except Exception:
++                    pass
++
+             if step == 0:
+                 pbar = tqdm(
+                     total=env.unwrapped.max_episode_length,
+@@ -211,6 +247,11 @@ def main():
+ 
+                 success_rate = (num_successes / num_episodes) * 100
+ 
++                if save_video_dir and episode_frames:
++                    outcome = "success" if (is_terminated and not is_truncated) else "fail"
++                    _write_mp4(os.path.join(save_video_dir, f"ep{num_episodes:02d}_{outcome}.mp4"), episode_frames)
++                episode_frames = []
++
+                 # Reset for next episode
+                 obs, _ = env.reset()
+                 policy.reset()
+@@ -226,6 +267,7 @@ def main():
+                     pbar = None
+ 
+                 print(f"[MANUAL RESET] Episode interrupted at step {step}")
++                episode_frames = []
+                 obs, _ = env.reset()
+                 policy.reset()
+                 step = 0

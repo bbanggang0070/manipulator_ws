@@ -172,9 +172,13 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 
 ### E.2 추론 영상
 
-<!-- headless eval에 front 카메라 프레임 덤프(PyAV) 추가 → assets/inference.mp4 -->
-> _sim closed-loop 추론 영상(파지→이송→배치)을 여기에 삽입 (`assets/inference.mp4`). 현재 headless라
-> 프레임 덤프 추가 후 1개 에피소드 녹화 예정. (5090 모니터 GUI로도 직접 관찰 가능)_
+headless eval에 front(external_D455) 카메라 프레임 덤프(PyAV, `lerobot_eval.py --save_video_dir`)를 추가해
+성공 에피소드를 녹화. 아래는 성공 롤아웃 6프레임(접근 → 파지 → 이송 → 박스에 배치):
+
+![Phase D sim 추론 성공 롤아웃](assets/inference_success_strip.jpg)
+
+> 전체 영상: `assets/inference_success.mp4` (ep04, 231프레임/7.7s — **성공 판정으로 조기 종료**,
+> timeout 450프레임 아님). 정책이 빨간 큐브를 집어 검은 박스에 넣는 것을 closed-loop로 확인.
 
 ---
 

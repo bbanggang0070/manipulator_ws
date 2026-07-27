@@ -61,7 +61,8 @@ docker run --name teleop-eval --rm --privileged --gpus all \
   teleop-docker:latest \
   bash -c "lerobot_eval --task $TASK --num_envs 1 --num_episodes $NUM \
     --rename_map '$RENAME' --action_horizon 16 \
-    --lang_instruction '$LANG' --headless" 2>&1 | tee "$CLI_LOG"
+    --lang_instruction '$LANG' --headless \
+    ${SAVE_VIDEO_DIR:+--save_video_dir $SAVE_VIDEO_DIR}" 2>&1 | tee "$CLI_LOG"
 
 echo
 echo "=== 결과 요약 ==="
