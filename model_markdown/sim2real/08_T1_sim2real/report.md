@@ -1,16 +1,18 @@
 # T1 Sim-to-Real 실행 리포트 — 빨간 큐브 → 검은 박스 (GR00T N1.6)
 
 > Isaac Sim에 T1 태스크(빨간 큐브를 검은 오픈박스에 넣기) 씬을 만들고, 리더암 teleop으로
-> 학습 데이터를 수집해 GR00T N1.6를 학습하기까지의 실행 기록.
+> 학습 데이터를 수집해 GR00T N1.6를 학습하고 sim에서 추론 평가하기까지의 실행 기록.
 > 계획: [../08_custom_T1_sim2real.md](../08_custom_T1_sim2real.md) · Phase별 상세: [README.md](README.md)
 
-작성: 2026-07-25
+작성: 2026-07-25 · 최종 갱신: 2026-07-27
 
 | Phase | 내용 | 상태 |
 |---|---|---|
 | **A** | T1 씬·에셋 제작 | ✅ 완료 |
 | **B** | 리더암 teleop 데이터 수집 (75ep) | ✅ 완료 |
-| **C** | GR00T N1.6 8-bit 학습 | 🔄 진행 중 |
+| **C** | GR00T N1.6 8-bit 학습 (loss 0.0073) | ✅ 완료 |
+| **D** | sim 추론 평가 (Eval 60% / DR-Eval 50%) | ✅ 완료 |
+| **E** | sim→real 전이 (실기) | ⏳ 대기 |
 
 ---
 
@@ -173,12 +175,15 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 ### E.2 추론 영상
 
 headless eval에 front(external_D455) 카메라 프레임 덤프(PyAV, `lerobot_eval.py --save_video_dir`)를 추가해
-성공 에피소드를 녹화. 아래는 성공 롤아웃 6프레임(접근 → 파지 → 이송 → 박스에 배치):
+성공 에피소드를 녹화. 아래는 성공 롤아웃(접근 → 파지 → 이송 → 박스에 배치):
 
-![Phase D sim 추론 성공 롤아웃](assets/inference_success_strip.jpg)
+<video src="assets/inference_success.mp4" controls muted width="640">
+  인라인 재생이 안 되면 <a href="assets/inference_success.mp4">assets/inference_success.mp4</a> 를 여세요.
+</video>
 
-> 전체 영상: `assets/inference_success.mp4` (ep04, 231프레임/7.7s — **성공 판정으로 조기 종료**,
-> timeout 450프레임 아님). 정책이 빨간 큐브를 집어 검은 박스에 넣는 것을 closed-loop로 확인.
+> ep04, 231프레임/7.7s — **성공 판정으로 조기 종료**(timeout 450프레임 아님). 정책이 빨간 큐브를
+> 집어 검은 박스에 넣는 것을 closed-loop로 확인. (GitHub 웹은 상대경로 `<video>` 인라인 재생을
+> 지원하지 않으므로 위 링크 또는 로컬/에디터에서 재생. 6프레임 정적 미리보기: `assets/inference_success_strip.jpg`)
 
 ---
 
