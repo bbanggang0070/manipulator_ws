@@ -26,7 +26,7 @@ docker run -d --name gr00t-train8 --rm --gpus all --network host --ipc=host \
   real-robot-train8 \
   bash -c "cd /Isaac-GR00T && python3 /tmp/launch_cotrain.py \
     --base-model-path nvidia/GR00T-N1.6-3B \
-    --dataset-path /data/heongyu/sim_so101_blocktask \
+    --dataset-path /data/heongyu/sim_so101_blocktask_v2 \
     --modality-config-path examples/SO100/so100_config.py \
     --embodiment-tag NEW_EMBODIMENT --num-gpus 1 \
     --output-dir /workspace/models/$OUT_NAME \
