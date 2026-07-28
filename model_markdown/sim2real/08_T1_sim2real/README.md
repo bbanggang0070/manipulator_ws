@@ -13,8 +13,8 @@ Phase가 끝날 때마다 한 파일씩 정리한다. 계획서는 "무엇을 �
 | **C** | GR00T N1.6 8-bit 학습 (loss 0.0073) | ✅ 완료 | [C_training.md](C_training.md) |
 | **D** | sim 추론 확인 (Eval 60% / DR-Eval 50%) | ✅ 완료 | [report.md](report.md) E절 |
 | **E** | sim→real 전이 (배포 완성·부드러운 추론 / 파지 gap) | 🔄 진행 중 | [E_sim2real_transfer.md](E_sim2real_transfer.md) |
-| **재개선** | 데이터 문제 규명 → v2 재수집(100ep)·재학습 | 🔄 진행 중 | [report2.md](report2.md) |
-| **F 준비** | 실기 데이터 사전 제작 주의사항 (co-training) | 📋 문서 | [F_realdata_prep.md](F_realdata_prep.md) |
+| **재개선** | 데이터 문제 규명 → v2 재수집·재학습 → **sim SR 60%→80%** | ✅ 완료 | [report2.md](report2.md) |
+| **F** | 실기 50ep 수집 완료 → co-training 준비 | 🔄 진행 중 | [F_realdata_prep.md](F_realdata_prep.md) |
 
 ## 계획 대비 실행상의 주요 결정
 
