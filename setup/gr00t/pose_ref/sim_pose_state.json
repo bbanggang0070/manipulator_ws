@@ -1,0 +1,1 @@
+{"dataset": "sim_so101_blocktask_v2", "episode": 0, "frame": 0, "length": 225, "joints": ["shoulder_pan.pos", "shoulder_lift.pos", "elbow_flex.pos", "wrist_flex.pos", "wrist_roll.pos", "gripper.pos"], "state": [2.5282363891601562, -92.64937591552734, 92.63629150390625, 70.71612548828125, -1.2992401123046875, 3.716956853866577]}
