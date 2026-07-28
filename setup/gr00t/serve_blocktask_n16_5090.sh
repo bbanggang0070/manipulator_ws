@@ -26,16 +26,19 @@ if [ "$CMD" = "logs" ]; then exec docker logs -f gr00t-srv; fi
 if [ "$CMD" = "stop" ]; then docker rm -f gr00t-srv 2>/dev/null && echo "서버 종료" || echo "서버 없음"; exit 0; fi
 
 [ -d "$HOME/gr00tn16_ws/checkpoints/$MODEL" ] || { echo "체크포인트 없음: ~/gr00tn16_ws/checkpoints/$MODEL"; exit 1; }
+[ -f "$HOME/blocktask_srv/serve_blocktask_realclient.py" ] || { echo "서버 스크립트 없음: ~/blocktask_srv/ (serve_blocktask_realclient.py + service.py 배포 필요)"; exit 1; }
 docker rm -f gr00t-srv 2>/dev/null || true
 
+# 실기 클라이언트 service.py 규약(BaseInferenceServer, handler(obs) 단일 positional)로 Gr00tPolicy 서빙.
+# (run_gr00t_server.py=PolicyServer는 obs를 kwargs로 언팩해 실기 클라이언트의 평탄 키와 불일치)
 docker run -d --name gr00t-srv --rm --network host --privileged --gpus all \
   -e PYTHONUNBUFFERED=1 \
   -v "$HOME/gr00tn16_ws/checkpoints:/workspace/models" \
-  -v "$WORKSHOP/docker/real/scripts:/workspace/Isaac-GR00T/gr00t/eval/real_robot/SO100" \
+  -v "$HOME/blocktask_srv:/srv:ro" \
   real-robot \
-  bash -c "cd /Isaac-GR00T && python3 gr00t/eval/run_gr00t_server.py --model-path /workspace/models/$MODEL" \
+  bash -c "cd /Isaac-GR00T && python3 /srv/serve_blocktask_realclient.py --model-path /workspace/models/$MODEL --host 0.0.0.0 --port 5555" \
   > /dev/null
 
-echo "GR00T N1.6 블록 서버 시작 ($MODEL, 포트 5555, --network host)."
-echo "  준비 확인: $0 '' logs  → 'Server is ready' 대기"
+echo "GR00T N1.6 블록 서버 시작 ($MODEL, 포트 5555, 실기 클라이언트 호환)."
+echo "  준비 확인: $0 '' logs  → 'Ready to serve real client' / 'Server is ready' 대기"
 echo "  실기 클라이언트(로컬): setup/gr00t/infer_gr00t_blocktask_remote.sh"

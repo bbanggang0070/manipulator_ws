@@ -43,7 +43,42 @@ python -m lerobot.replay \
 """
 
 import logging
+import os
+import threading
 import time
+
+# 스텝 간격(초). 학습 fps=30Hz(0.033s)에 맞춤 → sim보다 빠른 실행으로 인한 덜컹임 완화.
+# 실험: STEP_DT=0.02 (빠름/50Hz) ~ 0.05 (느림/부드러움) 환경변수로 조정.
+_STEP_DT = float(os.environ.get("STEP_DT", "0.033"))
+
+# 비동기 추론: 현재 청크를 실행하는 동안 다음 청크를 백그라운드에서 미리 받아와 정지 구간 제거.
+# 이러면 horizon을 낮춰(closed-loop↑ 파지↑) 도 정지가 안 생겨 부드럽다. ASYNC=0 이면 기존 동기 방식.
+_ASYNC = os.environ.get("ASYNC", "1") == "1"
+
+# 카메라 이미지 JPEG 압축 전송: 1.84MB → ~50KB (WiFi 전송지연 제거). JPEG=0 이면 원본(uint8) 전송.
+_JPEG = os.environ.get("JPEG", "1") == "1"
+_JPEG_Q = int(os.environ.get("JPEG_Q", "90"))
+
+# Temporal ensembling: 매 스텝 관측하며 겹치는 청크들을 블렌딩 → 청크 경계 튐 제거(부드러운 모션).
+# ENSEMBLE=0 이면 기존 청크 단위 실행. ENSEMBLE_W: 최신 예측 가중치(클수록 최신만, 0=균등평균).
+_ENSEMBLE = os.environ.get("ENSEMBLE", "1") == "1"
+_ENS_W = float(os.environ.get("ENSEMBLE_W", "0.1"))
+
+
+def _jpeg_encode_videos(obs_dict):
+    """video.* 값(B,H,W,C uint8)을 JPEG 바이트로 인코딩(채널 순서는 불투명하게 보존)."""
+    import cv2
+
+    for k in list(obs_dict.keys()):
+        if not k.startswith("video."):
+            continue
+        arr = np.asarray(obs_dict[k])
+        frames = [
+            cv2.imencode(".jpg", arr[b], [cv2.IMWRITE_JPEG_QUALITY, _JPEG_Q])[1].tobytes()
+            for b in range(arr.shape[0])
+        ]
+        obs_dict[k] = {"__jpeg__": frames, "shape": list(arr.shape)}
+    return obs_dict
 from dataclasses import asdict, dataclass
 from pprint import pformat
 
@@ -230,6 +265,10 @@ class Gr00tRobotInferenceClient:
             else:
                 obs_dict[k] = [obs_dict[k]]
 
+        # 카메라 이미지 JPEG 압축(WiFi 전송지연 완화)
+        if _JPEG:
+            obs_dict = _jpeg_encode_videos(obs_dict)
+
         # get the action chunk via the policy server
         # Example of obs_dict for single camera task:
         # obs_dict = {
@@ -337,25 +376,112 @@ def eval(cfg: EvalConfig):
         blocking=True,
     )
 
-    # Step 3: Run the Eval Loop
-    while True:
-        # get the realtime image
-        observation_dict = robot.get_observation()
-        _rr_obs(observation_dict, camera_keys, robot_state_keys)
-        _t0 = time.perf_counter()
-        action_chunk = policy.get_action(observation_dict, language_instruction)
-        _infer_ms = (time.perf_counter() - _t0) * 1e3
-        _rr_infer_ms(_infer_ms)
-        _log_chunk(observation_dict, camera_keys, _infer_ms)
-        print(f"inference+RTT: {_infer_ms:.0f}ms")
+    # Step 3-ENS: Temporal ensembling 루프 (매 스텝 관측+블렌딩 → 부드러운 모션 + rerun 카메라 실시간)
+    if _ENSEMBLE:
+        _sh = {"obs": None, "step": 0, "chunks": [], "stop": False}
+        _lk = threading.Lock()
 
+        def _infer_loop():
+            while not _sh["stop"]:
+                with _lk:
+                    obs = _sh["obs"]
+                    s = _sh["step"]
+                if obs is None:
+                    time.sleep(0.005)
+                    continue
+                try:
+                    chunk = policy.get_action(obs, language_instruction)  # list[H] action dicts
+                except Exception:
+                    continue
+                with _lk:
+                    _sh["chunks"].append((s, chunk))
+                    cur = _sh["step"]
+                    _sh["chunks"] = [(cs, c) for (cs, c) in _sh["chunks"] if cs + len(c) > cur]
+
+        obs0 = robot.get_observation()
+        _sh["obs"] = obs0
+        _sh["chunks"].append((0, policy.get_action(obs0, language_instruction)))
+        threading.Thread(target=_infer_loop, daemon=True).start()
+
+        t = 0
+        _tl = time.perf_counter()
+        while True:
+            obs = robot.get_observation()
+            _rr_obs(obs, camera_keys, robot_state_keys)  # 매 스텝 → rerun 카메라 부드러움
+            with _lk:
+                _sh["obs"] = obs
+                _sh["step"] = t
+                covering = [(cs, c[t - cs]) for (cs, c) in _sh["chunks"] if cs <= t < cs + len(c)]
+                n_chunks = len(_sh["chunks"])
+            if covering:
+                ws = np.array([np.exp(_ENS_W * (cs - t)) for (cs, _) in covering], dtype=np.float64)
+                ws /= ws.sum()
+                blended = {
+                    jk: float(sum(w * float(ad.get(jk, 0.0)) for w, (_, ad) in zip(ws, covering)))
+                    for jk in robot_state_keys
+                }
+                sent = robot.send_action(blended)
+                sent = sent if isinstance(sent, dict) else blended
+                _rr_action(sent)
+                _log_action(sent)
+            time.sleep(_STEP_DT)
+            if t % 30 == 0:
+                _dt = time.perf_counter() - _tl
+                _tl = time.perf_counter()
+                print(f"[ensemble] step={t} covering={len(covering)} chunks={n_chunks} rate={30/_dt:.0f}Hz")
+            t += 1
+
+    # Step 3-CHUNK: 기존 청크 단위 실행 (ENSEMBLE=0)
+    _next = {}
+
+    def _prefetch(obs):
+        try:
+            _next["chunk"] = policy.get_action(obs, language_instruction)
+        except Exception as e:  # 실패 시 메인에서 동기 재시도
+            _next["err"] = e
+
+    # 최초 청크(동기 1회)
+    observation_dict = robot.get_observation()
+    _rr_obs(observation_dict, camera_keys, robot_state_keys)
+    action_chunk = policy.get_action(observation_dict, language_instruction)
+
+    while True:
+        # 다음 청크용 관측 (카메라 2대 읽기 — 여기가 느리면 청크 경계 정지의 원인)
+        _to = time.perf_counter()
+        obs_next = robot.get_observation()
+        _obs_ms = (time.perf_counter() - _to) * 1e3
+        _rr_obs(obs_next, camera_keys, robot_state_keys)
+        _next.clear()
+        th = None
+        if _ASYNC:
+            th = threading.Thread(target=_prefetch, args=(obs_next,), daemon=True)
+            th.start()
+
+        # 현재 청크 실행 (이 동안 다음 청크 추론이 백그라운드로 진행)
+        _te = time.perf_counter()
         for i in range(cfg.action_horizon):
             action_dict = action_chunk[i]
             sent = robot.send_action(action_dict)
             sent = sent if isinstance(sent, dict) else action_dict
             _rr_action(sent)
             _log_action(sent)
-            time.sleep(0.02)  # Implicitly wait for the action to be executed
+            time.sleep(_STEP_DT)
+        _exec_ms = (time.perf_counter() - _te) * 1e3
+
+        # 다음 청크 확보 — 여기서 기다리는 시간(wait)이 크면 추론이 실행을 못 따라감(정지)
+        _tw = time.perf_counter()
+        if _ASYNC:
+            th.join()
+            action_chunk = _next.get("chunk")
+            if action_chunk is None:
+                action_chunk = policy.get_action(obs_next, language_instruction)
+        else:
+            action_chunk = policy.get_action(obs_next, language_instruction)
+        _wait_ms = (time.perf_counter() - _tw) * 1e3
+        _rr_infer_ms(_exec_ms + _wait_ms)
+        _log_chunk(obs_next, camera_keys, _exec_ms + _wait_ms)
+        # 진단: obs=카메라읽기 / exec=청크실행 / wait=다음청크 대기(정지) — wait·obs가 크면 그게 병목
+        print(f"obs={_obs_ms:.0f}  exec={_exec_ms:.0f}  wait(stall)={_wait_ms:.0f} ms  H={cfg.action_horizon}")  # 학습 fps에 맞춰 대기 (STEP_DT env로 조정)
 
 
 if __name__ == "__main__":

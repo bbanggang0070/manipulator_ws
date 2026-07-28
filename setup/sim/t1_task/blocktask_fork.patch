@@ -1,0 +1,451 @@
+diff --git a/source/sim_to_real_so101/scripts/lerobot_agent.py b/source/sim_to_real_so101/scripts/lerobot_agent.py
+index fec012f..f516696 100644
+--- a/source/sim_to_real_so101/scripts/lerobot_agent.py
++++ b/source/sim_to_real_so101/scripts/lerobot_agent.py
+@@ -63,6 +63,12 @@ parser.add_argument(
+ )
+ parser.add_argument("--task_name", type=str, default=None, help="Name of the task.")
+ parser.add_argument("--seed", type=int, default=101, help="Environment seed")
++parser.add_argument(
++    "--rerun",
++    action="store_true",
++    default=False,
++    help="Rerun 뷰어로 가상 카메라(ego/external) 시점 실시간 표시",
++)
+ 
+ 
+ # append AppLauncher cli args
+@@ -83,6 +89,7 @@ simulation_app = app_launcher.app
+ import gymnasium as gym
+ import torch
+ import time
++import numpy as np
+ 
+ 
+ import isaaclab_tasks  # noqa: F401
+@@ -130,6 +137,12 @@ def main():
+     if len(cameras) == 0:
+         print(f"[Info]: No cameras found - videos will not be recorded")
+ 
++    # Rerun 뷰어: 가상 카메라 시점 실시간 표시 (--rerun). 워크숍 검증 함수 사용.
++    if args_cli.rerun:
++        from lerobot.utils.visualization_utils import init_rerun
++        init_rerun(session_name="so101_teleop_record")
++        print("[INFO]: Rerun 뷰어 실행 — 카메라(ego/external) 시점 실시간 표시")
++
+     robot_iface = LeRobotSO101Interface(
+         device=env.unwrapped.device,
+         port=args_cli.port,
+@@ -182,6 +195,20 @@ def main():
+ 
+             obs, _, _, _, _ = env.step(actions)
+ 
++            # Rerun: 가상 카메라 시점 실시간 로깅
++            if args_cli.rerun:
++                import rerun as rr
++                _vis = obs.get("visual", None)
++                if _vis is not None:
++                    for _cam, _t in _vis.items():
++                        if not _cam.startswith("rgb"):
++                            continue
++                        _img = _t[0].detach().cpu().numpy()
++                        if _img.dtype != np.uint8:
++                            _mx = float(_img.max()) if _img.size else 1.0
++                            _img = (_img * 255.0 if _mx <= 1.5 else _img).clip(0, 255).astype(np.uint8)
++                        rr.log(f"cameras/{_cam}", rr.Image(_img))
++
+             if keyboard_control.reset_world:
+                 keyboard_control.reset_world = False
+                 env.reset()
+diff --git a/source/sim_to_real_so101/scripts/lerobot_eval.py b/source/sim_to_real_so101/scripts/lerobot_eval.py
+index 349a4c0..54dbb6c 100644
+--- a/source/sim_to_real_so101/scripts/lerobot_eval.py
++++ b/source/sim_to_real_so101/scripts/lerobot_eval.py
+@@ -14,11 +14,33 @@
+ # limitations under the License.
+ import argparse
+ import json
++import os
+ import random
++import numpy as np
+ from tqdm import tqdm
+ 
+ from isaaclab.app import AppLauncher
+ 
++
++def _write_mp4(path, frames, fps=30):
++    """headless 평가에서 롤아웃 프레임을 mp4로 저장(PyAV, libx264). 실패해도 평가는 계속."""
++    try:
++        import av
++        container = av.open(path, mode="w")
++        stream = container.add_stream("libx264", rate=fps)
++        stream.height, stream.width = frames[0].shape[:2]
++        stream.pix_fmt = "yuv420p"
++        for f in frames:
++            vf = av.VideoFrame.from_ndarray(np.ascontiguousarray(f), format="rgb24")
++            for pkt in stream.encode(vf):
++                container.mux(pkt)
++        for pkt in stream.encode():
++            container.mux(pkt)
++        container.close()
++        print(f"[VIDEO] saved {path} ({len(frames)} frames)")
++    except Exception as e:
++        print(f"[VIDEO] failed to save {path}: {e}")
++
+ # add argparse arguments
+ parser = argparse.ArgumentParser(description="Isaac Lab SO-101 Eval Client (remote GR00T inference server).")
+ parser.add_argument(
+@@ -53,6 +75,7 @@ parser.add_argument(
+     help="Language instruction for the policy",
+ )
+ parser.add_argument("--rerun", action="store_true", default=False, help="Enable Rerun visualization")
++parser.add_argument("--save_video_dir", type=str, default=None, help="설정 시 에피소드별 front 카메라 롤아웃을 mp4로 저장(headless 검증용)")
+ 
+ # append AppLauncher cli args
+ AppLauncher.add_app_launcher_args(parser)
+@@ -168,10 +191,23 @@ def main():
+ 
+     pbar = None
+ 
++    save_video_dir = args_cli.save_video_dir
++    if save_video_dir:
++        os.makedirs(save_video_dir, exist_ok=True)
++    episode_frames = []
++
+     while simulation_app.is_running():
+         # run everything in inference mode
+         with torch.inference_mode():
+ 
++            if save_video_dir:
++                try:
++                    vkey = "rgb_external_D455" if "rgb_external_D455" in obs["visual"] else "rgb_ego"
++                    fr = obs["visual"][vkey][0].detach().cpu().numpy()
++                    episode_frames.append(np.clip(fr, 0, 255).astype(np.uint8))
++                except Exception:
++                    pass
++
+             if step == 0:
+                 pbar = tqdm(
+                     total=env.unwrapped.max_episode_length,
+@@ -211,6 +247,11 @@ def main():
+ 
+                 success_rate = (num_successes / num_episodes) * 100
+ 
++                if save_video_dir and episode_frames:
++                    outcome = "success" if (is_terminated and not is_truncated) else "fail"
++                    _write_mp4(os.path.join(save_video_dir, f"ep{num_episodes:02d}_{outcome}.mp4"), episode_frames)
++                episode_frames = []
++
+                 # Reset for next episode
+                 obs, _ = env.reset()
+                 policy.reset()
+@@ -226,6 +267,7 @@ def main():
+                     pbar = None
+ 
+                 print(f"[MANUAL RESET] Episode interrupted at step {step}")
++                episode_frames = []
+                 obs, _ = env.reset()
+                 policy.reset()
+                 step = 0
+diff --git a/source/sim_to_real_so101/tasks/task_env_cfg.py b/source/sim_to_real_so101/tasks/task_env_cfg.py
+index 2f27635..cddb684 100644
+--- a/source/sim_to_real_so101/tasks/task_env_cfg.py
++++ b/source/sim_to_real_so101/tasks/task_env_cfg.py
+@@ -46,6 +46,15 @@ from .so101_env_cfg import (
+ 
+ assets_path = os.path.dirname(os.path.abspath(assets.__file__))
+ 
++# external_D455(top) 카메라를 workspace에 가깝게 당기는 오프셋(camera_mount translate 기준, m).
++# blocktask_run.sh가 CAM_X/CAM_Y/CAM_Z 환경변수로 전달. rerun external_D455 뷰 보며 값·부호 조정
++# (큐브가 더 크게 보이면 가까워진 것). 0이면 원래 위치.
++_CAM_EXT = (  # 기본값 = 튜닝으로 확정한 "가까운" top 카메라 구도 (2026-07-27). env로 override 가능.
++    float(os.environ.get("CAM_X", "-0.05")),
++    float(os.environ.get("CAM_Y", "0")),
++    float(os.environ.get("CAM_Z", "-0.05")),
++)
++
+ camera_object = TiledCameraCfg(
+     prim_path="",
+     update_period=0.0,
+@@ -149,10 +158,10 @@ class TaskEventCfg(EventCfg):
+         mode="reset",
+         params={
+             "prim_path_pattern": "{ENV_REGEX_NS}/LightStudio/LightBox/camera_mount",
+-            "pos_range": {
+-                "x": (-0.02, 0.02),  # ±2cm
+-                "y": (-0.02, 0.02),
+-                "z": (-0.01, 0.01),
++            "pos_range": {  # DR ±지터를 CAM_X/Y/Z 오프셋 중심으로 이동(카메라 당기기)
++                "x": (_CAM_EXT[0] - 0.02, _CAM_EXT[0] + 0.02),
++                "y": (_CAM_EXT[1] - 0.02, _CAM_EXT[1] + 0.02),
++                "z": (_CAM_EXT[2] - 0.01, _CAM_EXT[2] + 0.01),
+             },
+             "rot_range": {
+                 "roll": (-0.05, 0.05),  # ±3°
+diff --git a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
+index 170026d..c8316da 100644
+--- a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
++++ b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
+@@ -79,7 +79,7 @@ BLOCK_MASS = 0.005  # 5g
+ # task_env_cfg.py's mat.init_state), not on the world ground plane at z=0.
+ # Half height alone spawns them embedded under the mat with nothing to catch
+ # them, which makes the physics solver eject them and they fall out of frame.
+-BLOCK_SPAWN_Z = 0.045  # mat top (0.035) + half height (0.01) + small clearance
++BLOCK_SPAWN_Z = 0.036  # mat top(0.026)+half(0.01). 원본 vials 작동높이로 낮춤 → 그리퍼 하강 여유↑(파지 개선)
+ 
+ # On each reset, the block is placed at a random point within an annulus around the
+ # robot base (env-local (-0.05, 0.0), see so101.py's SO101_CFG.init_state.pos) so it's
+@@ -124,7 +124,26 @@ BOX_SIZE = (0.10, 0.20, 0.075)  # 100mm (x) x 200mm (y) x 75mm (z), baked into b
+ # Its root origin sits at the base of the box (not its center), so unlike the
+ # primitive-shape props above, the spawn z here is the resting surface height
+ # itself (mat top, see BLOCK_SPAWN_Z), not a half-height offset.
+-BASKET_SPAWN_Z = 0.045  # mat top (0.035) + small clearance to avoid initial penetration
++BASKET_SPAWN_Z = 0.027  # mat top(0.026) + 작은 clearance (mat 낮춤에 맞춰 하향)
++
++# 블록-in-바스켓 성공 판정 파라미터 (vials 함수 재사용). 매 호출 새 dict/SceneEntityCfg 반환
++# (obs·termination이 SceneEntityCfg 인스턴스를 공유하면 인덱스 이중 해석 위험 → 원본 vials처럼 분리).
++# basket_box.usda 원점=바닥 중심(벽 x=±0.047, y=±0.097) → 대칭 경계. 블록은 방향 무관 → vertical_threshold=0.
++def _block_place_params():
++    return dict(
++        contact_sensor_cfg=SceneEntityCfg("contact_grasp"),
++        vials=["block_red"],
++        rack_name="basket_black",
++        warmup_steps=30,
++        grasp_history_window=20,
++        force_threshold=2,
++        rack_local_x_min=-0.05,
++        rack_local_x_max=0.05,
++        rack_local_y_min=-0.10,
++        rack_local_y_max=0.10,
++        rack_local_z_max=0.08,
++        vertical_threshold=0.0,
++    )
+ 
+ paper_box_base = RigidObjectCfg(
+     prim_path="{ENV_REGEX_NS}/Basket",
+@@ -165,6 +184,32 @@ class VialsToRackSceneCfg(SO101TaskSceneCfg):
+     basket_black.prim_path = "{ENV_REGEX_NS}/Basket_Black"
+     basket_black.init_state.pos = (0.10, -0.22, BASKET_SPAWN_Z)
+ 
++    # 그리퍼 jaw ↔ 블록 접촉 센서 (파지 감지) — 성공 판정용. (원본 vials엔 있었으나 블록 개조 시 누락됨)
++    contact_grasp = ContactSensorCfg(
++        prim_path="{ENV_REGEX_NS}/Robot/jaw",
++        update_period=0.0,
++        history_length=1,
++        debug_vis=False,
++        filter_prim_paths_expr=["{ENV_REGEX_NS}/Block_Red"],
++    )
++
++    # mat.usda(텍스처 매트) 제거 → 깔끔한 밝은 회색 평면 바닥으로 교체. 물체 높이 튜닝(top=0.035) 보존.
++    # ⚠️ 정적 AssetBaseCfg collision은 GPU 물리에서 미등록되어 물체가 통과·낙하함 → kinematic
++    # RigidObject로 확실한 collision 확보. reset_mat_rotation은 아래 이벤트에서 비활성화(prim_paths 불필요).
++    mat = RigidObjectCfg(
++        prim_path="{ENV_REGEX_NS}/Mat",
++        spawn=sim_utils.CuboidCfg(
++            size=(0.8, 1.0, 0.005),  # 넓게(전 영역 커버, 물체 안 떨어짐) + 얇게(5mm). kinematic이라 안정.
++            rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True),
++            collision_props=sim_utils.CollisionPropertiesCfg(),
++            physics_material=sim_utils.RigidBodyMaterialCfg(
++                static_friction=1.0, dynamic_friction=1.0
++            ),
++            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.85, 0.85, 0.85)),
++        ),
++        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.20, -0.05, 0.0235)),  # top=0.026 (원본 작동높이로 낮춤, 그리퍼 하강 여유↑)
++    )
++
+ 
+ @configclass
+ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
+@@ -187,6 +232,9 @@ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
+ class VialsToRackEventCfg(TaskEventCfg):
+     """Configuration for events."""
+ 
++    # mat이 kinematic RigidObject(평면 바닥)라 prim_paths 미보유 → mat 회전 DR 비활성화.
++    reset_mat_rotation = None
++
+     # Robot arm color for this task only (base EventCfg defaults to orange).
+     reset_set_robot_visual_material = EventTerm(
+         func=randomize_robot_color,
+@@ -227,7 +275,7 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+         func=randomize_robot_color,
+         mode="reset",
+         params={
+-            "color_names": list(ROBOT_COLORS.keys()),
++            "color_names": ["purple"],  # 색 고정(보라) — DR에서도 랜덤화 안 함
+         },
+     )
+ 
+@@ -242,14 +290,8 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+         },
+     )
+ 
+-    reset_mat_rotation = EventTerm(
+-        func=randomize_mat_rotation,
+-        mode="reset",
+-        params={
+-            "yaw_range": (-0.3, 0.3),  # ±17° rotation
+-            "asset_cfg": SceneEntityCfg("mat"),
+-        },
+-    )
++    # mat이 kinematic RigidObject(평면 바닥)라 prim_paths 미보유 → DR에서도 mat 회전 비활성화.
++    reset_mat_rotation = None
+ 
+ 
+ @configclass
+@@ -260,6 +302,22 @@ class VialsToRackObservationsCfg(TaskObservationsCfg):
+     class SubtaskCfg(ObsGroup):
+         """Observations for subtask tracking."""
+ 
++        block_grasped = ObsTerm(
++            func=any_vial_grasped,
++            params={
++                "contact_sensor_cfg": SceneEntityCfg("contact_grasp"),
++                "vials": ["block_red"],
++                "min_height": 0.06,  # 블록(mat top 0.035 + half 0.01)에서 들어올려진 판정 높이
++                "warmup_steps": 30,
++                "force_threshold": 2,
++            },
++        )
++
++        block_placed = ObsTerm(
++            func=vial_placed_on_rack,
++            params=_block_place_params(),
++        )
++
+         def __post_init__(self) -> None:
+             self.enable_corruption = False
+             self.concatenate_terms = False
+@@ -276,6 +334,14 @@ class VialsToRackTerminationsCfg:
+         time_out=True,
+     )
+ 
++    # 성공 = 블록이 바스켓 안에 놓이고 릴리스됨. lerobot_eval은 이 termination(=not truncated)으로 SR 집계.
++    # (원본 vials엔 있었으나 블록 개조 시 누락 → 그래서 SR이 구조적으로 0%였음)
++    success = DoneTerm(
++        func=vial_placed_on_rack_termination,
++        time_out=False,
++        params=_block_place_params(),
++    )
++
+ 
+ 
+ @configclass
+@@ -307,7 +373,7 @@ class VialsToRackEvalEnvCfg(VialsToRackEnvCfg):
+ 
+     def __post_init__(self) -> None:
+         super().__post_init__()
+-        self.episode_length_s = 450 / 60.0
++        self.episode_length_s = 900 / 60.0
+ 
+ 
+ @configclass
+@@ -319,4 +385,4 @@ class VialsToRackEvalDREnvCfg(VialsToRackDREnvCfg):
+ 
+     def __post_init__(self) -> None:
+         super().__post_init__()
+-        self.episode_length_s = 450 / 60.0
++        self.episode_length_s = 900 / 60.0
+diff --git a/source/sim_to_real_so101/utils/keyboard.py b/source/sim_to_real_so101/utils/keyboard.py
+index e970fbe..fec967f 100644
+--- a/source/sim_to_real_so101/utils/keyboard.py
++++ b/source/sim_to_real_so101/utils/keyboard.py
+@@ -43,24 +43,26 @@ class KeyboardControl:
+         # Only process key press events
+         if event.type == carb.input.KeyboardEventType.KEY_PRESS:
+             if event.input.name == "R":
++                # 월드 리셋: 진행 중 에피소드는 미완성이므로 삭제(저장 안 함)
+                 self.reset_world = True
+-                self.stop_recording()
++                self.cancel_recording()
+                 print(f"[INFO]: Reset world...")
+                 return True
+ 
+             if event.input.name == "S":
+-                if self.recording:
+-                    self.stop_recording()
+-                    return True
+-
+-                
++                # S = 녹화 시작 (저장은 → 로만)
+                 self.start_recording()
+                 return True
+ 
+-            if event.input.name == "C":
+-                if self.recording:
+-                    self.cancel_recording()
+-                    return True
++            if event.input.name == "RIGHT":
++                # → = 녹화 중지 + 저장
++                self.stop_recording()
++                return True
++
++            if event.input.name == "LEFT":
++                # ← = 녹화 중지 + 삭제(취소)
++                self.cancel_recording()
++                return True
+ 
+         return False
+ 
+diff --git a/source/sim_to_real_so101/utils/lerobot_interface.py b/source/sim_to_real_so101/utils/lerobot_interface.py
+index 37d122d..1c33f10 100644
+--- a/source/sim_to_real_so101/utils/lerobot_interface.py
++++ b/source/sim_to_real_so101/utils/lerobot_interface.py
+@@ -147,9 +147,18 @@ class LeRobotSO101Interface:
+         mapped_deg = self.joint_mins + normalized * (self.joint_maxs - self.joint_mins)
+ 
+         # Convert to radians
+-        return mapped_deg * torch.pi / 180
++        rad = mapped_deg * torch.pi / 180
++        # Wrist_Roll(index 4) 보정: 리더-rest는 sim 손목 0으로 매핑되나, 리셋 init_state(-1.6034)와
++        # 실물 rest(카메라 정면)는 -1.6034. teleop 시작 시 손목이 90° 안 틀어지도록 매핑을 -1.6034만큼 이동.
++        # (방향이 반대면 부호를 +로 바꾸면 됨)
++        rad[..., 4] = rad[..., 4] - 1.6034
++        return rad
+ 
+     def get_raw_actions_from_radians(self, raw_values):
++        # get_mapped_actions_vectorized의 Wrist_Roll(-1.6034) 보정 undo → 녹화/평가 state를
++        # leader(실물) 프레임으로 되돌려 action과 정합. (sim 팔로워는 -1.6034에 있어 카메라만 정면)
++        raw_values = raw_values.clone()
++        raw_values[..., 4] = raw_values[..., 4] + 1.6034
+         # Convert from radians to degrees
+         mapped_deg = raw_values * 180 / torch.pi
+ 
+diff --git a/source/sim_to_real_so101/utils/lerobot_recorder.py b/source/sim_to_real_so101/utils/lerobot_recorder.py
+index 82a4df2..6adb66a 100644
+--- a/source/sim_to_real_so101/utils/lerobot_recorder.py
++++ b/source/sim_to_real_so101/utils/lerobot_recorder.py
+@@ -125,7 +125,7 @@ class LeRobotRecorder:
+         self.num_recorded_episodes = 0
+ 
+         self.device = device
+-        self.capcity = 2 * 60 * self.fps
++        self.capcity = 60 * self.fps  # 최대 60초/에피소드 (16GB GPU 여유 확보; RGB버퍼 카메라당 ~1.6GB)
+         self.current_frame = 0
+ 
+         self.action_buffers_tensor = None
+@@ -314,10 +314,11 @@ class LeRobotRecorder:
+ 
+             self.action_buffers_tensor = None
+             self.observation_buffer_tensor = None
+-            self.rgb_buffer_tensor = {}
++            self.rgb_buffer_tensors = {}  # (오타 수정: 단수 rgb_buffer_tensor → 복수) GPU 버퍼 실제 해제
+             self.depth_buffer_tensors = {}
+             self.instance_id_seg_buffers_tensors = {}
+             self.current_frame = 0
++            torch.cuda.empty_cache()  # 다음 에피소드 할당 전 GPU 메모리 반환(OOM 방지)
+             print("[INFO]: Cleared buffers")
+ 
+     def cancel_recording(self, event: Event):
+@@ -325,8 +326,11 @@ class LeRobotRecorder:
+             print(f"[INFO]: Cancelled recording.")
+             self.action_buffers_tensor = None
+             self.observation_buffer_tensor = None
+-            self.rgb_buffer_tensor = {}
++            self.rgb_buffer_tensors = {}  # (오타 수정) GPU 버퍼 실제 해제
++            self.depth_buffer_tensors = {}
++            self.instance_id_seg_buffers_tensors = {}
+             self.current_frame = 0
++            torch.cuda.empty_cache()
+             print("[INFO]: Cleared buffers")
+             print(f"[INFO]: Episode cancelled.")
+ 

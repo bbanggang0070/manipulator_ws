@@ -12,13 +12,16 @@ MODE="${1:-view}"
 WORKSHOP="$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop"
 [ -d "$WORKSHOP/source" ] || { echo "❌ $WORKSHOP 없음 — 먼저 클론하세요"; exit 1; }
 
-DATASET_DIR="$WORKSHOP/datasets/sim_so101_blocktask"
+# 데이터셋 이름(=repo 하위). 기본은 새 수집본 v2 → record/clear가 원본(sim_so101_blocktask)을
+# 건드리지 않음(원본은 DSNAME=sim_so101_blocktask 로 명시해야만 접근). 다른 데이터셋은 DSNAME 지정.
+DSNAME="${DSNAME:-sim_so101_blocktask_v2}"
+DATASET_DIR="$WORKSHOP/datasets/$DSNAME"
 
 # clear: 데이터셋 폴더 삭제(root 소유 → 컨테이너로). 재녹화 전 초기화용.
 # ⚠️ 기존 녹화 에피소드가 모두 지워집니다. recorder가 resume을 못 해 재시작 시 필요.
 if [ "$MODE" = "clear" ]; then
   echo "삭제: $DATASET_DIR (기존 에피소드 전부 삭제됩니다)"
-  sg docker -c "docker run --rm --entrypoint /bin/bash -v $WORKSHOP/datasets:/d teleop-docker:latest -c 'rm -rf /d/sim_so101_blocktask'" 2>&1 | tail -1
+  sg docker -c "docker run --rm --entrypoint /bin/bash -v $WORKSHOP/datasets:/d teleop-docker:latest -c 'rm -rf /d/$DSNAME'" 2>&1 | tail -1
   echo "완료 — 이제 ./blocktask_run.sh record 로 새로 녹화하세요."
   exit 0
 fi
@@ -32,11 +35,17 @@ CALIB=".cache/huggingface/lerobot/calibration"
 mkdir -p "$WORKSHOP/outputs" "$WORKSHOP/datasets"
 
 if [ "$MODE" = "record" ]; then
-  # 리더암 teleop 녹화 (S=에피소드 저장/중지, R=리셋). repo_id는 본인 데이터셋으로 조정.
+  # recorder는 기존 폴더에 append 불가("folder already exists") → 대상이 이미 있으면
+  # 자동으로 새 폴더(_2, _3, ...)를 골라 충돌·에러 방지. (세션별 폴더 → 학습 시 다중 데이터셋으로 합침)
+  N=1; TRY="$DSNAME"
+  while [ -d "$WORKSHOP/datasets/$TRY" ]; do N=$((N+1)); TRY="${DSNAME}_${N}"; done
+  DSNAME="$TRY"; DATASET_DIR="$WORKSHOP/datasets/$DSNAME"
+  echo "▶ 녹화 대상 폴더(신규): datasets/$DSNAME"
+  # 리더암 teleop 녹화 (S=에피소드 저장/중지, R=리셋).
   INNER="lerobot_agent --task Lerobot-So101-Teleop-Vials-To-Rack-DR --num_envs 1 --rerun \
     --port /dev/ttyLEADER --robot_id leader \
-    --repo_id heongyu/sim_so101_blocktask \
-    --repo_root /workspace/Sim-to-Real-SO-101-Workshop/datasets/sim_so101_blocktask \
+    --repo_id heongyu/$DSNAME \
+    --repo_root /workspace/Sim-to-Real-SO-101-Workshop/datasets/$DSNAME \
     --task_name 'Pick up the block and place it in the box'"
 else
   INNER="zero_agent --task Lerobot-So101-Teleop-Vials-To-Rack --num_envs 1"
@@ -47,6 +56,7 @@ echo "종료: Ctrl+C 또는 다른 터미널에서 docker rm -f blocktask"
 
 RUN="docker run --name blocktask --rm -it --privileged --gpus all \
   -e ACCEPT_EULA=Y -e PRIVACY_CONSENT=Y -e DISPLAY=$DISPLAY --network=host \
+  -e CAM_X=${CAM_X:-0} -e CAM_Y=${CAM_Y:-0} -e CAM_Z=${CAM_Z:-0} \
   -v /dev:/dev -v /run/udev:/run/udev:ro \
   -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/.Xauthority:/root/.Xauthority \
   -v $HOME/docker/isaac-sim/cache/kit:/isaac-sim/kit/cache:rw \

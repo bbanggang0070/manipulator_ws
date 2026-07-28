@@ -12,8 +12,8 @@ Phase가 끝날 때마다 한 파일씩 정리한다. 계획서는 "무엇을 �
 | **B** | 리더암 teleop 데이터 수집 (75ep) | ✅ 완료 | [B_data_collection.md](B_data_collection.md) |
 | **C** | GR00T N1.6 8-bit 학습 (loss 0.0073) | ✅ 완료 | [C_training.md](C_training.md) |
 | **D** | sim 추론 확인 (Eval 60% / DR-Eval 50%) | ✅ 완료 | [report.md](report.md) E절 |
-| **E** | sim-to-real 전이 (실기) | ⏳ 대기 | (D 후 작성) |
-| **F** | (성능 부족 시) 실기 co-training | ⏳ 대기 | (E 판단 후) |
+| **E** | sim→real 전이 (배포 완성·부드러운 추론 / 파지 gap) | 🔄 진행 중 | [E_sim2real_transfer.md](E_sim2real_transfer.md) |
+| **개선** | sim SR 재개선(mat·카메라·교정) + Phase F 도구 | 🔄 진행 중 | [E_sim2real_transfer.md](E_sim2real_transfer.md) §4 |
 
 ## 계획 대비 실행상의 주요 결정
 
