@@ -28,4 +28,5 @@ exec uv run lerobot-record \
   --dataset.episode_time_s=60 \
   --dataset.reset_time_s=15 \
   --dataset.private=true \
+  --dataset.push_to_hub=false \
   $RESUME
