@@ -57,6 +57,7 @@ echo "종료: Ctrl+C 또는 다른 터미널에서 docker rm -f blocktask"
 RUN="docker run --name blocktask --rm -it --privileged --gpus all \
   -e ACCEPT_EULA=Y -e PRIVACY_CONSENT=Y -e DISPLAY=$DISPLAY --network=host \
   -e CAM_X=${CAM_X:-0} -e CAM_Y=${CAM_Y:-0} -e CAM_Z=${CAM_Z:-0} \
+  -e LEROBOT_RERUN_MEMORY_LIMIT=${LEROBOT_RERUN_MEMORY_LIMIT:-30%} \
   -v /dev:/dev -v /run/udev:/run/udev:ro \
   -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/.Xauthority:/root/.Xauthority \
   -v $HOME/docker/isaac-sim/cache/kit:/isaac-sim/kit/cache:rw \
