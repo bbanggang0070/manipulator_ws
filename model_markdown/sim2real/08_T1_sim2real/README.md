@@ -14,7 +14,7 @@ Phase가 끝날 때마다 한 파일씩 정리한다. 계획서는 "무엇을 �
 | **D** | sim 추론 확인 (Eval 60% / DR-Eval 50%) | ✅ 완료 | [report.md](report.md) E절 |
 | **E** | sim→real 전이 (배포 완성·부드러운 추론 / 파지 gap) | 🔄 진행 중 | [E_sim2real_transfer.md](E_sim2real_transfer.md) |
 | **재개선** | 데이터 문제 규명 → v2 재수집·재학습 → **sim SR 60%→80%** | ✅ 완료 | [report2.md](report2.md) |
-| **F** | 실기 50ep 수집 완료 → co-training 준비 | 🔄 진행 중 | [F_realdata_prep.md](F_realdata_prep.md) |
+| **F** | 실기 50ep co-training → **실기 SR 10%→90%** (Δ+80%p) | ✅ 완료 | [report2.md](report2.md) §5 |
 
 ## 계획 대비 실행상의 주요 결정
 
