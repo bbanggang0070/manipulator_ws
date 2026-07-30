@@ -291,9 +291,11 @@ co-training이 gap을 줄였다고 **정량적으로** 말하려면, 재학습 �
 
 ### 5.2 진행 상황
 
-- **2026-07-29** co-training 착수. 첫 스텝 정상(loss ~1.05, grad_norm 정상, OOM 없음), ~3.2 s/step,
-  20k steps 완주 ETA ≈ 13–18h. VRAM 확보를 위해 이전 zero-shot 서버는 종료(상태 없음 — 필요 시 재기동).
-- *(완주 후 checkpoint-20000 기록)*
+- **2026-07-29** co-training 착수. 첫 스텝 정상(loss ~1.05, grad_norm 정상, OOM 없음), ~2.74 s/step.
+  VRAM 확보를 위해 이전 zero-shot 서버는 종료(상태 없음 — 필요 시 재기동).
+- **2026-07-30 완주** ✅ 20,000 steps 도달, 최종 loss ≈ **0.008~0.010**(grad_norm 0.07~0.11, 안정 수렴,
+  v2 최종 0.0073과 유사 궤적). checkpoint 5k/10k/15k/**20000** 저장, 에러·OOM 없음.
+  최종 산출물: `checkpoints/gr00t_blocktask_cotrain_n16_8bit/checkpoint-20000`.
 
 ### 5.3 효과 검증 결과 (§4.7 프로토콜)
 
