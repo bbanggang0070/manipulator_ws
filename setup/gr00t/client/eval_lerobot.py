@@ -378,7 +378,7 @@ def eval(cfg: EvalConfig):
 
     # Step 3-ENS: Temporal ensembling 루프 (매 스텝 관측+블렌딩 → 부드러운 모션 + rerun 카메라 실시간)
     if _ENSEMBLE:
-        _sh = {"obs": None, "step": 0, "chunks": [], "stop": False}
+        _sh = {"obs": None, "step": 0, "chunks": [], "stop": False, "infer_ms": 0.0}
         _lk = threading.Lock()
 
         def _infer_loop():
@@ -390,7 +390,9 @@ def eval(cfg: EvalConfig):
                     time.sleep(0.005)
                     continue
                 try:
+                    _ti = time.perf_counter()
                     chunk = policy.get_action(obs, language_instruction)  # list[H] action dicts
+                    _sh["infer_ms"] = (time.perf_counter() - _ti) * 1e3  # 서버 추론+왕복 실측
                 except Exception:
                     continue
                 with _lk:
@@ -424,6 +426,9 @@ def eval(cfg: EvalConfig):
                 sent = sent if isinstance(sent, dict) else blended
                 _rr_action(sent)
                 _log_action(sent)
+            if t % 8 == 0:  # 30Hz/8 ≈ 4fps — video.mp4 프레임레이트와 일치
+                _rr_infer_ms(_sh["infer_ms"])
+                _log_chunk(obs, camera_keys, _sh["infer_ms"])
             time.sleep(_STEP_DT)
             if t % 30 == 0:
                 _dt = time.perf_counter() - _tl

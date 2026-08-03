@@ -15,6 +15,10 @@ cd "$(dirname "$0")/../../envs/lerobot" || exit 1
 SERVER_HOST="${SERVER_HOST:-192.168.0.56}"   # 5090
 MRT="${MRT:-8.0}"
 HORIZON="${HORIZON:-16}"   # 청크(16) 실행 수 — covariate shift 완화 실측치
+# 언어 지시문. 기본은 학습(sim)과 정확히 일치. 일반화 실험(색상/물체 변경) 시
+# LANG_INSTRUCTION 환경변수로 덮어써서 조건별 지시문 사용:
+#   LANG_INSTRUCTION="Pick up the red block and place it in the box" ./infer_gr00t_blocktask_remote.sh
+LANG_INSTRUCTION="${LANG_INSTRUCTION:-Pick up the block and place it in the box}"
 
 CAMS="{ front: {type: opencv, index_or_path: /dev/cam_top,  width: 640, height: 480, fps: 30, fourcc: MJPG},
         wrist: {type: opencv, index_or_path: /dev/cam_wrist, width: 640, height: 480, fps: 30, fourcc: MJPG}}"
@@ -29,4 +33,4 @@ exec uv run --project ../../../envs/lerobot python eval_lerobot.py \
   --policy_host="$SERVER_HOST" \
   --policy_port=5555 \
   --action_horizon="$HORIZON" \
-  --lang_instruction="Pick up the block and place it in the box"
+  --lang_instruction="$LANG_INSTRUCTION"
