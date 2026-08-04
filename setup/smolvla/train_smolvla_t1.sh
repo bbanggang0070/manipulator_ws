@@ -4,7 +4,7 @@
 #         nohup ./setup/smolvla/train_smolvla_t1.sh > ~/manipulator_ws/logs/smolvla_t1_v2.log 2>&1 &
 #
 # 2026-07-10: 논문 프로토콜(50demo=5위치×10궤적)에 맞춰 T1 데이터를 3점/큰 마킹(30ep, v1) →
-#   5점/소형 점 마킹(50ep, v2)으로 전면 재수집(§ model_markdown/02_SmolVLA.md, report/SmolVLA_report.md).
+#   5점/소형 점 마킹(50ep, v2)으로 전면 재수집(§ model_md/02_SmolVLA.md, report/SmolVLA_report.md).
 #   v1과 비교 가능하도록 batch_size/steps 등 학습 레시피는 동일하게 유지 — 데이터만 변경한 것이
 #   결과 차이의 원인임을 격리하기 위함. 단, 프레임 수가 늘어(13,032→28,882) 동일 steps 기준
 #   epoch은 v1(24.55)보다 낮아짐(~11.1) — 이 자체도 비교 대상.

@@ -7,13 +7,13 @@
 
 ```
 manipulator_ws/
-├─ model_markdown/   # 진행 가이드라인 + 모델별 체크리스트·결과 기록
+├─ model_md/         # 4모델 비교 (계획·체크리스트·결과·보고서)
 │  ├─ README.md      #   전체 계획·평가 프로토콜·일별 체크리스트 (시작점)
-│  ├─ 01_ACT.md      #   ACT (FT 참조군)
-│  ├─ 02_SmolVLA.md  #   SmolVLA (zero-shot 주력)
-│  ├─ 03_Pi0.md      #   π0 (zero-shot + 5090 원격 FT)
-│  └─ 04_GR00T_N1.5.md
-├─ report/           # 진행 보고서 (ACT/SmolVLA 전 과정 등)
+│  ├─ 01_ACT.md / 02_SmolVLA.md / 03_Pi0.md / 04_GR00T_N1.5.md
+│  ├─ report/        #   모델별 진행 보고서 (ACT/SmolVLA/Pi0/GR00T)
+│  └─ sim2real/      #   sim2real 계획 + 모델별 sim (01~05_SimToReal)
+├─ manipulator_md/   # GR00T 선정 이후 진행 기록
+│  └─ sim2real/      #   01_실행기록·02_gr00t종합·03_custom_T1 + 08_T1_sim2real/
 ├─ setup/            # 재현용 스크립트 (기능별/모델별 하위 디렉터리)
 │  ├─ hardware/             # 장치 공통: udev rules, 카메라 점검·튜닝, teleop
 │  │  ├─ 99-lerobot.rules   #   카메라·시리얼 경로 고정

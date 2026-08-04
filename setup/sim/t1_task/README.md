@@ -1,6 +1,6 @@
 # 커스텀 T1 sim 태스크 (빨간 큐브 → 검은 박스)
 
-[08_custom_T1_sim2real.md](../../../model_markdown/sim2real/08_custom_T1_sim2real.md) Phase A 산출물.
+[03_custom_T1_sim2real.md](../../../manipulator_md/sim2real/03_custom_T1_sim2real.md) Phase A 산출물.
 워크숍(`~/Sim-to-Real-SO-101-Workshop`)의 vials_to_rack 태스크를 T1으로 개조한 정본.
 
 ## 파일

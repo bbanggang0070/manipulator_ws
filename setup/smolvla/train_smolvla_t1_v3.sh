@@ -6,7 +6,7 @@
 # 2026-07-13: v2(steps=20000, epoch=11.08, SR 30%)가 v1(steps=20000, epoch=24.55, SR 50%)보다
 #   오히려 낮게 나온 원인이 "위치 다양화/마킹 변경" 때문인지 "데이터가 늘어 동일 step 기준
 #   epoch이 줄어든 것" 때문인지 분리하기 위해, 데이터는 v2와 완전히 동일하게 두고 steps만
-#   45,000으로 늘려 v1과 비슷한 epoch(24.93)을 맞춤 (§ model_markdown/02_SmolVLA.md).
+#   45,000으로 늘려 v1과 비슷한 epoch(24.93)을 맞춤 (§ model_md/02_SmolVLA.md).
 #   45000 = 24.55(v1 epoch) * 28882(v2 frames) / 16(batch) 역산 후 반올림.
 cd "$(dirname "$0")/../../envs/lerobot" || exit 1
 

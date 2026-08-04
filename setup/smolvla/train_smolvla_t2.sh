@@ -5,7 +5,7 @@
 #
 # train_smolvla_t1.sh와 동일 설정(batch16/steps20k) — T2 데이터가 T1보다 2.5배 커서
 # (32,835 vs 13,032 프레임) 같은 step 기준 epoch은 더 낮음(~9.8 vs 24.55), ACT-T1/T2도
-# 같은 step 수를 유지한 전례를 따름(§model_markdown/01_ACT.md).
+# 같은 step 수를 유지한 전례를 따름(§model_md/01_ACT.md).
 cd "$(dirname "$0")/../../envs/lerobot" || exit 1
 
 exec uv run lerobot-train \

@@ -21,7 +21,7 @@ import rerun as rr
 W, H, FPS = 640, 480, 30
 CAMS = {"front": "/dev/cam_top", "wrist": "/dev/cam_wrist"}
 ASSETS = os.path.join(os.path.dirname(__file__),
-                      "../../model_markdown/sim2real/08_T1_sim2real/assets")
+                      "../../manipulator_md/sim2real/08_T1_sim2real/assets")
 SIM_REF = {"front": "sim_ref_front.jpg", "wrist": "sim_ref_wrist.jpg"}
 
 

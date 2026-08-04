@@ -14,4 +14,4 @@ nohup.out
 setup/hardware/snapshots/
 
 # T1 sim2real 실기 추론 실험 산출물(대용량 영상·로그) — repo 제외
-model_markdown/sim2real/08_T1_sim2real/assets/generalization/
+manipulator_md/sim2real/08_T1_sim2real/assets/generalization/

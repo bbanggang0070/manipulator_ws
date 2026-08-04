@@ -25,4 +25,4 @@ for i in $(seq 1 "$N"); do
   timeout -s INT 60 "$DIR/infer_gr00t_blocktask_remote.sh" || true
 done
 echo ""
-echo "===== $N 시행 완료 — 성공/실패는 수기 기록. 결과표: model_markdown/sim2real/08_custom_T1_sim2real.md §10 ====="
+echo "===== $N 시행 완료 — 성공/실패는 수기 기록. 결과표: manipulator_md/sim2real/03_custom_T1_sim2real.md §10 ====="

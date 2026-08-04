@@ -23,7 +23,7 @@ set -u
 
 GR00T_DIR="$(cd "$(dirname "$0")" && pwd)"
 LABEL="${1:?사용법: LANG_INSTRUCTION=\"...\" ./infer_save.sh <LABEL>  (예: color_red)}"
-ASSETS="$GR00T_DIR/../../model_markdown/sim2real/08_T1_sim2real/assets/generalization"
+ASSETS="$GR00T_DIR/../../manipulator_md/sim2real/08_T1_sim2real/assets/generalization"
 mkdir -p "$ASSETS"
 
 # 다음 시행 번호 자동 계산 (<LABEL>_01.mp4, _02.mp4 ... 중 비어있는 첫 번호)
