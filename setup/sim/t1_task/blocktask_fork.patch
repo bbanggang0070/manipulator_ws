@@ -1,3 +1,28 @@
+diff --git a/source/sim_to_real_so101/mdp/resets.py b/source/sim_to_real_so101/mdp/resets.py
+index 126512e..ddd9221 100644
+--- a/source/sim_to_real_so101/mdp/resets.py
++++ b/source/sim_to_real_so101/mdp/resets.py
+@@ -338,6 +338,7 @@ def reset_prop_random_reach(
+         max_dist: float,
+         angle_range: tuple[float, float],
+         z: float,
++        yaw_range: tuple[float, float] | None = None,
+ ):
+     """Reset the given prop to a random (x, y) point sampled uniformly (by area) within an
+     annulus around ``base_xy`` (typically the robot base), so it's never too close (self-
+@@ -362,6 +363,12 @@ def reset_prop_random_reach(
+     default_state = asset.data.default_root_state[env_ids].clone()
+     world_pos = chosen_pos_local + env.scene.env_origins[env_ids]
+     orientation = default_state[:, 3:7]
++    # 선택: yaw 무작위(기본 자세에 z축 회전 합성). None이면 기존처럼 기본 자세 유지(하위호환).
++    if yaw_range is not None:
++        yaw = math_utils.sample_uniform(yaw_range[0], yaw_range[1], (n,), device=asset.device)
++        zeros = torch.zeros_like(yaw)
++        dq = math_utils.quat_from_euler_xyz(zeros, zeros, yaw)
++        orientation = math_utils.quat_mul(orientation, dq)
+ 
+     asset.write_root_pose_to_sim(torch.cat([world_pos, orientation], dim=-1), env_ids=env_ids)
+     zero_velocity = torch.zeros((len(env_ids), 6), device=asset.device)
 diff --git a/source/sim_to_real_so101/scripts/lerobot_agent.py b/source/sim_to_real_so101/scripts/lerobot_agent.py
 index fec012f..f516696 100644
 --- a/source/sim_to_real_so101/scripts/lerobot_agent.py
@@ -183,7 +208,7 @@ index 2f27635..e8d1dea 100644
              "rot_range": {
                  "roll": (-0.05, 0.05),  # ±3°
 diff --git a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
-index 170026d..99657f1 100644
+index 170026d..1b902a6 100644
 --- a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
 +++ b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
 @@ -41,6 +41,10 @@ from sim_to_real_so101.mdp import (
@@ -219,7 +244,7 @@ index 170026d..99657f1 100644
  
  block_base = RigidObjectCfg(
      prim_path="{ENV_REGEX_NS}/Block",
-@@ -124,7 +128,26 @@ BOX_SIZE = (0.10, 0.20, 0.075)  # 100mm (x) x 200mm (y) x 75mm (z), baked into b
+@@ -124,12 +128,32 @@ BOX_SIZE = (0.10, 0.20, 0.075)  # 100mm (x) x 200mm (y) x 75mm (z), baked into b
  # Its root origin sits at the base of the box (not its center), so unlike the
  # primitive-shape props above, the spawn z here is the resting surface height
  # itself (mat top, see BLOCK_SPAWN_Z), not a half-height offset.
@@ -237,17 +262,23 @@ index 170026d..99657f1 100644
 +        warmup_steps=30,
 +        grasp_history_window=20,
 +        force_threshold=2,
-+        rack_local_x_min=-0.05,
-+        rack_local_x_max=0.05,
-+        rack_local_y_min=-0.10,
-+        rack_local_y_max=0.10,
-+        rack_local_z_max=0.08,
++        rack_local_x_min=-0.042,   # 박스 0.85배 축소 반영 (기존 ±0.05)
++        rack_local_x_max=0.042,
++        rack_local_y_min=-0.085,   # 기존 ±0.10
++        rack_local_y_max=0.085,
++        rack_local_z_max=0.068,    # 기존 0.08
 +        vertical_threshold=0.0,
 +    )
  
  paper_box_base = RigidObjectCfg(
      prim_path="{ENV_REGEX_NS}/Basket",
-@@ -165,6 +188,32 @@ class VialsToRackSceneCfg(SO101TaskSceneCfg):
+     spawn=sim_utils.UsdFileCfg(
+         usd_path=f"{assets_path}/usd/basket_box.usda",
++        scale=(0.85, 0.85, 0.85),   # 박스 조금 작게 (2026-08-04, 성공경계도 ×0.85)
+         mass_props=sim_utils.MassPropertiesCfg(mass=0.15),
+         rigid_props=sim_utils.RigidBodyPropertiesCfg(
+             solver_position_iteration_count=8,
+@@ -165,6 +189,32 @@ class VialsToRackSceneCfg(SO101TaskSceneCfg):
      basket_black.prim_path = "{ENV_REGEX_NS}/Basket_Black"
      basket_black.init_state.pos = (0.10, -0.22, BASKET_SPAWN_Z)
  
@@ -280,7 +311,7 @@ index 170026d..99657f1 100644
  
  @configclass
  class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
-@@ -187,6 +236,9 @@ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
+@@ -187,6 +237,9 @@ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
  class VialsToRackEventCfg(TaskEventCfg):
      """Configuration for events."""
  
@@ -290,7 +321,7 @@ index 170026d..99657f1 100644
      # Robot arm color for this task only (base EventCfg defaults to orange).
      reset_set_robot_visual_material = EventTerm(
          func=randomize_robot_color,
-@@ -227,7 +279,7 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+@@ -227,7 +280,7 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
          func=randomize_robot_color,
          mode="reset",
          params={
@@ -299,7 +330,7 @@ index 170026d..99657f1 100644
          },
      )
  
-@@ -242,12 +294,44 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+@@ -242,12 +295,47 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
          },
      )
  
@@ -311,8 +342,10 @@ index 170026d..99657f1 100644
 +    # ── 물리 DR (2026-08-04, 접촉 역학 다양성) — 파지 일반화. block_red 마찰·질량 매 reset 랜덤 ──
 +    randomize_block_friction = EventTerm(
 +        func=randomize_rigid_body_material,
-+        mode="reset",
-+        params={
+         mode="reset",
+         params={
+-            "yaw_range": (-0.3, 0.3),  # ±17° rotation
+-            "asset_cfg": SceneEntityCfg("mat"),
 +            "asset_cfg": SceneEntityCfg("block_red"),
 +            "static_friction_range": (0.56, 1.04),   # base 0.8 ±30%
 +            "dynamic_friction_range": (0.42, 0.78),  # base 0.6 ±30%
@@ -331,24 +364,25 @@ index 170026d..99657f1 100644
 +        },
 +    )
 +
-+    # ── 박스 위치 무작위 (2026-08-04) — 기존 고정 리셋(reset_props) 대체 ──
-+    # 기본 basket_black pos = (0.10, -0.22)[=오른쪽]. -y=오른쪽 / +y=왼쪽.
-+    # +y로 크게 확대해 오른쪽→정면→왼쪽 전역 커버. x는 도달범위 내로 소폭.
++    # ── 박스 위치 무작위 (2026-08-04) — 팔 겹침 방지: 도달 annulus(외곽) arc 배치 ──
++    # 로봇 base(-0.05,0) 기준 정면~오른쪽 외곽. min_dist로 팔 겹침 방지, angle로 정면·오른쪽만,
++    # yaw로 방향 다양성. (블록과 같은 reset_prop_random_reach 재사용 + yaw_range 옵션)
 +    reset_props = None
 +    reset_basket_random = EventTerm(
-+        func=reset_root_state_uniform,
-         mode="reset",
-         params={
--            "yaw_range": (-0.3, 0.3),  # ±17° rotation
--            "asset_cfg": SceneEntityCfg("mat"),
-+            "asset_cfg": SceneEntityCfg("basket_black"),
-+            # x∈[0.05,0.18], y∈[-0.22(우)→+0.18(좌)], yaw ±0.6rad(~±34°)
-+            "pose_range": {"x": (-0.05, 0.08), "y": (0.0, 0.40), "yaw": (-0.6, 0.6)},
-+            "velocity_range": {},
++        func=reset_prop_random_reach,
++        mode="reset",
++        params={
++            "asset_name": "basket_black",
++            "base_xy": BLOCK_REACH_BASE_XY,   # 로봇 base
++            "min_dist": 0.24,                 # 외곽(팔 겹침 방지)
++            "max_dist": 0.32,                 # 도달 범위 내
++            "angle_range": (-1.15, 0.05),     # 오른쪽(~-66°)~정면(~+3°). 왼쪽(+y) 제외
++            "z": BASKET_SPAWN_Z,
++            "yaw_range": (-0.5, 0.5),         # ±~28° 방향 다양성
          },
      )
  
-@@ -260,6 +344,22 @@ class VialsToRackObservationsCfg(TaskObservationsCfg):
+@@ -260,6 +348,22 @@ class VialsToRackObservationsCfg(TaskObservationsCfg):
      class SubtaskCfg(ObsGroup):
          """Observations for subtask tracking."""
  
@@ -371,7 +405,7 @@ index 170026d..99657f1 100644
          def __post_init__(self) -> None:
              self.enable_corruption = False
              self.concatenate_terms = False
-@@ -276,6 +376,14 @@ class VialsToRackTerminationsCfg:
+@@ -276,6 +380,14 @@ class VialsToRackTerminationsCfg:
          time_out=True,
      )
  
@@ -386,7 +420,7 @@ index 170026d..99657f1 100644
  
  
  @configclass
-@@ -307,7 +415,7 @@ class VialsToRackEvalEnvCfg(VialsToRackEnvCfg):
+@@ -307,7 +419,7 @@ class VialsToRackEvalEnvCfg(VialsToRackEnvCfg):
  
      def __post_init__(self) -> None:
          super().__post_init__()
@@ -395,7 +429,7 @@ index 170026d..99657f1 100644
  
  
  @configclass
-@@ -319,4 +427,4 @@ class VialsToRackEvalDREnvCfg(VialsToRackDREnvCfg):
+@@ -319,4 +431,4 @@ class VialsToRackEvalDREnvCfg(VialsToRackDREnvCfg):
  
      def __post_init__(self) -> None:
          super().__post_init__()
