@@ -48,11 +48,14 @@ if [ "$MODE" = "record" ]; then
   fi
   DATASET_DIR="$WORKSHOP/datasets/$DSNAME"
   # 리더암 teleop 녹화 (S=에피소드 저장/중지, R=리셋).
+  # ⚠️ task_name은 컨테이너 env(TASK_NAME, 아래 docker run -e)에서 받는다 — 문자열에 공백이 있어
+  # 여기서 직접 작은따옴표로 넣으면 RUN 구성 시 바깥 bash -c '$INNER'의 따옴표와 중첩되어
+  # "Pick"만 남고 나머지가 유실된다(2026-08-04 발견·수정. 과거 전체 sim 수집이 이 버그로 영향받음).
   INNER="lerobot_agent --task Lerobot-So101-Teleop-Vials-To-Rack-DR --num_envs 1 --rerun \
     --port /dev/ttyLEADER --robot_id leader \
     --repo_id heongyu/$DSNAME \
     --repo_root /workspace/Sim-to-Real-SO-101-Workshop/datasets/$DSNAME \
-    --task_name 'Pick up the block and place it in the box'"
+    --task_name \"\$TASK_NAME\""
 else
   INNER="zero_agent --task Lerobot-So101-Teleop-Vials-To-Rack --num_envs 1"
 fi
@@ -63,6 +66,7 @@ echo "종료: Ctrl+C 또는 다른 터미널에서 docker rm -f blocktask"
 RUN="docker run --name blocktask --rm -it --privileged --gpus all \
   -e ACCEPT_EULA=Y -e PRIVACY_CONSENT=Y -e DISPLAY=$DISPLAY --network=host \
   -e CAM_X=${CAM_X:-0} -e CAM_Y=${CAM_Y:-0} -e CAM_Z=${CAM_Z:-0} \
+  -e TASK_NAME=\"${TASK_NAME:-Pick up the block and place it in the box}\" \
   -e LEROBOT_RERUN_MEMORY_LIMIT=${LEROBOT_RERUN_MEMORY_LIMIT:-30%} \
   -v /dev:/dev -v /run/udev:/run/udev:ro \
   -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/.Xauthority:/root/.Xauthority \
