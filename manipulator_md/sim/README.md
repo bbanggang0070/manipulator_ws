@@ -115,6 +115,16 @@ flowchart TD
 - **동일 프로토콜 고정**: v2 측정과 공정 비교를 위해 배포 설정·에피소드 길이(900프레임)·성공 판정을
   동일하게 유지한다. 조건만 바꾸는 것은 `blocktask_ood_sweep.sh`가 자동 처리한다.
 
+> ⚠️ **평가 환경은 `-DR-Eval`이 기본** (2026-08-04 정정). 수집을 `-DR` 태스크로 하므로 학습 분포에
+> **박스 무작위·물리 DR·조명 DR이 이미 포함**돼 있다. 따라서 *in-distribution 기준선 = `-DR-Eval`* 이며,
+> non-DR `-Eval`(박스 고정·물리DR 없음)로 재면 학습 분포가 아닌 값을 얻는다.
+> OOD 축을 볼 때도 **베이스를 DR로 두고 해당 축만** 바꿔야 교란이 없다(예: 색상만 바꾸고 나머지는 학습분포).
+> v2와의 비교가 필요하면 `fixed_light` 조건(non-DR)을 별도로 쓴다 — v2 baseline과 같은 슬라이스지만
+> **v3의 in-distribution은 아니다.**
+>
+> 부수 사실: `reset_basket_random`·물리 DR은 `VialsToRackEventDRCfg`에만 정의돼 있어, non-DR 평가에서는
+> 박스 관련 씬 편집이 **무효**가 된다(base cfg의 `reset_props`가 고정 위치로 리셋).
+
 ## 6. 데이터 · DR 전략 (핵심 — [분석](sim_generalization_analysis.md) §4.1·§4.2)
 
 ### 6.1 데이터: 다양성 > 양 🔴
