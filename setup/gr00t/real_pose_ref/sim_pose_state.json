@@ -1,0 +1,1 @@
+{"dataset": "so101_blocktask_real", "episode": 0, "frame": 0, "length": 409, "joints": ["shoulder_pan.pos", "shoulder_lift.pos", "elbow_flex.pos", "wrist_flex.pos", "wrist_roll.pos", "gripper.pos"], "state": [9.670330047607422, -94.32967376708984, 89.45054626464844, 75.82417297363281, -3.8241758346557617, 2.6502909660339355]}

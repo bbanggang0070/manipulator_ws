@@ -19,11 +19,21 @@ import rerun as rr
 from lerobot.robots.so_follower.so_follower import SOFollower
 from lerobot.robots.so_follower.config_so_follower import SOFollowerRobotConfig
 
-REF = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pose_ref")
+# 기준 프레임 디렉터리. 기본은 sim(pose_ref). 실기 dataset 비교는 POSE_REF=real_pose_ref 로 전환
+# (extract_real_pose.sh 가 생성). 상대경로면 이 파일 기준으로 해석 → 하위호환(기본값 불변).
+_here = os.path.dirname(os.path.abspath(__file__))
+_ref = os.environ.get("POSE_REF", "pose_ref")
+REF = _ref if os.path.isabs(_ref) else os.path.join(_here, _ref)
 d = json.load(open(os.path.join(REF, "sim_pose_state.json")))
 TARGET = {j: float(v) for j, v in zip(d["joints"], d["state"])}
 front_ref = cv2.imread(os.path.join(REF, "sim_pose_front.jpg"))
 wrist_ref = cv2.imread(os.path.join(REF, "sim_pose_wrist.jpg"))
+
+# 선택적 오버레이: 90% 시절(2026-07-30) 배포 프레임 = 알려진-정상 화각. 있으면 era90/* 로 추가 표시.
+# (real_success_w03.mp4 frame0에서 front/wrist 분리. top 카메라 각도를 '그때'로 되돌리는 기준)
+_ERA90 = os.path.join(_here, "pose_ref_era90")
+era90_front = cv2.imread(os.path.join(_ERA90, "front.jpg"))
+era90_wrist = cv2.imread(os.path.join(_ERA90, "wrist.jpg"))
 
 CAMS = {"front": "/dev/cam_top", "wrist": "/dev/cam_wrist"}
 W, H, FPS = 640, 480, 30
@@ -49,6 +59,11 @@ def main():
         rr.log("sim_ref/front", rr.Image(cv2.cvtColor(front_ref, cv2.COLOR_BGR2RGB)), static=True)
     if wrist_ref is not None:
         rr.log("sim_ref/wrist", rr.Image(cv2.cvtColor(wrist_ref, cv2.COLOR_BGR2RGB)), static=True)
+    if era90_front is not None:
+        rr.log("era90/front", rr.Image(cv2.cvtColor(era90_front, cv2.COLOR_BGR2RGB)), static=True)
+        print("✓ 90% 시절 오버레이: era90/front", flush=True)
+    if era90_wrist is not None:
+        rr.log("era90/wrist", rr.Image(cv2.cvtColor(era90_wrist, cv2.COLOR_BGR2RGB)), static=True)
 
     r = None
     for attempt in range(6):

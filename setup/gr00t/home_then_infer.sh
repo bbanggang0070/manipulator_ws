@@ -19,14 +19,17 @@ GR00T_DIR="$(cd "$(dirname "$0")" && pwd)"
 LEROBOT_DIR="$GR00T_DIR/../../envs/lerobot"
 TOL="${TOL:-1.0}"
 MAX_TRIES="${MAX_TRIES:-20}"
+# 홈 스크립트 선택. 기본 goto_home_sim.py(옛 sim rest). co-train 실기 배포는
+# HOME_SCRIPT=goto_home_real.py (실기 rest, elbow +89.8 → 초반 rest 지연 제거).
+HOME_SCRIPT="${HOME_SCRIPT:-goto_home_sim.py}"
 
 i=0
 while : ; do
   i=$((i + 1))
   echo "[home] 시도 $i/$MAX_TRIES  (목표: 최대 오차 <= ${TOL}°)"
 
-  # 원본 goto_home_sim.py 실행 (출력은 화면에도 보여주고 변수로도 캡처)
-  out="$( cd "$LEROBOT_DIR" && uv run python "$GR00T_DIR/goto_home_sim.py" 2>&1 )"
+  # 홈 스크립트 실행 (출력은 화면에도 보여주고 변수로도 캡처)
+  out="$( cd "$LEROBOT_DIR" && uv run python "$GR00T_DIR/$HOME_SCRIPT" 2>&1 )"
   echo "$out"
 
   # "최대 오차 X.X°" 에서 숫자만 추출
