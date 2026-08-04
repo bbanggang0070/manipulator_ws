@@ -81,9 +81,13 @@ PY
 echo "모델: $MODEL | N=$N | 조건: ${CONDS[*]}" | tee "$SUMMARY"
 echo "결과 폴더: $OUTDIR" | tee -a "$SUMMARY"
 echo | tee -a "$SUMMARY"
+# printf 패딩은 바이트 기준이라 한글(3바이트/2칸)이 섞이면 정렬이 깨진다 → 헤더는 ASCII로 통일.
+printf "%-14s %-16s %s\n" "COND" "SR" "TIME(mm:ss)" | tee -a "$SUMMARY"
 
+SWEEP_T0=$(date +%s)
 for c in "${CONDS[@]}"; do
   echo "===== [$c] 시작 $(date +%H:%M:%S) ====="
+  T0=$(date +%s)
   apply_cond "$c" || continue
   # ⚠️ 기본 모드는 **dr(-DR-Eval)** 이다. 수집이 `-DR` 태스크로 이뤄져 학습 분포에
   # 박스 무작위·물리 DR·조명 DR이 이미 포함돼 있기 때문(= -DR-Eval이 곧 학습 분포).
@@ -96,12 +100,15 @@ for c in "${CONDS[@]}"; do
   SAVE_VIDEO_DIR=/workspace/Sim-to-Real-SO-101-Workshop/outputs/sweep_$c \
     "$HOME/blocktask_sim_eval.sh" "$MODEL" "$N" "$MODE" > "$OUTDIR/$c.log" 2>&1
   SR=$(grep -oE "success: [0-9.]+%" "$OUTDIR/$c.log" | tail -1)
-  printf "%-14s %s\n" "$c" "${SR:-(측정 실패 — 로그 확인)}" | tee -a "$SUMMARY"
+  EL=$(( $(date +%s) - T0 ))   # 조건별 소요(모델 로딩 ~1-2분 + N 에피소드 롤아웃 포함)
+  printf "%-14s %-16s %02d:%02d\n" "$c" "${SR:-FAILED(로그 확인)}" $((EL/60)) $((EL%60)) | tee -a "$SUMMARY"
 done
 
 # 영상 권한(컨테이너 root 소유 → 호스트에서 읽기)
 docker run --rm -v "$WORKSHOP/outputs:/o" --entrypoint chmod teleop-docker:latest -R a+rw /o >/dev/null 2>&1 || true
 
+TOTAL=$(( $(date +%s) - SWEEP_T0 ))
 echo | tee -a "$SUMMARY"
+printf "총 소요: %02d:%02d:%02d (%d개 조건)\n" $((TOTAL/3600)) $((TOTAL%3600/60)) $((TOTAL%60)) "${#CONDS[@]}" | tee -a "$SUMMARY"
 echo "=== 완료 ===" | tee -a "$SUMMARY"
 cat "$SUMMARY"
