@@ -83,10 +83,31 @@ git apply "$MW/setup/sim/t1_task/blocktask_fork.patch"
 git diff --stat        # 7 files changed, ~190 insertions 확인
 ```
 
-적용되는 7파일: `scripts/lerobot_agent.py`(rerun), `scripts/lerobot_eval.py`(영상 덤프),
-`tasks/task_env_cfg.py`(카메라/DR), `tasks/vials_to_rack_env_cfg.py`(블록 씬 정제·성공 판정),
+적용되는 **8파일**: `scripts/lerobot_agent.py`(rerun), `scripts/lerobot_eval.py`(영상 덤프),
+`tasks/task_env_cfg.py`(카메라 오프셋·고정), `tasks/vials_to_rack_env_cfg.py`(블록 씬·물리 DR·박스 arc·성공 판정),
+`mdp/resets.py`(`reset_prop_random_reach`의 `yaw_range` 옵션),
 `utils/keyboard.py`(키 리매핑), `utils/lerobot_interface.py`(wrist_roll 오프셋),
 `utils/lerobot_recorder.py`(VRAM 누수 수정 + `SIM_RECORD_SECONDS`).
+
+### 적용 확인 (권장)
+패치가 제대로 붙었는지 아래 값들이 나오면 정상이다(2026-08-04 v3 기준):
+```bash
+V=source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
+grep -E "^BLOCK_REACH_(MIN|MAX|ANGLE)" $V     # 0.16 / 0.34 / (-0.7, 1.25)
+grep -cE "randomize_block_friction|randomize_block_mass" $V   # 2  (물리 DR)
+grep -E '"min_dist"|"yaw_range"' $V           # 0.28 / (-3.14159, 3.14159)  (박스 arc)
+grep -n "scale=(0.85" $V                      # 박스 0.85배
+grep -E 'CAM_X", "0.03|CAM_Z", "0.02' source/sim_to_real_so101/tasks/task_env_cfg.py  # 카메라 오프셋
+```
+
+### (선택) 씬 진단 도구
+`setup/sim/t1_task/diag_block.py`를 fork의 `source/sim_to_real_so101/scripts/`에 복사해 두면
+headless로 물체 좌표를 찍어볼 수 있다(GUI 없이 mat/block/basket/robot 위치 확인).
+```bash
+cp <manipulator_ws>/setup/sim/t1_task/diag_block.py source/sim_to_real_so101/scripts/
+# 컨테이너 안에서: python3 source/sim_to_real_so101/scripts/diag_block.py
+```
+씬 재현에는 **불필요**하며(다른 코드가 참조하지 않음), 문제 진단용 보조 도구다.
 
 > `git lfs pull` 후 `.usd`/`.usda`가 실제 파일인지 `file source/sim_to_real_so101/assets/usd/basket_box.usda`
 > 로 확인(“ASCII text”면 정상, “ASCII text, 130 bytes 포인터”면 LFS 미수신).
