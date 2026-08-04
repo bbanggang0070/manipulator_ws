@@ -173,7 +173,7 @@ index 349a4c0..54dbb6c 100644
                  policy.reset()
                  step = 0
 diff --git a/source/sim_to_real_so101/tasks/task_env_cfg.py b/source/sim_to_real_so101/tasks/task_env_cfg.py
-index 2f27635..e8d1dea 100644
+index 2f27635..2b66183 100644
 --- a/source/sim_to_real_so101/tasks/task_env_cfg.py
 +++ b/source/sim_to_real_so101/tasks/task_env_cfg.py
 @@ -46,6 +46,15 @@ from .so101_env_cfg import (
@@ -192,7 +192,14 @@ index 2f27635..e8d1dea 100644
  camera_object = TiledCameraCfg(
      prim_path="",
      update_period=0.0,
-@@ -149,10 +158,10 @@ class TaskEventCfg(EventCfg):
+@@ -144,20 +153,22 @@ class TaskEventCfg(EventCfg):
+         },
+     )
+ 
++    # 카메라 위치 고정 (2026-08-04): DR 지터 제거(범위 폭 0) → 매 에피소드 동일 위치.
++    # _CAM_EXT(CAM_X/Y/Z) 오프셋은 그대로 적용(고정 오프셋). 카메라를 옮기려면 CAM_* 값만 조정.
+     reset_camera_external_pose = EventTerm(
+         func=randomize_camera_pose,
          mode="reset",
          params={
              "prim_path_pattern": "{ENV_REGEX_NS}/LightStudio/LightBox/camera_mount",
@@ -200,13 +207,22 @@ index 2f27635..e8d1dea 100644
 -                "x": (-0.02, 0.02),  # ±2cm
 -                "y": (-0.02, 0.02),
 -                "z": (-0.01, 0.01),
-+            "pos_range": {  # DR ±지터를 CAM_X/Y/Z 오프셋 중심으로 이동(카메라 당기기)
-+                "x": (_CAM_EXT[0] - 0.02, _CAM_EXT[0] + 0.02),
-+                "y": (_CAM_EXT[1] - 0.02, _CAM_EXT[1] + 0.02),
-+                "z": (_CAM_EXT[2] - 0.01, _CAM_EXT[2] + 0.01),
++            "pos_range": {  # 지터 0 — default + _CAM_EXT 로 고정
++                "x": (_CAM_EXT[0], _CAM_EXT[0]),
++                "y": (_CAM_EXT[1], _CAM_EXT[1]),
++                "z": (_CAM_EXT[2], _CAM_EXT[2]),
              },
-             "rot_range": {
-                 "roll": (-0.05, 0.05),  # ±3°
+-            "rot_range": {
+-                "roll": (-0.05, 0.05),  # ±3°
+-                "pitch": (-0.05, 0.05),
+-                "yaw": (-0.05, 0.05),
++            "rot_range": {  # 회전 지터도 0 (고정)
++                "roll": (0.0, 0.0),
++                "pitch": (0.0, 0.0),
++                "yaw": (0.0, 0.0),
+             },
+         },
+     )
 diff --git a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
 index 170026d..2e9ce34 100644
 --- a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
