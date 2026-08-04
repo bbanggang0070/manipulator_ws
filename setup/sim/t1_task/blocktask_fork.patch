@@ -183,10 +183,21 @@ index 2f27635..e8d1dea 100644
              "rot_range": {
                  "roll": (-0.05, 0.05),  # ±3°
 diff --git a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
-index 170026d..c8316da 100644
+index 170026d..bc89d7d 100644
 --- a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
 +++ b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
-@@ -79,7 +79,7 @@ BLOCK_MASS = 0.005  # 5g
+@@ -41,6 +41,10 @@ from sim_to_real_so101.mdp import (
+     vial_placed_on_rack,
+     vial_placed_on_rack_termination,
+     time_out,
++    # 물리 DR + 박스 위치 무작위 (isaaclab.envs.mdp re-export via mdp/__init__)
++    randomize_rigid_body_material,
++    randomize_rigid_body_mass,
++    reset_root_state_uniform,
+ )
+ 
+ from .so101_env_cfg import EventCfg
+@@ -79,7 +83,7 @@ BLOCK_MASS = 0.005  # 5g
  # task_env_cfg.py's mat.init_state), not on the world ground plane at z=0.
  # Half height alone spawns them embedded under the mat with nothing to catch
  # them, which makes the physics solver eject them and they fall out of frame.
@@ -195,7 +206,20 @@ index 170026d..c8316da 100644
  
  # On each reset, the block is placed at a random point within an annulus around the
  # robot base (env-local (-0.05, 0.0), see so101.py's SO101_CFG.init_state.pos) so it's
-@@ -124,7 +124,26 @@ BOX_SIZE = (0.10, 0.20, 0.075)  # 100mm (x) x 200mm (y) x 75mm (z), baked into b
+@@ -92,9 +96,9 @@ BLOCK_SPAWN_Z = 0.045  # mat top (0.035) + half height (0.01) + small clearance
+ # that side, wider on the clear side, both bounds keeping the point on the Mat and clear
+ # of the basket's footprint with margin.
+ BLOCK_REACH_BASE_XY = (-0.05, 0.0)
+-BLOCK_REACH_MIN_DIST = 0.20
+-BLOCK_REACH_MAX_DIST = 0.32
+-BLOCK_REACH_ANGLE_RANGE = (-0.5, 0.70)  # radians, ~(-28.6deg toward basket, +40deg away from it)
++BLOCK_REACH_MIN_DIST = 0.16   # 위치 전역 커버리지(2026-08-04): 학습 밖 근/원거리 포함 (기존 0.20)
++BLOCK_REACH_MAX_DIST = 0.34   # (기존 0.32)
++BLOCK_REACH_ANGLE_RANGE = (-0.7, 1.25)  # radians, 좌우 확대(위치 OOD 붕괴 대응, 기존 -0.5~0.70)
+ 
+ block_base = RigidObjectCfg(
+     prim_path="{ENV_REGEX_NS}/Block",
+@@ -124,7 +128,26 @@ BOX_SIZE = (0.10, 0.20, 0.075)  # 100mm (x) x 200mm (y) x 75mm (z), baked into b
  # Its root origin sits at the base of the box (not its center), so unlike the
  # primitive-shape props above, the spawn z here is the resting surface height
  # itself (mat top, see BLOCK_SPAWN_Z), not a half-height offset.
@@ -223,7 +247,7 @@ index 170026d..c8316da 100644
  
  paper_box_base = RigidObjectCfg(
      prim_path="{ENV_REGEX_NS}/Basket",
-@@ -165,6 +184,32 @@ class VialsToRackSceneCfg(SO101TaskSceneCfg):
+@@ -165,6 +188,32 @@ class VialsToRackSceneCfg(SO101TaskSceneCfg):
      basket_black.prim_path = "{ENV_REGEX_NS}/Basket_Black"
      basket_black.init_state.pos = (0.10, -0.22, BASKET_SPAWN_Z)
  
@@ -256,7 +280,7 @@ index 170026d..c8316da 100644
  
  @configclass
  class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
-@@ -187,6 +232,9 @@ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
+@@ -187,6 +236,9 @@ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
  class VialsToRackEventCfg(TaskEventCfg):
      """Configuration for events."""
  
@@ -266,7 +290,7 @@ index 170026d..c8316da 100644
      # Robot arm color for this task only (base EventCfg defaults to orange).
      reset_set_robot_visual_material = EventTerm(
          func=randomize_robot_color,
-@@ -227,7 +275,7 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+@@ -227,7 +279,7 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
          func=randomize_robot_color,
          mode="reset",
          params={
@@ -275,24 +299,53 @@ index 170026d..c8316da 100644
          },
      )
  
-@@ -242,14 +290,8 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+@@ -242,12 +294,41 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
          },
      )
  
 -    reset_mat_rotation = EventTerm(
 -        func=randomize_mat_rotation,
--        mode="reset",
--        params={
--            "yaw_range": (-0.3, 0.3),  # ±17° rotation
--            "asset_cfg": SceneEntityCfg("mat"),
--        },
--    )
 +    # mat이 kinematic RigidObject(평면 바닥)라 prim_paths 미보유 → DR에서도 mat 회전 비활성화.
 +    reset_mat_rotation = None
++
++    # ── 물리 DR (2026-08-04, 접촉 역학 다양성) — 파지 일반화. block_red 마찰·질량 매 reset 랜덤 ──
++    randomize_block_friction = EventTerm(
++        func=randomize_rigid_body_material,
++        mode="reset",
++        params={
++            "asset_cfg": SceneEntityCfg("block_red"),
++            "static_friction_range": (0.56, 1.04),   # base 0.8 ±30%
++            "dynamic_friction_range": (0.42, 0.78),  # base 0.6 ±30%
++            "restitution_range": (0.0, 0.0),
++            "num_buckets": 64,
++        },
++    )
++    randomize_block_mass = EventTerm(
++        func=randomize_rigid_body_mass,
++        mode="reset",
++        params={
++            "asset_cfg": SceneEntityCfg("block_red"),
++            "mass_distribution_params": (0.5, 1.5),   # ±50% (scale)
++            "operation": "scale",
++            "distribution": "uniform",
++        },
++    )
++
++    # ── 박스 위치 무작위 (2026-08-04) — 기존 고정 리셋(reset_props) 대체 ──
++    reset_props = None
++    reset_basket_random = EventTerm(
++        func=reset_root_state_uniform,
+         mode="reset",
+         params={
+-            "yaw_range": (-0.3, 0.3),  # ±17° rotation
+-            "asset_cfg": SceneEntityCfg("mat"),
++            "asset_cfg": SceneEntityCfg("basket_black"),
++            "pose_range": {"x": (-0.03, 0.03), "y": (-0.03, 0.03), "yaw": (-0.30, 0.30)},
++            "velocity_range": {},
+         },
+     )
  
- 
- @configclass
-@@ -260,6 +302,22 @@ class VialsToRackObservationsCfg(TaskObservationsCfg):
+@@ -260,6 +341,22 @@ class VialsToRackObservationsCfg(TaskObservationsCfg):
      class SubtaskCfg(ObsGroup):
          """Observations for subtask tracking."""
  
@@ -315,7 +368,7 @@ index 170026d..c8316da 100644
          def __post_init__(self) -> None:
              self.enable_corruption = False
              self.concatenate_terms = False
-@@ -276,6 +334,14 @@ class VialsToRackTerminationsCfg:
+@@ -276,6 +373,14 @@ class VialsToRackTerminationsCfg:
          time_out=True,
      )
  
@@ -330,7 +383,7 @@ index 170026d..c8316da 100644
  
  
  @configclass
-@@ -307,7 +373,7 @@ class VialsToRackEvalEnvCfg(VialsToRackEnvCfg):
+@@ -307,7 +412,7 @@ class VialsToRackEvalEnvCfg(VialsToRackEnvCfg):
  
      def __post_init__(self) -> None:
          super().__post_init__()
@@ -339,7 +392,7 @@ index 170026d..c8316da 100644
  
  
  @configclass
-@@ -319,4 +385,4 @@ class VialsToRackEvalDREnvCfg(VialsToRackDREnvCfg):
+@@ -319,4 +424,4 @@ class VialsToRackEvalDREnvCfg(VialsToRackDREnvCfg):
  
      def __post_init__(self) -> None:
          super().__post_init__()
