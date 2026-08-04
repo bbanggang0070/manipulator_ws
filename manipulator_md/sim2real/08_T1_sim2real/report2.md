@@ -263,6 +263,44 @@ co-training이 gap을 줄였다고 **정량적으로** 말하려면, 재학습 �
 - **웹 재생 불가**: OpenCV `fourcc('mp4v')`는 MPEG-4 Part 2라 브라우저·Notion·Slack에서 재생되지 않고,
   `moov`가 파일 끝에 있어 faststart도 아니다. 공유용은 H.264 + `-movflags +faststart`로 변환한다.
   (본 문서의 실기 영상은 모두 변환본)
+- **sim 데이터 언어 지시문이 `"Pick"`으로 잘려 저장됨** (2026-08-04 발견, 아래 §4.9 별도 정리)
+
+### 4.9 ⚠️ sim 데이터의 언어 지시문 절단 버그 (2026-08-04 발견)
+
+sim 일반화 작업 중 v3 데이터셋을 검증하다, **저장된 task 문자열이 의도한
+`"Pick up the block and place it in the box"`가 아니라 `"Pick"` 4글자뿐**임을 발견했다.
+
+**원인** — `blocktask_run.sh`의 셸 따옴표 중첩:
+```bash
+INNER="... --task_name 'Pick up the block and place it in the box'"
+...  teleop-docker:latest bash -c '$INNER'      # ← 바깥 작은따옴표
+```
+`$INNER` 안의 작은따옴표가 바깥 `bash -c '...'`와 중첩되어, 셸이 `--task_name ` 직후 첫 `'`에서
+바깥 따옴표를 닫아버린다. 그 결과 `Pick`만 명령 문자열로 남고 `up the block ...`은
+`bash -c`의 **위치 인자($1,$2,…)로 흩어져 조용히 버려졌다**(에러 없음 → 오래 미발견).
+
+**영향 범위 (감사 결과)**:
+
+| 데이터셋 | 저장된 task | 비고 |
+|---|---|---|
+| `sim_so101_blocktask`(원본 75ep) | `"Pick"` | sim 수집 경로 |
+| `sim_so101_blocktask_v2`(100ep) | `"Pick"` | **§3~§5의 모든 sim 학습이 이 상태** |
+| `sim_so101_blocktask_v3`(100ep) | `"Pick"` → **수정 완료** | 2026-08-04 |
+| **`so101_blocktask_real`(실기 50ep)** | **정상**(전체 문구) | 실기 수집은 `record_blocktask_real.sh`가 `--dataset.single_task="..."`를 도커 `bash -c` 중첩 없이 직접 전달 → **버그 없음** |
+
+> **따라서 §5의 co-training은 sim 쪽 `"Pick"` + 실기 쪽 전체 문구라는 "언어 불일치" 상태로 학습됐다.**
+> 그럼에도 실기 SR 10%→90%를 달성했다(§5.3). 즉 이 태스크에서 성능을 가른 것은 언어 문구가 아니라
+> **시각·데이터 분포**였다는 방증이며, §5.3의 결론(데이터가 gap을 메웠다)은 유지된다.
+> 다만 배포 시 클라이언트가 보내는 문구는 항상 전체 문장이었으므로 **학습·추론 문구는 불일치했다**.
+
+**조치**:
+- `blocktask_run.sh`: task 문자열을 리터럴 대신 **컨테이너 env(`TASK_NAME`, `docker -e`)로 전달**하고
+  `INNER`에서 `--task_name "$TASK_NAME"`로 참조 → 중첩 따옴표 자체를 제거(`CAM_X`와 동일 패턴).
+- v3 데이터셋(5090 v2.1 병합본 + 로컬 v3.0 원본 2세션)의 `tasks`/`episodes` 메타를 전체 문구로 수정.
+  GR00T는 `lerobot_episode_loader.py`가 `tasks.jsonl`로 `task_index→task` 매핑을 만들고
+  parquet엔 `task_index`만 있으므로 **메타 수정만으로 충분**(재수집 불필요).
+- v2 등 기존 데이터는 **의도적으로 보존** — 이미 학습된 모델과의 대응 관계(“v2 모델은 `"Pick"`으로
+  학습됨”)를 기록으로 남기기 위함.
 
 ---
 
@@ -283,6 +321,7 @@ co-training이 gap을 줄였다고 **정량적으로** 말하려면, 재학습 �
 | 하이퍼파라미터 | v2와 **동일** (8-bit `paged_adamw`, LR 1e-4, warmup 0.05, batch 2×grad_accum 32, max-steps 20,000, save 5,000마다) |
 | 실행 | 5090 단일 GPU, `train_gr00t_blocktask_cotrain_n16_8bit.sh` → `gr00t-train8` 컨테이너 |
 | 출력 | `~/gr00tn16_ws/checkpoints/gr00t_blocktask_cotrain_n16_8bit` |
+| ⚠️ 언어 지시문 | **sim `"Pick"` / 실기 전체 문구**로 불일치 상태에서 학습됨 (2026-08-04 사후 발견, [§4.9](#49-️-sim-데이터의-언어-지시문-절단-버그-2026-08-04-발견)) |
 
 > 하이퍼파라미터를 v2와 동일하게 고정한 이유: §4.7과 같은 논리로, **비교 시 유일한 변수를 '실기 데이터
 > 추가' 하나로** 두기 위함.
