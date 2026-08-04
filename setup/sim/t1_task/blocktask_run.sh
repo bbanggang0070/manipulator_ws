@@ -35,12 +35,18 @@ CALIB=".cache/huggingface/lerobot/calibration"
 mkdir -p "$WORKSHOP/outputs" "$WORKSHOP/datasets"
 
 if [ "$MODE" = "record" ]; then
-  # recorder는 기존 폴더에 append 불가("folder already exists") → 대상이 이미 있으면
-  # 자동으로 새 폴더(_2, _3, ...)를 골라 충돌·에러 방지. (세션별 폴더 → 학습 시 다중 데이터셋으로 합침)
-  N=1; TRY="$DSNAME"
-  while [ -d "$WORKSHOP/datasets/$TRY" ]; do N=$((N+1)); TRY="${DSNAME}_${N}"; done
-  DSNAME="$TRY"; DATASET_DIR="$WORKSHOP/datasets/$DSNAME"
-  echo "▶ 녹화 대상 폴더(신규): datasets/$DSNAME"
+  # 기본: 대상 폴더가 있으면 새 폴더(_2, _3...)로 분리(세션별 → 나중에 병합).
+  # RESUME=1: 기존 폴더에 그대로 이어쓰기(recorder._init_existing_dataset). 단일 데이터셋 유지.
+  if [ "${RESUME:-0}" = "1" ]; then
+    if [ -d "$WORKSHOP/datasets/$DSNAME" ]; then echo "▶ 이어쓰기(RESUME): 기존 datasets/$DSNAME 에 추가"
+    else echo "▶ RESUME=1이나 폴더 없음 → 신규 datasets/$DSNAME 생성"; fi
+  else
+    N=1; TRY="$DSNAME"
+    while [ -d "$WORKSHOP/datasets/$TRY" ]; do N=$((N+1)); TRY="${DSNAME}_${N}"; done
+    DSNAME="$TRY"
+    echo "▶ 녹화 대상 폴더(신규): datasets/$DSNAME"
+  fi
+  DATASET_DIR="$WORKSHOP/datasets/$DSNAME"
   # 리더암 teleop 녹화 (S=에피소드 저장/중지, R=리셋).
   INNER="lerobot_agent --task Lerobot-So101-Teleop-Vials-To-Rack-DR --num_envs 1 --rerun \
     --port /dev/ttyLEADER --robot_id leader \
