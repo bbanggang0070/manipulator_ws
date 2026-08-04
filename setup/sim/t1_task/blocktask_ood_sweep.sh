@@ -48,7 +48,7 @@ apply_cond() {  # $1 = 조건명. 항상 원본에서 시작.
     pos_ood)
       sed -i -E 's/^BLOCK_REACH_MIN_DIST = [0-9.]+/BLOCK_REACH_MIN_DIST = 0.12/;
                  s/^BLOCK_REACH_MAX_DIST = [0-9.]+/BLOCK_REACH_MAX_DIST = 0.38/;
-                 s/^BLOCK_REACH_ANGLE_RANGE = \([^)]*\)/BLOCK_REACH_ANGLE_RANGE = (-1.0, 1.55)/' "$CFG" ;;
+                 s/^BLOCK_REACH_ANGLE_RANGE = [(][^)]*[)]/BLOCK_REACH_ANGLE_RANGE = (-1.0, 1.55)/' "$CFG" ;;
     box_ood)
       # 박스 arc 블록(reset_basket_random) 안의 min/max/angle만 정확히 교체.
       # (주석 정렬 때문에 단순 문자열 치환은 실패 → 블록 범위를 잡아 정규식 적용)
@@ -80,7 +80,10 @@ echo | tee -a "$SUMMARY"
 for c in "${CONDS[@]}"; do
   echo "===== [$c] 시작 $(date +%H:%M:%S) ====="
   apply_cond "$c" || continue
-  MODE=eval; [ "$c" = "dr" ] && MODE=dr
+  # ⚠️ reset_basket_random(박스 무작위)·물리 DR은 VialsToRackEventDRCfg에만 존재한다.
+  # non-DR eval은 base EventCfg(reset_props로 박스 고정)를 쓰므로, box_ood는 cfg를 편집해도
+  # eval 모드로 돌리면 무효가 된다 → box_ood도 dr 모드로 실행한다.
+  MODE=eval; [[ "$c" == "dr" || "$c" == "box_ood" ]] && MODE=dr
   rm -rf "$WORKSHOP/outputs/sweep_$c"
   SAVE_VIDEO_DIR=/workspace/Sim-to-Real-SO-101-Workshop/outputs/sweep_$c \
     "$HOME/blocktask_sim_eval.sh" "$MODEL" "$N" "$MODE" > "$OUTDIR/$c.log" 2>&1
@@ -89,7 +92,7 @@ for c in "${CONDS[@]}"; do
 done
 
 # 영상 권한(컨테이너 root 소유 → 호스트에서 읽기)
-docker run --rm --entrypoint chmod -v "$WORKSHOP/outputs:/o" teleop-docker:latest -R a+rw /o >/dev/null 2>&1 || true
+docker run --rm -v "$WORKSHOP/outputs:/o" --entrypoint chmod teleop-docker:latest -R a+rw /o >/dev/null 2>&1 || true
 
 echo | tee -a "$SUMMARY"
 echo "=== 완료 ===" | tee -a "$SUMMARY"
