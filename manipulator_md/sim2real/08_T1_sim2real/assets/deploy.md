@@ -221,21 +221,30 @@ v3.0 백업은 `…_v3.0`. 카메라 매핑은 `blocktask_modality.json`(top→f
 
 파일: `source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py`
 
-| 바꾸려는 것 | 심볼 | 방법 |
+> ℹ️ **2026-08-04 갱신** — 아래는 v3 수집 시점의 현재 설정이다. 그 전(v2) 대비 바뀐 점:
+> 물리 DR 신설, 블록 위치 전역 확대, 박스 위치·회전 무작위(고정 위치 → arc 샘플링), 박스 0.85배 축소,
+> top 카메라 지터 제거(고정).
+
+| 바꾸려는 것 | 심볼 | 현재 값 / 방법 |
 |---|---|---|
-| **큐브 색상** | `block_red.spawn.visual_material` (`diffuse_color=(0.9,0.1,0.1)`) | RGB 교체 |
-| **큐브 크기** | `BLOCK_SIZE = (0.02,0.02,0.02)` | 값 변경 |
-| **큐브 위치 범위** | `BLOCK_REACH_MIN_DIST/MAX_DIST/ANGLE_RANGE` + `reset_block_position` | 애뉼러스 범위(전역 스윕) |
-| **박스 위치** | `basket_black.init_state.pos = (0.10,-0.22,…)` | 값 변경 |
-| **박스 회전(45/90°)** | `basket_black.init_state.rot` (현재 없음) | `euler_angles_to_quat([0,0,deg],degrees=True)` 추가 |
-| **물체 변경** | `block_base = CuboidCfg(...)` | USD(`Vial_opaque.usda` 등)/다른 프리미티브로 교체 + `contact_grasp` 필터·성공판정 `vials=[...]` 이름 정합 |
-| **조명/외형 DR** | `Lerobot-So101-Teleop-Vials-To-Rack-DR(-Eval)` 태스크 | 이미 sky light·노출·온도·카메라 지터 랜덤화 |
+| **큐브 색상** | `block_red.spawn.visual_material` | `diffuse_color=(0.9,0.1,0.1)` — RGB 교체 |
+| **큐브 크기** | `BLOCK_SIZE` | `(0.02,0.02,0.02)` |
+| **큐브 위치 범위** | `BLOCK_REACH_MIN_DIST/MAX_DIST/ANGLE_RANGE` + `reset_block_position` | **반경 0.16~0.34, 각 −0.7~1.25 rad**(전역). 로봇 base `(-0.05,0)` 기준 애뉼러스 |
+| **박스 위치·회전** | `reset_basket_random`(EventTerm, `reset_prop_random_reach`) | **arc 0.28~0.34, 각 ±1.15 rad(우·정면·좌), yaw ±π(완전 무작위)**. `min_dist`가 팔 겹침을 막으므로 낮추지 말 것 |
+| **박스 크기** | `paper_box_base.spawn.scale` | **`(0.85,0.85,0.85)`** — 변경 시 `_block_place_params()`의 `rack_local_*` 경계도 같은 배율로 조정 |
+| **물리 DR** | `randomize_block_friction` / `randomize_block_mass` (DR cfg) | 마찰 ±30%(static 0.56~1.04 / dynamic 0.42~0.78), 질량 scale ±50% |
+| **물체 변경** | `block_base = CuboidCfg(...)` | USD(`Vial_opaque.usda` 등)/프리미티브 교체 + `contact_grasp` 필터·성공판정 `vials=[...]` 이름 정합 |
+| **조명/외형 DR** | `-DR(-Eval)` 태스크 | sky light·노출·온도 랜덤화 (**카메라 지터는 아래대로 비활성**) |
+| **top 카메라** | `task_env_cfg.py`의 `_CAM_EXT` + `reset_camera_external_pose` | **오프셋 `CAM_X=0.03, CAM_Z=0.02` 기본값, 지터 폭 0(고정)**. 옮기려면 `CAM_*` env |
+| **언어 지시문** | `blocktask_run.sh`의 `TASK_NAME` env | 기본 `"Pick up the block and place it in the box"`. **리터럴로 넣지 말 것**(§9 따옴표 중첩 함정) |
 
 성공 판정은 `_block_place_params()` + `VialsToRackTerminationsCfg.success`(블록이 박스 로컬
 경계 안 + 접촉 릴리스). 박스를 회전해도 **박스 로컬 좌표** 기준이라 유효.
 
-closed-loop 평가는 `setup/sim/t1_task/blocktask_sim_eval.sh <MODEL> <N> [eval|dr]`
-(real-robot 서버 + teleop-docker `lerobot_eval`, 성공률 자동 집계).
+closed-loop 평가:
+- 단일 조건: `setup/sim/t1_task/blocktask_sim_eval.sh <MODEL> <N> [eval|dr]`
+- **조건 스윕(권장)**: `setup/sim/t1_task/blocktask_ood_sweep.sh <MODEL> <N> [조건...]`
+  — train/dr/pos_ood/box_ood/color_* 를 자동 편집·평가·복원하고 조건별 SR + 시행별 mp4를 남긴다.
 
 ---
 
@@ -250,7 +259,9 @@ closed-loop 평가는 `setup/sim/t1_task/blocktask_sim_eval.sh <MODEL> <N> [eval
 | wrist(ego) 카메라가 90° 돌아감 | `init_state` Wrist_Roll(-1.6034rad) vs leader-rest 0° 불일치 → 패치의 관절 매핑 오프셋으로 해결(기록 데이터는 실기 프레임 유지) |
 | 물체가 바닥을 통과/낙하 | GPU 물리에서 정적 collision 미등록 → 매트를 **kinematic RigidObject 평면**으로(패치 반영) |
 | 뷰포트에서 매트 토글 시 “Simulation view invalidated” | GPU 물리 런타임 프림 토글 불가 → cfg에서 처음부터 평면으로(패치 반영) |
-| AV1 mp4가 VLC에서 검은 화면 | 하이브리드 그래픽 이슈 → **mpv**로 재생 |
+| AV1 mp4가 VLC에서 검은 화면 | 하이브리드 그래픽 이슈 → **mpv**로 재생. (파이썬 cv2도 AV1을 못 열 수 있음 → `ffmpeg`로 프레임 추출 후 처리) |
+| **저장된 task 문자열이 `"Pick"`으로 잘림** ⚠️ | `bash -c '$INNER'` 바깥 작은따옴표와 `--task_name '...'` 안쪽 따옴표가 **중첩**되어 첫 `'`에서 닫힘 → 나머지 단어가 `bash -c`의 위치인자로 흩어져 **에러 없이** 유실. **해결**: task 문자열을 `docker -e TASK_NAME="..."`로 넘기고 `--task_name "$TASK_NAME"`로 참조(현재 `blocktask_run.sh` 반영됨). **수집 후 `meta/tasks.parquet`(v3.0) 또는 `meta/tasks.jsonl`(v2.1)에서 전체 문장인지 반드시 확인** |
+| 데이터셋 폴더가 root 소유라 수정 불가 | 컨테이너가 root로 씀 → `docker run --rm -v <datasets>:/ds --entrypoint chown teleop-docker:latest -R 1000:1000 /ds/<name>` |
 
 ---
 
