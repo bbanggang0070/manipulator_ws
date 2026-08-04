@@ -208,7 +208,7 @@ index 2f27635..e8d1dea 100644
              "rot_range": {
                  "roll": (-0.05, 0.05),  # ±3°
 diff --git a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
-index 170026d..1b902a6 100644
+index 170026d..b242637 100644
 --- a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
 +++ b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
 @@ -41,6 +41,10 @@ from sim_to_real_so101.mdp import (
@@ -374,11 +374,11 @@ index 170026d..1b902a6 100644
 +        params={
 +            "asset_name": "basket_black",
 +            "base_xy": BLOCK_REACH_BASE_XY,   # 로봇 base
-+            "min_dist": 0.24,                 # 외곽(팔 겹침 방지)
-+            "max_dist": 0.32,                 # 도달 범위 내
++            "min_dist": 0.28,                 # 외곽·더 멀리(정면 근접 방지, 기존 0.24)
++            "max_dist": 0.34,                 # 도달 한계 근처까지(기존 0.32)
 +            "angle_range": (-1.15, 0.05),     # 오른쪽(~-66°)~정면(~+3°). 왼쪽(+y) 제외
 +            "z": BASKET_SPAWN_Z,
-+            "yaw_range": (-0.5, 0.5),         # ±~28° 방향 다양성
++            "yaw_range": (-3.14159, 3.14159), # 완전 무작위 회전(±180°, 기존 ±0.5rad)
          },
      )
  
