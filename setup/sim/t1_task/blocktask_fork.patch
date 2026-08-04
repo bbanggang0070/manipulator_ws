@@ -173,7 +173,7 @@ index 349a4c0..54dbb6c 100644
                  policy.reset()
                  step = 0
 diff --git a/source/sim_to_real_so101/tasks/task_env_cfg.py b/source/sim_to_real_so101/tasks/task_env_cfg.py
-index 2f27635..2b66183 100644
+index 2f27635..4666f14 100644
 --- a/source/sim_to_real_so101/tasks/task_env_cfg.py
 +++ b/source/sim_to_real_so101/tasks/task_env_cfg.py
 @@ -46,6 +46,15 @@ from .so101_env_cfg import (
@@ -183,10 +183,10 @@ index 2f27635..2b66183 100644
 +# external_D455(top) 카메라를 workspace에 가깝게 당기는 오프셋(camera_mount translate 기준, m).
 +# blocktask_run.sh가 CAM_X/CAM_Y/CAM_Z 환경변수로 전달. rerun external_D455 뷰 보며 값·부호 조정
 +# (큐브가 더 크게 보이면 가까워진 것). 0이면 원래 위치.
-+_CAM_EXT = (  # 기본값 0 = 원래 top 카메라 위치(원복, 2026-07-28). 필요시 CAM_X/Y/Z env로 조정 가능.
-+    float(os.environ.get("CAM_X", "0")),
++_CAM_EXT = (  # 기본값(2026-08-04 확정): CAM_X=0.03, CAM_Z=0.02 (rerun 육안 최적). CAM_* env로 덮어쓰기 가능.
++    float(os.environ.get("CAM_X", "0.03")),
 +    float(os.environ.get("CAM_Y", "0")),
-+    float(os.environ.get("CAM_Z", "0")),
++    float(os.environ.get("CAM_Z", "0.02")),
 +)
 +
  camera_object = TiledCameraCfg(
