@@ -36,9 +36,43 @@ CONDS=("$@")
 
 WORKSHOP="$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop"
 CFG="$WORKSHOP/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py"
+CAMCFG="$WORKSHOP/source/sim_to_real_so101/tasks/task_env_cfg.py"
 OUTDIR="$HOME/ood_sweep_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$OUTDIR"
 SUMMARY="$OUTDIR/summary.txt"
+
+# ── 씬 버전 검증 (2026-08-06 추가) ────────────────────────────────────────────
+# 배경: 로컬 fork에만 v3 씬 개조(물리 DR·박스 arc·위치 확대·카메라 오프셋)를 적용하고
+#   5090에 rsync를 빠뜨린 채 sweep을 돌려, v2 씬에서 측정한 무효 데이터를 얻은 사고가 있었다.
+#   (box_ood의 assert가 없었다면 조용히 틀린 숫자가 나왔을 것)
+# → 매 실행 전에 v3 씬 필수 요소를 확인하고, 하나라도 없으면 즉시 중단한다.
+#   씬을 고쳤다면 반드시 배포: rsync -a <로컬>/source/ 5090:~/blocktask_ws/.../source/
+verify_scene() {
+  local miss=0
+  check() {  # $1=설명 $2=파일 $3=패턴
+    if grep -q "$3" "$2"; then printf "  ✅ %s\n" "$1"
+    else printf "  ❌ %s  (없음: %s)\n" "$1" "$3"; miss=1; fi
+  }
+  echo "=== 씬 버전 검증 (v3 기준) ==="
+  check "물리 DR — 마찰"      "$CFG"    "randomize_block_friction"
+  check "물리 DR — 질량"      "$CFG"    "randomize_block_mass"
+  check "박스 위치·회전 무작위" "$CFG"    "reset_basket_random"
+  check "박스 고정 리셋 비활성" "$CFG"    "reset_props = None"
+  check "박스 축소 0.85"       "$CFG"    "scale=(0.85"
+  check "카메라 오프셋 고정"    "$CAMCFG" 'CAM_X", "0.03'
+  echo "  · 블록 스폰 범위: $(grep -E '^BLOCK_REACH_(MIN|MAX)_DIST' "$CFG" | awk '{printf "%s ", $3}')"
+  echo "  · 블록 각도 범위: $(grep -E '^BLOCK_REACH_ANGLE_RANGE' "$CFG" | cut -d= -f2 | cut -d'#' -f1 | xargs)"
+  if [ "$miss" != "0" ]; then
+    echo
+    echo "❌ 씬이 v3 버전이 아닙니다 — 측정이 무효가 되므로 중단합니다."
+    echo "   로컬에서 배포하세요:"
+    echo "     rsync -a ~/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/ \\"
+    echo "       5090:~/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/"
+    exit 2
+  fi
+  echo "  → 검증 통과"; echo
+}
+verify_scene | tee -a "$SUMMARY"
 
 BAK="$CFG.sweep_bak"
 cp "$CFG" "$BAK"
