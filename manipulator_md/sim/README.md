@@ -4,6 +4,7 @@
 > **일반화 성능**을 모두 갖춘 GR00T N1.6 모델을 확보한다.
 
 최종 갱신: 2026-08-06 · 관련: [2주 계획](2week_plan.md) · [선행연구 분석](sim_generalization_analysis.md)
+· [**2차 학습 분기 설계**](training_plan.md) · [학습 전략 4조합](training_strategy_analysis.md)
 · [실기 파이프라인 선례](../sim2real/08_T1_sim2real/report2.md)
 
 ---

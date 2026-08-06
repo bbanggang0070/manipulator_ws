@@ -4,6 +4,7 @@
 >
 > 원 기간: 2026-08-04(월) ~ 08-15(금) · 최종 갱신: **2026-08-06**
 > 근거 문서: [README.md](README.md) · [선행연구 분석](sim_generalization_analysis.md)
+> 2차 학습 분기 설계: **[training_plan.md](training_plan.md)** ← 무엇을 왜 학습할지의 결정 근거
 
 > [!IMPORTANT]
 > 이 문서는 **원안 그대로가 아니라, 실측에 따라 두 번 방향을 튼 기록**이다.

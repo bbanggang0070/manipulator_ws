@@ -28,6 +28,12 @@ PRESETS = {
     "color_green": ("train", "fixed", False, False, "green"),
     # 학습 분포 그대로(= 배포 현실). 목표 'train SR ≥80%' 판정은 이 조건으로 한다.
     "full":        ("train", "train", True,  True,  "red"),
+    # ── 진단용(2026-08-06): box_rand의 −40%p가 '위치' 때문인지 '회전(yaw)' 때문인지 분해 ──
+    #   box_pos_only : 위치만 랜덤(yaw 고정) → 위치 기여
+    #   box_yaw_only : 회전만 랜덤(위치 고정) → yaw 기여
+    #   yaw가 병목이면 분포 축소(yaw ±45°)가 데이터 2배보다 싸고 효과적일 수 있다.
+    "box_pos_only": ("train", "pos_only", False, False, "red"),
+    "box_yaw_only": ("train", "yaw_only", False, False, "red"),
 }
 
 BLOCK = {  # (min, max, angle_range)
@@ -39,6 +45,10 @@ BOX = {  # (min_dist, max_dist, angle_range, yaw_range)
     "fixed": ("0.266", "0.266", "(-0.97, -0.97)", "(0.0, 0.0)"),
     "train": ("0.28",  "0.34",  "(-1.15, 1.15)",  "(-3.14159, 3.14159)"),
     "ood":   ("0.24",  "0.38",  "(-1.45, 1.45)",  "(-3.14159, 3.14159)"),
+    # 진단용: 학습범위 위치 랜덤 + yaw만 고정
+    "pos_only": ("0.28", "0.34", "(-1.15, 1.15)", "(0.0, 0.0)"),
+    # 진단용: 위치는 ref와 동일 고정 + yaw만 학습범위 랜덤
+    "yaw_only": ("0.266", "0.266", "(-0.97, -0.97)", "(-3.14159, 3.14159)"),
 }
 COLOR = {"red": "(0.9, 0.1, 0.1)", "blue": "(0.1, 0.1, 0.9)", "green": "(0.15, 0.6, 0.15)"}
 
