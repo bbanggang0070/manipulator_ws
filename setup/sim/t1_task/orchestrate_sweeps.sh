@@ -33,7 +33,7 @@ pull_videos() {  # $1 = 로컬 디렉터리명
 
 run_sweep() {  # $1=모델 $2=로그파일
   echo "[sweep] $1 시작 $(date +%T)"
-  ssh 5090 "nohup ~/blocktask_ood_sweep.sh $1 20 > ~/$2 2>&1 & echo started"
+  ssh 5090 "nohup ~/blocktask_ood_sweep.sh $1 10 > ~/$2 2>&1 & echo started"
   sleep 5
   wait_done "~/$2" || { echo "❌ $2 타임아웃"; return 1; }
   echo "[sweep] $1 완료 $(date +%T)"
