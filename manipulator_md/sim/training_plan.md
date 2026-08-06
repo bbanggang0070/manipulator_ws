@@ -1,5 +1,20 @@
 # 다음 학습 계획 — 측정 결과에 따른 분기 설계
 
+> ## ⚠️ 이 문서는 **대체되었다** (2026-08-06)
+>
+> 여기 설계한 분기(§4)는 **GUI 재측정으로 전제가 무너져 실행되지 않았다.**
+> 근거로 삼은 `box_rand` −40%p가 **겹침 씬 아티팩트**였고(재측정 −10%p, 노이즈 범위),
+> 진짜 원인은 **블록-박스 근접**이었다.
+> → 현재 계획: **[collection_plan_v4.md](collection_plan_v4.md)**
+>
+> **아직 유효한 부분**: **§2 resume 분석** — cosine LR 완주, `ShardedMixtureDataset`의
+> `global_step` 의존 샘플러, catastrophic forgetting. 현재 계획이 "신규 학습"을 택한 근거로
+> 계속 인용된다. §5의 **스텝 수 함정**(같은 스텝 ≠ 같은 epoch)도 v4 학습에 그대로 적용했다.
+>
+> **폐기된 부분**: §1 언더핏 진단, §3 판정 기준, §4 분기(W1~W4), §6 20분 진단
+> (`box_pos_only`/`box_yaw_only` — 분해할 −40%p가 사라져 실행하지 않음), §7 요약.
+
+
 > [training_strategy_analysis.md](training_strategy_analysis.md)의 4조합 분석을 **우리 실측 진단에
 > 맞춰 보정**하고, GUI 재측정 결과에 따라 무엇을 할지 확정하는 문서.
 >

@@ -4,8 +4,9 @@
 > **일반화 성능**을 모두 갖춘 GR00T N1.6 모델을 확보한다.
 
 최종 갱신: 2026-08-06 · 관련: [2주 계획](2week_plan.md) · [선행연구 분석](sim_generalization_analysis.md)
-· [**v4 타깃 수집 계획**](collection_plan_v4.md) · [2차 학습 분기 설계](training_plan.md)
-· [학습 전략 4조합](training_strategy_analysis.md) · [실기 파이프라인 선례](../sim2real/08_T1_sim2real/report2.md)
+· [**v4 타깃 수집 계획**](collection_plan_v4.md)
+· [실기 파이프라인 선례](../sim2real/08_T1_sim2real/report2.md)
+> <sub>참고(대체됨): [2차 학습 분기 설계](training_plan.md) · [학습 전략 4조합](training_strategy_analysis.md) — resume 분석만 유효</sub>
 
 > **현황 한 줄**: v3@40k는 **OOD 82.5%로 통과**했으나 학습 분포(`full`)가 **61~67%로 미달**.
 > 원인은 **블록이 박스에 가까운 배치**(근접 39% vs 원거리 83%)이고, 그 구성이 수집 필터에
