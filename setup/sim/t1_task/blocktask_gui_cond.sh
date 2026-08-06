@@ -77,6 +77,7 @@ echo "   ┌──────────────────────�
 echo "   │  R      : 이 씬 건너뛰기(겹침 등) — 미집계 │"
 echo "   │  Ctrl+C : 종료                             │"
 echo "   └────────────────────────────────────────────┘"
+echo "   rerun 뷰어에 cameras/rgb_external_D455(top)·cameras/rgb_ego(wrist) 표시됩니다."
 echo "   ※ 파일명의 success/fail은 termination 기준이라 오표기 가능 —"
 echo "      최종 판정은 **직접 보신 결과**를 기록하세요."
 docker run --name teleop-eval --rm -it --privileged --gpus all \
@@ -88,7 +89,7 @@ docker run --name teleop-eval --rm -it --privileged --gpus all \
   -v "$WORKSHOP/outputs:/workspace/Sim-to-Real-SO-101-Workshop/outputs" \
   teleop-docker:latest \
   bash -c "lerobot_eval --task $TASK --num_envs 1 --num_episodes $NUM \
-    --rename_map '$RENAME' --action_horizon 16 \
+    --rename_map '$RENAME' --action_horizon 16 --rerun \
     --lang_instruction '$LANG' --save_video_dir $OUTDIR_CT"
 
 echo

@@ -83,7 +83,7 @@ index fec012f..f516696 100644
                  keyboard_control.reset_world = False
                  env.reset()
 diff --git a/source/sim_to_real_so101/scripts/lerobot_eval.py b/source/sim_to_real_so101/scripts/lerobot_eval.py
-index 349a4c0..54dbb6c 100644
+index 349a4c0..dc56528 100644
 --- a/source/sim_to_real_so101/scripts/lerobot_eval.py
 +++ b/source/sim_to_real_so101/scripts/lerobot_eval.py
 @@ -14,11 +14,33 @@
@@ -152,7 +152,29 @@ index 349a4c0..54dbb6c 100644
              if step == 0:
                  pbar = tqdm(
                      total=env.unwrapped.max_episode_length,
-@@ -211,6 +247,11 @@ def main():
+@@ -189,6 +225,21 @@ def main():
+ 
+             obs, rewards, terminated, truncated, info = env.step(actions)
+ 
++            # Rerun: top(external_D455)·wrist(ego) 가상 카메라 시점 실시간 로깅.
++            # (--rerun 만으로는 관절 데이터만 나가고 카메라는 안 보이므로 lerobot_agent 방식 이식)
++            if args_cli.rerun:
++                import rerun as rr
++                _vis = obs.get("visual", None)
++                if _vis is not None:
++                    for _cam, _t in _vis.items():
++                        if not _cam.startswith("rgb"):
++                            continue
++                        _img = _t[0].detach().cpu().numpy()
++                        if _img.dtype != np.uint8:
++                            _mx = float(_img.max()) if _img.size else 1.0
++                            _img = (_img * 255.0 if _mx <= 1.5 else _img).clip(0, 255).astype(np.uint8)
++                        rr.log(f"cameras/{_cam}", rr.Image(_img))
++
+             step += 1
+ 
+             # Update progress bar
+@@ -211,6 +262,11 @@ def main():
  
                  success_rate = (num_successes / num_episodes) * 100
  
@@ -164,7 +186,7 @@ index 349a4c0..54dbb6c 100644
                  # Reset for next episode
                  obs, _ = env.reset()
                  policy.reset()
-@@ -226,6 +267,7 @@ def main():
+@@ -226,6 +282,7 @@ def main():
                      pbar = None
  
                  print(f"[MANUAL RESET] Episode interrupted at step {step}")
