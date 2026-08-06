@@ -55,10 +55,22 @@ RENAME='{"external_D455": "front", "ego": "wrist"}'
 LANG="Pick up the block and place it in the box"
 SRV_LOG="$HOME/blocktask_gui_server.log"
 
-BAK="$CFG.gui_bak"
-cp "$CFG" "$BAK"
+# 복원은 **불변 기준본**에서 한다.
+# (이전 방식: 실행 시점 파일을 백업 → 비정상 종료로 조건이 적용된 채 남으면 다음 실행이
+#  그 오염본을 '기준'으로 백업/복원해 드리프트가 영구화됨. 실제로 5090이 ref 상태로 굳었음.)
+BASE="$CFG.v3base"
+if [ ! -f "$BASE" ]; then
+  echo "⚠ 기준본($BASE)이 없습니다. 현재 파일을 기준본으로 저장합니다 —"
+  echo "  현재 파일이 조건이 적용되지 않은 v3 원본인지 먼저 확인하세요:"
+  grep -E '^BLOCK_REACH_(MIN|MAX)_DIST' "$CFG"
+  sed -n '/reset_basket_random = EventTerm/,/^    )/p' "$CFG" | grep -oE '"(min_dist|max_dist|yaw_range)":[^,#]*'
+  echo "  (정상값: min 0.28 / max 0.34 / yaw ±3.14159)"
+  read -rp "  기준본으로 저장할까요? [y/N] " _a
+  [ "$_a" = "y" ] || exit 1
+  cp "$CFG" "$BASE"; chmod 444 "$BASE"
+fi
 cleanup() {
-  cp "$BAK" "$CFG"; rm -f "$BAK"
+  cp "$BASE" "$CFG"; chmod 644 "$CFG"
   docker rm -f gr00t-srv teleop-eval >/dev/null 2>&1 || true
   echo; echo "[정리] 씬 복원 + 컨테이너 종료 완료"
 }
