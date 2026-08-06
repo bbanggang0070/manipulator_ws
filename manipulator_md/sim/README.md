@@ -394,10 +394,11 @@ cosine LR도 40k에서 0으로 완주해 resume은 **warm restart**다. 상세 [
 | 11 | 영상→평면 보정으로 수집 분포 복원 | ✅ | 잔차 0.74cm · 근접선별 35ep 확정 |
 | 12 | `reset_block_near_box` + Near task | ✅ | 조건부 샘플링, 수용률 36% |
 | 13 | `verify_near_scene.py` 30회 분포 검증 | ✅ | 목표대 100%, 폴백 0회, θ<0 53% |
-| 14 | 타깃 수집 65ep (**로컬 5070 Ti**, 리더암) | ⬜ | `blocktask_collect_near.sh record`, ~1.5h |
-| 15 | 병합 200ep → 신규 학습 86k | ⬜ | ~65h |
-| 16 | 무인 재평가 (full 45ep × 2시드) | ⬜ | ~1h, 사람 불필요 |
-| 17 | sim2real + co-training | ⬜ | 16 합격 후 |
+| 14 | 타깃 수집 65ep (**로컬 5070 Ti**, 리더암) | ✅ | 목표대 81.5%, 근접 55/65 |
+| 15 | 병합 `v4_200` (200ep, 82,951f, 근접 54.5%) | ✅ | v3 100 + 선별 35 + 신규 65 |
+| 16 | **신규 학습 86k (66.3 epoch)** | 🔄 **진행 중** | ~65h, 08-06 시작 |
+| 17 | 무인 재평가 (full 45ep × 2시드) | ⬜ | ~1h, 사람 불필요 |
+| 18 | sim2real + co-training | ⬜ | 17 합격 후 |
 
 **합격 판정 기준(2차 학습 후)**
 
@@ -423,6 +424,9 @@ cosine LR도 40k에서 0으로 완주해 resume은 **warm restart**다. 상세 [
 | **`analyze_dataset_geometry.py`** | 수집 영상에서 블록·박스 배치를 **미터 단위 복원**(잔차 0.74cm) → 근접 선별 |
 | **`verify_near_scene.py`** | v4 Near 씬 배치 분포 검증 (추론 없이 리셋만, ~3분) |
 | **`blocktask_collect_near.sh`** | **v4 타깃 수집** — 로컬 5070 Ti에서 실행 (Near task, 배포 검증 게이트, 카메라 0.03/0.02 고정) |
+| **`prepare_blocktask_v4_200.sh`** | 전송→v3.0/v2.1 변환→선별 병합→검증 (단계별 실행 가능) |
+| **`merge_blocktask_select.py`** | 세션별 **에피소드 선별** 병합 (기존 merge는 세션 통째로만) |
+| **`train_gr00t_blocktask_v4_200_n16_8bit.sh`** | v4_200 학습 (86k = 66.3 epoch, 데이터셋 선확인 게이트) |
 | `capture_scene_conditions.py` | 조건 검증용 캡처 (추론 없이, 4배 빠름) |
 | `train_gr00t_blocktask_v3_200_n16_8bit.sh` | 200ep 학습 (진행 중 학습 보호장치) |
 
