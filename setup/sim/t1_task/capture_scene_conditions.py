@@ -50,22 +50,58 @@ def main():
 
     import imageio.v2 as imageio
 
+    def visual_group(obs):
+        """obs에서 카메라 그룹을 꺼낸다. 구조가 예상과 다르면 사용 가능한 키를 보여주고 중단."""
+        if isinstance(obs, dict) and "visual" in obs:
+            return obs["visual"]
+        # wrapper 등으로 구조가 바뀐 경우 — rgb_* 키를 가진 dict를 탐색
+        if isinstance(obs, dict):
+            for v in obs.values():
+                if isinstance(v, dict) and any(str(k).startswith("rgb_") for k in v):
+                    return v
+            if any(str(k).startswith("rgb_") for k in obs):
+                return obs
+        raise KeyError(
+            "카메라 관측을 찾지 못했습니다. obs 최상위 키: "
+            f"{list(obs.keys()) if isinstance(obs, dict) else type(obs)}"
+        )
+
+    def to_uint8(t):
+        """cfg가 normalize=False라 0~255로 오지만, 0~1(float)로 오는 경우도 안전하게 처리."""
+        a = t.detach().cpu().numpy() if hasattr(t, "detach") else np.asarray(t)
+        a = a.astype(np.float32)
+        if a.size and a.max() <= 1.001:   # 0~1 정규화된 경우
+            a = a * 255.0
+        return np.clip(a, 0, 255).astype(np.uint8)
+
+    # front(external_D455) + wrist(ego) 둘 다 저장 — 조건별 시점 비교용
+    CAMS = {"": "rgb_external_D455", "_wrist": "rgb_ego"}
+
     with torch.inference_mode():
         for ep in range(1, args.episodes + 1):
             obs, _ = env.reset()
             # 리셋 이벤트(로봇 색·카메라·박스 배치)가 렌더에 반영될 때까지 몇 스텝 진행
             for _ in range(args.settle):
                 obs, *_ = env.step(torch.zeros(env.action_space.shape, device=env.unwrapped.device))
-            vis = obs["visual"] if "visual" in obs else obs
-            key = "rgb_external_D455" if "rgb_external_D455" in vis else "rgb_ego"
-            img = vis[key][0].detach().cpu().numpy()
-            img = np.clip(img, 0, 255).astype(np.uint8)
-            path = os.path.join(args.out, f"ep{ep:02d}.png")
-            imageio.imwrite(path, img)
-            print(f"[cap] {path}", flush=True)
+            vis = visual_group(obs)
+            if ep == 1:
+                print(f"[cap] 사용 가능한 카메라 키: {list(vis.keys())}", flush=True)
+            for suffix, key in CAMS.items():
+                if key not in vis:
+                    continue
+                path = os.path.join(args.out, f"ep{ep:02d}{suffix}.png")
+                imageio.imwrite(path, to_uint8(vis[key][0]))
+                print(f"[cap] {path}", flush=True)
     env.close()
 
 
 if __name__ == "__main__":
-    main()
-    app.close()
+    # 예외가 나도 Isaac Sim 앱은 반드시 닫는다(미종료 시 GPU 점유·hang).
+    try:
+        main()
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        raise
+    finally:
+        app.close()
