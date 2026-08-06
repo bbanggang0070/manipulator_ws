@@ -78,8 +78,12 @@
 
 ### 수집 실행
 
+**실행 위치: 로컬 5070 Ti** — 리더암(`/dev/ttyLEADER`)이 여기 물려 있다.
+5090은 학습·평가 전용이므로 수집은 로컬, 학습은 5090으로 역할이 갈린다.
+수집이 끝나면 데이터셋을 5090으로 옮겨 학습한다.
+
 ```bash
-# 5090 데스크톱
+# 로컬 5070 Ti
 ./blocktask_collect_near.sh view      # 배치만 육안 확인
 ./blocktask_collect_near.sh record    # 리더암 teleop 녹화 (S=저장, R=리셋)
 RESUME=1 DSNAME=sim_so101_blocktask_v4_near ./blocktask_collect_near.sh record   # 이어쓰기
@@ -222,9 +226,10 @@ python verify_near_scene.py --episodes 30
 ```
 [1] reset_block_near_box 구현 + Near task 등록          ✅ 완료
 [2] 5090 배포 + verify_near_scene.py 30회 분포 검증      (3분)  ← 필수
-[3] 타깃 수집 65ep — blocktask_collect_near.sh record   (~1.5h)
-[4] 변환 + v3 100ep + 선별 35ep 병합 → 200ep           (~30분)
-[5] 신규 학습 86k                                      (~65h)
+[3] 타깃 수집 65ep — blocktask_collect_near.sh record   (~1.5h, 로컬)
+[3b] 수집 분포 검증 — analyze_dataset_geometry.py       (~5분)
+[4] 변환 + v3 100ep + 선별 35ep 병합 → 200ep → 5090 전송 (~40분)
+[5] 신규 학습 86k                                      (~65h, 5090)
 [6] 무인 평가 full 45ep × 2시드 = 90ep                  (~1h, 사람 불필요)
 [7] 합격(≥80%) 시 sim2real
 ```

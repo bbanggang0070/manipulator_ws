@@ -7,7 +7,11 @@
 #   (씬의 자연 분포는 43.2%)에 그쳤다. 그 구멍만 메운다.
 #   태스크가 다르므로(...-Near) blocktask_run.sh를 건드리지 않고 분리했다.
 #
-# 사용법(5090 데스크톱):
+# 실행 위치: **로컬 5070 Ti** — 리더암(/dev/ttyLEADER)이 여기 물려 있다.
+#   (5090은 GR00T 학습·평가 전용. 수집은 로컬, 학습은 5090 — 역할 분리)
+#   수집 후 데이터셋을 5090으로 옮겨 학습한다.
+#
+# 사용법:
 #   ./blocktask_collect_near.sh view      # 배치만 육안 확인(로봇 0액션)
 #   ./blocktask_collect_near.sh record    # 리더암 teleop 녹화  ← 본 작업
 #   ./blocktask_collect_near.sh clear     # 데이터셋 폴더 삭제(재시작용)
@@ -59,6 +63,8 @@ CALIB=".cache/huggingface/lerobot/calibration"
 mkdir -p "$WORKSHOP/outputs" "$WORKSHOP/datasets"
 
 if [ "$MODE" = "record" ]; then
+  # 리더암이 없으면 컨테이너를 띄운 뒤에야 실패한다(Isaac Sim 기동 1~2분 낭비) → 먼저 확인
+  [ -e /dev/ttyLEADER ] || { echo "❌ /dev/ttyLEADER 없음 — 리더암 연결 확인(로컬 5070 Ti에서 실행해야 함)"; exit 3; }
   if [ "${RESUME:-0}" = "1" ]; then
     echo "▶ 이어쓰기(RESUME): datasets/$DSNAME"
   else
