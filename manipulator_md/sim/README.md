@@ -394,7 +394,7 @@ cosine LR도 40k에서 0으로 완주해 resume은 **warm restart**다. 상세 [
 | 11 | 영상→평면 보정으로 수집 분포 복원 | ✅ | 잔차 0.74cm · 근접선별 35ep 확정 |
 | 12 | `reset_block_near_box` + Near task | ✅ | 조건부 샘플링, 수용률 36% |
 | 13 | `verify_near_scene.py` 30회 분포 검증 | ✅ | 목표대 100%, 폴백 0회, θ<0 53% |
-| 14 | 타깃 수집 65ep | ⬜ | ~1.5h |
+| 14 | 타깃 수집 65ep | ⬜ | `blocktask_collect_near.sh record`, ~1.5h |
 | 15 | 병합 200ep → 신규 학습 86k | ⬜ | ~65h |
 | 16 | 무인 재평가 (full 45ep × 2시드) | ⬜ | ~1h, 사람 불필요 |
 | 17 | sim2real + co-training | ⬜ | 16 합격 후 |
@@ -422,6 +422,7 @@ cosine LR도 40k에서 0으로 완주해 resume은 **warm restart**다. 상세 [
 | **`blocktask_headless_scenes.sh`** | **무인 대량 측정** (영상 + `scenes.csv`, 사람 불필요) |
 | **`analyze_dataset_geometry.py`** | 수집 영상에서 블록·박스 배치를 **미터 단위 복원**(잔차 0.74cm) → 근접 선별 |
 | **`verify_near_scene.py`** | v4 Near 씬 배치 분포 검증 (추론 없이 리셋만, ~3분) |
+| **`blocktask_collect_near.sh`** | **v4 타깃 수집** (Near task, 배포 검증 게이트, 카메라 0.03/0.02 고정) |
 | `capture_scene_conditions.py` | 조건 검증용 캡처 (추론 없이, 4배 빠름) |
 | `train_gr00t_blocktask_v3_200_n16_8bit.sh` | 200ep 학습 (진행 중 학습 보호장치) |
 
