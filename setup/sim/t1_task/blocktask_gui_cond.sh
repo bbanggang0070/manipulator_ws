@@ -10,11 +10,18 @@
 #
 # 사용법(5090 데스크톱 터미널):
 #   xhost +local:root                      # 최초 1회
+#   ~/blocktask_gui_cond.sh <조건> [에피소드수]           # 모델 기본값 사용
 #   ~/blocktask_gui_cond.sh <조건> [모델] [에피소드수]
 #   예: ~/blocktask_gui_cond.sh ref
+#       ~/blocktask_gui_cond.sh full 20
 #       ~/blocktask_gui_cond.sh box_rand gr00t_blocktask_v3_n16_8bit/checkpoint-40000 10
 #
-# 조건: ref | pos_ood | box_rand | box_ood | color_blue | color_green
+# ⚠ 표본을 늘리려면 **같은 명령을 두 번 돌리지 말 것** — 시드가 고정이라 같은 씬을 재생할 뿐이고,
+#   시작 시 출력 폴더를 지우므로 기존 영상까지 사라진다. NUM을 키우거나 SEED를 바꿀 것.
+#     SEED=7 ~/blocktask_gui_cond.sh full 10   → outputs/gui_full_s7 에 별도 저장
+#
+# 조건: ref | pos_ood | box_rand | box_ood | color_blue | color_green | full
+#       (full = 학습 분포 전체: 박스 랜덤 + 물리 DR + 조명 DR → **합격 판정 조건**)
 #      (phys_dr·light_dr는 제외 — light_dr은 라이트박스가 씬을 감싸 sky_light 효과가
 #       거의 없음이 실측 확인됐고, 실기 환경도 조명이 안정적이라 불필요)
 #
@@ -26,8 +33,20 @@
 set -uo pipefail
 
 COND="${1:?조건 필요: ref|pos_ood|box_rand|box_ood|color_blue|color_green}"
-MODEL="${2:-gr00t_blocktask_v3_n16_8bit/checkpoint-40000}"
-NUM="${3:-10}"
+DEF_MODEL="gr00t_blocktask_v3_n16_8bit/checkpoint-40000"
+# 2번째 인자가 숫자면 **에피소드 수**로 해석(모델은 기본값) — `... full 20` 형태를 허용
+if [[ "${2:-}" =~ ^[0-9]+$ ]]; then
+  MODEL="$DEF_MODEL"; NUM="$2"
+else
+  MODEL="${2:-$DEF_MODEL}"; NUM="${3:-10}"
+fi
+# 시드는 조건 간 짝지음(paired)을 위해 1984 고정. 표본을 **늘리려면 NUM을 키울 것**
+# (시드는 시작 시 1회만 걸리므로 20ep = 서로 다른 씬 20개, 앞 10개는 10ep 실행과 동일).
+# 같은 NUM으로 재실행하는 것은 표본 추가가 아니라 **같은 씬 재생**이고, 아래 rm -rf로
+# 기존 영상도 지워진다. 정말 독립 표본이 필요하면 SEED를 바꿔서 실행할 것.
+SEED="${SEED:-1984}"
+# 시드를 바꾸면 다른 폴더에 저장해 기존 배치를 보존한다.
+SUFFIX=""; [ "$SEED" != "1984" ] && SUFFIX="_s$SEED"
 
 WORKSHOP="$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop"
 CFG="$WORKSHOP/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py"
@@ -66,12 +85,12 @@ done
 
 # 영상은 5090 로컬에 조건별로 저장 → 나중에 검토·로컬(5070Ti) 전송 가능.
 # R로 건너뛴 씬은 프레임 버퍼가 비워지므로 **저장되지 않는다**(집계에서도 빠짐).
-OUTDIR_HOST="$WORKSHOP/outputs/gui_$COND"
-OUTDIR_CT="/workspace/Sim-to-Real-SO-101-Workshop/outputs/gui_$COND"
+OUTDIR_HOST="$WORKSHOP/outputs/gui_$COND$SUFFIX"
+OUTDIR_CT="/workspace/Sim-to-Real-SO-101-Workshop/outputs/gui_$COND$SUFFIX"
 docker run --rm -v "$WORKSHOP/outputs:/o" --entrypoint bash real-robot-train8 \
-  -c "rm -rf /o/gui_$COND" >/dev/null 2>&1 || true
+  -c "rm -rf /o/gui_$COND$SUFFIX" >/dev/null 2>&1 || true
 
-echo "▶ [3/3] GUI 추론 시작 — 조건 [$COND], ${NUM}ep"
+echo "▶ [3/3] GUI 추론 시작 — 조건 [$COND], ${NUM}ep (seed $SEED)"
 echo "   저장 위치: $OUTDIR_HOST"
 echo "   ┌────────────────────────────────────────────┐"
 echo "   │  R      : 이 씬 건너뛰기(겹침 등) — 미집계 │"
@@ -88,7 +107,7 @@ docker run --name teleop-eval --rm -it --privileged --gpus all \
   -v "$WORKSHOP/source:/workspace/Sim-to-Real-SO-101-Workshop/source" \
   -v "$WORKSHOP/outputs:/workspace/Sim-to-Real-SO-101-Workshop/outputs" \
   teleop-docker:latest \
-  bash -c "lerobot_eval --task $TASK --num_envs 1 --num_episodes $NUM \
+  bash -c "lerobot_eval --task $TASK --num_envs 1 --num_episodes $NUM --seed $SEED \
     --rename_map '$RENAME' --action_horizon 16 --rerun \
     --lang_instruction '$LANG' --save_video_dir $OUTDIR_CT"
 
