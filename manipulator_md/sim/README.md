@@ -6,7 +6,8 @@
 
 최종 갱신 **2026-08-07** · 기간 08-04 ~ 진행 중
 관련: [실행 계획·변경 이력](2week_plan.md) · [v4 수집 계획](collection_plan_v4.md)
-· [선행연구 분석](sim_generalization_analysis.md) · [실기 파이프라인 선례](../sim2real/08_T1_sim2real/report2.md)
+· [**데이터셋 카탈로그**](datasets.md) · [선행연구 분석](sim_generalization_analysis.md)
+· [실기 파이프라인 선례](../sim2real/08_T1_sim2real/report2.md)
 > <sub>참고(대체됨): [2차 학습 분기 설계](training_plan.md) · [학습 전략 4조합](training_strategy_analysis.md) — resume 분석만 유효</sub>
 
 ---
@@ -523,18 +524,21 @@ sim에서 일반화를 확보하는 목적은 *"실기에서 바로 되게 하�
 
 ## 11. 산출물과 도구
 
-### 데이터셋 (`datasets/_train/<버전>/`, v2.1)
+### 데이터셋 (`datasets/_train/<버전>/`, v2.1 · 합계 2.5GB)
+
+상세: **[datasets.md](datasets.md)**
 
 | 폴더 | ep / frames | 학습 모델 |
 |---|---|---|
 | `v1_sim75` | 75 / 25,549 | `blocktask75` 20k |
 | `v2_sim100` | 100 / 30,887 | `v2` 20k |
 | `v3_sim100` | 100 / 38,906 | **`v3` 40k** (현 기준, loss 0.0054) |
-| `v3_200_sim200` | 200 / 83,222 | 미학습 (대조군 후보) |
+| `v3_200_sim200` | 200 / 83,222 | 미학습 — **대조군 후보**(같은 200ep, 근접 보강 없음) |
 | `v4_200_sim200_near` | 200 / 82,951 | **`v4_200` 86k** 🔄 |
-| `real50` | 50 / 21,175 | co-training |
+| `real50` | 50 / 21,175 | co-training (실기 10%→90%) |
 
 수집 세션 원본(v3.0)은 `datasets/sim_so101_blocktask_*`에 그대로 보존.
+전 항목 **parquet 수 = mp4/2 = 에피소드 수**, `modality.json` 존재 확인 완료.
 
 ### 도구 (`setup/sim/t1_task/`)
 
