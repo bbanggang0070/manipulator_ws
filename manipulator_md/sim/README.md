@@ -12,7 +12,16 @@
 
 ---
 
-## 0. 요약
+## 0. 프로젝트 환경 및 현황 요약
+
+### 🎯 환경 요약
+- **모델**: GR00T-N1.6-3B (8-bit 양자화, paged_adamw)
+- **로봇**: SO-ARM101 (리더-팔로워 teleop 기반)
+- **시뮬레이터**: Isaac Sim / Isaac Lab 2.3.2
+- **태스크**: 테이블 위 빨간 큐브(20mm)를 집어 검은 상자에 넣는 pick-and-place
+- **데이터 파이프라인**: 수집(LeRobot v3.0) → 변환(v2.1) → 학습(GR00T 파이프라인)
+
+### 📊 현황 (진단 및 대응)
 
 | | 현황 |
 |---|---|
@@ -498,7 +507,35 @@ ssh 5090 '~/serve_blocktask_n16_5090.sh gr00t_blocktask_v4_200_n16_8bit/checkpoi
 # 로컬: goto_home_real.py + ENSEMBLE=1 W=0.3 + real_pose_align 정렬 확인
 ```
 
-### 10-2. 실기 zero-shot → co-training
+### 10-2. 실기 데이터 재수집 (학습과 **병행 진행**)
+
+기존 실기 50ep는 **박스가 완전히 고정**이다 — 50ep 전체에서 박스 픽셀 중심 편차가
+**x 7px, y 4px**. 실기 배포에서 박스를 옮길 예정이므로, 그대로 co-training하면
+**박스 다양성이 0인 채로** 실기 분포를 배우게 된다.
+
+| | 기존 real50 | **real_v2 (수집 예정)** |
+|---|---|---|
+| 박스 위치·회전 | **고정 1점** | 10자세 (거리 28~34cm, 각도 ±66°, 회전 ±90°) |
+| 블록-박스 근접 | 52% (박스가 고정이라 자연 발생) | **55% (의도적 배분)** |
+| 규모 | 50ep | **60ep** (10자세 × 6ep) |
+
+> **yaw는 ±90°면 충분**하다 — 박스가 직육면체라 180° 회전이 같은 모양이다.
+> sim은 ±180°를 쓰지만 실기에서는 조작 부담만 늘 뿐 새 정보가 없다.
+
+**사람이 감으로 놓으면 안 된다.** 무의식적으로 비슷한 자리에 몰리고, 그게 기존 50ep가
+박스 고정이 된 이유다. 층화 추출로 뽑은 **배치표**를 띄워놓고 그대로 따라 놓는다.
+
+```bash
+python3 setup/gr00t/gen_real_collect_schedule.py 10 6 > real_collect_schedule.md
+./setup/gr00t/record_blocktask_real_v2.sh 6        # 박스 자세 1개분, 10회 반복
+```
+
+배치표: [real_collect_schedule.md](real_collect_schedule.md)
+
+> 무작위로 10자세를 뽑았더니 **7개가 왼쪽에 몰렸다**(실측). 표본이 얇을 때 무작위에
+> 맡기지 않는다 — §8의 교훈을 수집 설계에 적용한 것이다. → 층화 추출로 −66°~+65° 균등 배치.
+
+### 10-3. 실기 zero-shot → co-training
 
 [report2 §5](../sim2real/08_T1_sim2real/report2.md)의 선례가 명확하다:
 
@@ -511,7 +548,7 @@ ssh 5090 '~/serve_blocktask_n16_5090.sh gr00t_blocktask_v4_200_n16_8bit/checkpoi
 sim에서 일반화를 확보하는 목적은 *"실기에서 바로 되게 하는 것"* 이 아니라
 **co-training의 출발점을 좋게 만드는 것**이다.
 
-### 10-3. sim2real에서 재검토할 항목
+### 10-4. sim2real에서 재검토할 항목
 
 | 항목 | 이유 |
 |---|---|
@@ -556,6 +593,8 @@ sim에서 일반화를 확보하는 목적은 *"실기에서 바로 되게 하�
 | **`merge_blocktask_select.py`** | 세션별 **에피소드 선별** 병합 (기존 merge는 세션 통째로만) |
 | `train_gr00t_blocktask_v3_n16_8bit.sh` | v3 학습 (100ep, 40k) |
 | **`train_gr00t_blocktask_v4_200_n16_8bit.sh`** | v4 학습 (200ep, 86k, 데이터셋 선확인 게이트) |
+| **`gr00t/gen_real_collect_schedule.py`** | 실기 수집 **배치표 생성** (층화 추출, 근접 55% 배분) |
+| **`gr00t/record_blocktask_real_v2.sh`** | 실기 재수집 (박스 다양성 포함, reset 25s) |
 
 ### 측정 자료 (`inf_video/`)
 
@@ -613,5 +652,6 @@ python verify_near_scene.py --episodes 30      # 컨테이너 안
 | 15 | **v4 학습 86k (66.3 epoch)** | 🔄 | ~65h, 08-06 시작 |
 | 16 | 무인 재평가 (full 45ep × 2시드) | ⬜ | ~1h, 사람 불필요 |
 | 17 | 합격 판정 | ⬜ | full ≥80% · 근접 ≥70% · 원거리 ≥80% · OOD ≥70% |
+| 16b | **실기 재수집 60ep** (박스 다양성) | ⬜ | **학습과 병행 가능** — GPU 불필요 |
 | 18 | sim2real 서빙 + 실기 zero-shot | ⬜ | 17 합격 후 |
-| 19 | co-training (실기 50ep) | ⬜ | report2 선례상 필요 가능성 높음 |
+| 19 | co-training (sim v4_200 + 실기 v2) | ⬜ | report2 선례: 10% → 90% |
