@@ -7,10 +7,18 @@
   현재 씬에서 재측정이 불가능해진 전례가 있다.
 
 기준(`--ref`):
-  · **era90** (기본) — 실기 SR 90%를 낸 시점의 top/wrist 구도. `pose_ref_era90/`
-    **실기 수집·배포는 이쪽에 맞춘다.** 그때 상태를 그대로 재현하는 것이 목적이다.
-  · sim — sim 학습 데이터의 프레임. 시점 자체가 실기와 달라 미세 정렬용으로는 부적합하고,
-    "대략 이런 구도" 참고용이다.
+  · **sim_v4** (기본) — **현재 학습 중인 sim 씬(v3/v4)의 구도**. `pose_ref_sim_v4/`
+    실기 환경을 sim에 맞춰 만들어 놓았으므로, **실기 카메라도 sim 구도에 맞춰야**
+    sim에서 낸 성공률이 실기로 옮겨진다. 수집·배포는 이쪽 기준.
+    v4 수집 영상 40개의 프레임3을 **중앙값 합성** → 블록·박스가 지워지고 고정 구조만 남는다.
+  · era90 — 실기 SR 90%를 낸 시점의 실기 구도. 다만 그건 **v2 시절 sim에 맞춘 것**이고,
+    v3에서 카메라 오프셋이 (0,0)→(0.03,0.02)로 바뀌어 현재 sim과 어긋난다.
+    "그때로 되돌리고 싶을 때"만 쓴다.
+  · sim_v2 — 7/27자 sim 프레임(오프셋 0 시절). 이력 참고용.
+
+⚠️ sim은 렌더, 실기는 사진이라 **질감·색이 달라 일치도 상한이 낮다**(1.00은 안 나온다).
+   overlay에서 **벽 모서리·바닥 경계·로봇 베이스가 겹치는지**를 주로 보고,
+   dx·dy는 방향 지시로 쓴다.
 
 뷰(rerun):
   real/*     현재 카메라
@@ -39,10 +47,19 @@ W, H, FPS = 640, 480, 30
 CAMS = {"front": "/dev/cam_top", "wrist": "/dev/cam_wrist"}
 HERE = os.path.dirname(os.path.abspath(__file__))
 REFS = {
-    "era90": {"front": os.path.join(HERE, "pose_ref_era90/front.jpg"),
-              "wrist": os.path.join(HERE, "pose_ref_era90/wrist.jpg")},
-    "sim":   {"front": os.path.join(HERE, "../../manipulator_md/sim2real/08_T1_sim2real/assets/sim_ref_front.jpg"),
-              "wrist": os.path.join(HERE, "../../manipulator_md/sim2real/08_T1_sim2real/assets/sim_ref_wrist.jpg")},
+    # 기본. **현재 학습 중인 sim 씬(v3/v4)의 실제 구도**를 재현한다.
+    # v4 수집 영상 40개의 프레임3을 중앙값 합성한 것이라 블록·박스가 지워지고
+    # 고정 구조(벽·바닥·로봇 홈 자세)만 남아 정렬 기준으로 적합하다.
+    "sim_v4": {"front": os.path.join(HERE, "pose_ref_sim_v4/front.jpg"),
+               "wrist": os.path.join(HERE, "pose_ref_sim_v4/wrist.jpg")},
+    # 실기 SR 90%를 낸 시점의 실기 구도. **v2 시절 sim에 맞춰 정렬한 것**이라
+    # v3에서 카메라 오프셋이 (0,0)→(0.03,0.02)로 바뀐 뒤로는 현재 sim과 어긋난다.
+    # "그때 상태로 되돌리고 싶을 때"만 쓴다.
+    "era90":  {"front": os.path.join(HERE, "pose_ref_era90/front.jpg"),
+               "wrist": os.path.join(HERE, "pose_ref_era90/wrist.jpg")},
+    # 7/27자 sim 프레임 — 오프셋 0 시절이라 **현재 sim과 다르다.** 이력 참고용.
+    "sim_v2": {"front": os.path.join(HERE, "../../manipulator_md/sim2real/08_T1_sim2real/assets/sim_ref_front.jpg"),
+               "wrist": os.path.join(HERE, "../../manipulator_md/sim2real/08_T1_sim2real/assets/sim_ref_wrist.jpg")},
 }
 
 
@@ -96,8 +113,8 @@ def compare(cur, ref):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ref", choices=list(REFS), default="era90",
-                    help="정렬 기준 (기본 era90 = 실기 90%% 시점 구도)")
+    ap.add_argument("--ref", choices=list(REFS), default="sim_v4",
+                    help="정렬 기준 (기본 sim_v4 = 현재 학습 중인 sim 씬 구도)")
     ap.add_argument("--alpha", type=float, default=0.5, help="overlay 블렌딩 비율(현재 쪽)")
     ap.add_argument("--save-ref", metavar="DIR",
                     help="종료 시 현재 프레임을 DIR/front.jpg·wrist.jpg 로 저장 — "
