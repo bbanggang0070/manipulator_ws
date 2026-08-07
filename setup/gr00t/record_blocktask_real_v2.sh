@@ -23,8 +23,11 @@
 #     sim에서 그 판단 때문에 유효 근접 구간이 통째로 걸러졌고 그게 v3의 병목이었다.
 #   · 파지 각도가 안 나오면 박스 벽을 피해 **비스듬히 접근**하는 시연을 일부러 보여줄 것.
 #   · rerun 뷰만 보고 조작(cheating 방지), 성공 종결만 저장. 정상 ~70% + 교정 ~30%.
-#   · ⚠️ 카메라는 **배포와 같은 위치에 고정**(top/wrist 모두). 기존 데이터와도 같은 구도여야
-#     co-training에서 두 세트를 함께 쓸 수 있다.
+#   · ⚠️ **수집 전 카메라 정렬 필수**. 기존 데이터와 같은 구도여야 co-training에서 두 세트를
+#     함께 쓸 수 있고, 배포 때도 같은 구도여야 한다.
+#       cd ~/manipulator_ws/envs/lerobot
+#       uv run python ../../setup/gr00t/rerun_cam_align.py          # 기준 era90
+#     overlay/front 를 보며 맞추고, 콘솔의 '일치'가 최대가 되게 한다. 맞춘 뒤 나사 고정.
 cd "$(dirname "$0")/../../envs/lerobot" || exit 1
 
 NUM="${1:-6}"

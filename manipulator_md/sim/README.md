@@ -526,9 +526,17 @@ ssh 5090 '~/serve_blocktask_n16_5090.sh gr00t_blocktask_v4_200_n16_8bit/checkpoi
 박스 고정이 된 이유다. 층화 추출로 뽑은 **배치표**를 띄워놓고 그대로 따라 놓는다.
 
 ```bash
+# ① 카메라 정렬 (수집 전 필수)
+cd envs/lerobot && uv run python ../../setup/gr00t/rerun_cam_align.py
+# ② 배치표 생성 후 띄워놓기
 python3 setup/gr00t/gen_real_collect_schedule.py 10 6 > real_collect_schedule.md
-./setup/gr00t/record_blocktask_real_v2.sh 6        # 박스 자세 1개분, 10회 반복
+# ③ 수집 — 박스 자세 1개분씩, 10회 반복
+./setup/gr00t/record_blocktask_real_v2.sh 6
 ```
+
+**①이 빠지면 나머지가 무의미하다.** GR00T는 이미지에서 직접 행동을 뽑으므로
+**카메라 구도가 곧 입력 분포**다. 실측(2026-08-07)으로 현재 구도는 era90 기준에서
+front 일치 0.41 / wrist 0.43으로 **벗어나 있다**(1.00이 완전 일치).
 
 배치표: [real_collect_schedule.md](real_collect_schedule.md)
 
@@ -595,6 +603,7 @@ sim에서 일반화를 확보하는 목적은 *"실기에서 바로 되게 하�
 | **`train_gr00t_blocktask_v4_200_n16_8bit.sh`** | v4 학습 (200ep, 86k, 데이터셋 선확인 게이트) |
 | **`gr00t/gen_real_collect_schedule.py`** | 실기 수집 **배치표 생성** (층화 추출, 근접 55% 배분) |
 | **`gr00t/record_blocktask_real_v2.sh`** | 실기 재수집 (박스 다양성 포함, reset 25s) |
+| **`gr00t/rerun_cam_align.py`** | 실기 카메라 정렬 — overlay·diff·**어긋난 방향(px)** 표시 |
 
 ### 측정 자료 (`inf_video/`)
 
