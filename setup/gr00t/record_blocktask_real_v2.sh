@@ -35,6 +35,21 @@ RESUME=""
 [ "${2:-}" = "resume" ] && RESUME="--resume=true"
 
 DSNAME="${DSNAME:-so101_blocktask_real_v2}"
+DS_ROOT="$HOME/.cache/huggingface/lerobot/heongyu/$DSNAME"
+
+# lerobot-record는 대상 폴더가 이미 있으면 FileExistsError로 죽는다(--resume 없이는).
+# 중단된 시도가 meta/info.json만 남기는 경우가 흔해 그때마다 손으로 지우게 되므로 여기서 처리한다.
+if [ -d "$DS_ROOT" ] && [ -z "$RESUME" ]; then
+  EP=$(python3 -c "import json;print(json.load(open('$DS_ROOT/meta/info.json'))['total_episodes'])" 2>/dev/null || echo 0)
+  if [ "$EP" -gt 0 ]; then
+    echo "❌ 이미 ${EP}ep 수집된 데이터셋이 있습니다: $DS_ROOT"
+    echo "   이어서 수집: $0 $NUM resume"
+    echo "   새로 시작(기존 삭제): rm -rf '$DS_ROOT' 후 다시 실행"
+    exit 1
+  fi
+  echo "▶ 빈 폴더 정리(중단된 시도, 0ep): $DS_ROOT"
+  rm -rf "$DS_ROOT"
+fi
 
 # 배포와 동일한 카메라 (front←top, wrist←wrist)
 CAMS='{ top:   {type: opencv, index_or_path: /dev/cam_top,   width: 640, height: 480, fps: 30, fourcc: MJPG},
