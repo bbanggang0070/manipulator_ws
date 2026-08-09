@@ -2,11 +2,12 @@
 # real-robot-train8 컨테이너 내부 실행 (prepare_blocktask_real_gr00t.sh가 호출).
 # v3.0 실기 블록 데이터셋 → GR00T N1.6용 v2.1 (변환 + modality.json[top→front/wrist→wrist] + stats count 수정).
 set -e
-DS=/data/heongyu/so101_blocktask_real
+DSNAME="${DSNAME:-so101_blocktask_real}"
+DS=/data/heongyu/$DSNAME
 
 echo "== [1] v3.0 → v2.1 변환 (원본 경로에 v2.1, _v3.0 백업 생성) =="
 python /gr00t/scripts/lerobot_conversion/convert_v3_to_v2.py \
-  --repo-id heongyu/so101_blocktask_real --root /data
+  --repo-id heongyu/$DSNAME --root /data
 
 echo "== [2] modality.json 배치 (top→front, wrist→wrist) =="
 cp /tmp/blocktask_real_modality.json "$DS/meta/modality.json"
