@@ -31,10 +31,10 @@ set -e
 DATA_ROOT="${1:-$HOME/gr00tn16_ws/sim_data}"
 [ -z "$DATA_ROOT" ] && DATA_ROOT="$HOME/gr00tn16_ws/sim_data"
 MIX="${2:-1.0}"        # 실기 mix_ratio. 실기가 sim의 절반 규모라 1.0이 기본. 희소하면 1.5~2.0
-STEPS="${3:-43000}"
+STEPS="${3:-48000}"
 OUT_NAME="gr00t_blocktask_cotrain_v4_n16_8bit"
 SIM_DS="sim_so101_blocktask_v4_200"
-REAL_DS="so101_blocktask_real_v2"
+REAL_DS="so101_blocktask_real_v2_57"   # 재시도 섞인 ep2·33·49 제외본
 LAUNCH="$HOME/gr00tn16_ws/launch_cotrain.py"
 
 [ -f "$LAUNCH" ] || { echo "❌ launch_cotrain.py 없음: $LAUNCH"; exit 1; }
