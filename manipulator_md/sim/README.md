@@ -6,7 +6,8 @@
 
 최종 갱신 **2026-08-07** · 기간 08-04 ~ 진행 중
 관련: [실행 계획·변경 이력](2week_plan.md) · [v4 수집 계획](collection_plan_v4.md)
-· [**데이터셋 카탈로그**](datasets.md) · [선행연구 분석](sim_generalization_analysis.md)
+· [**데이터셋 카탈로그**](datasets.md) · [**일반화 평가 계획**](generalization_eval_plan.md)
+· [co-training 계획](cotraining_plan_v4.md) · [선행연구 분석](sim_generalization_analysis.md)
 · [실기 파이프라인 선례](../sim2real/08_T1_sim2real/report2.md)
 > <sub>참고(대체됨): [2차 학습 분기 설계](training_plan.md) · [학습 전략 4조합](training_strategy_analysis.md) — resume 분석만 유효</sub>
 
