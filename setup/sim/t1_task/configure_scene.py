@@ -174,13 +174,19 @@ def edit_distractor(s, names):
 
     성공 판정은 `vials=["block_red"]`만 추적하므로, 모델이 방해물을 집어 박스에 넣어도
     성공으로 잡히지 않는다(의도된 동작).
+
     ⚠️ 빨강 계열은 넣지 않는다 — 분석 스크립트가 빨간 픽셀로 타깃을 찾기 때문에
        모델뿐 아니라 **계측까지** 교란된다.
+
+    배치는 `reset_distractors`(거부 샘플링)로 한다. 처음엔 `reset_prop_random_reach`로
+    독립 추첨했는데 실제 캡처에서 **방해물끼리 붙거나 타깃을 가리는 배치**가 잦아
+    (3ep 중 2ep) 조건이 무의미해졌다. 이 term은 타깃·박스의 현재 위치를 읽으므로
+    **DR cfg의 `reset_basket_random` 다음**에 삽입해야 한다.
     """
     if not names:
         return s
     assert "block_red = block_base.replace()" in s, "block_red 정의 없음"
-    objs, evts = [], []
+    objs = []
     for i, n in enumerate(names):
         color, shape = DISTRACTOR[n]
         cfg, dims = SHAPE[shape]
@@ -195,29 +201,36 @@ def edit_distractor(s, names):
         collision_props=sim_utils.CollisionPropertiesCfg(),
         visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color={COLOR[color]}),
     )''')
-        # 타깃/박스와 겹치지 않도록 도달 범위 안에서 별도 추첨
-        evts.append(f'''
-    reset_{n} = EventTerm(
-        func=reset_prop_random_reach,
+    # (1) 씬 정의 — block_red 선언 뒤
+    anchor = re.search(r"(    block_red\.spawn\.visual_material = sim_utils\.PreviewSurfaceCfg\(\n"
+                       r"        diffuse_color=[^\n]*\n    \)\n)", s)
+    assert anchor, "block_red visual_material 블록 없음"
+    s = s.replace(anchor.group(1), anchor.group(1) + "".join(objs) + "\n")
+
+    # (2) import — reset_distractors 추가
+    s = s.replace("    reset_prop_random_reach,\n",
+                  "    reset_prop_random_reach,\n    reset_distractors,\n", 1)
+
+    # (3) 리셋 이벤트 — **reset_basket_random 다음**(박스 위치가 정해진 뒤)
+    m = re.search(r"(    reset_basket_random = EventTerm\(.*?\n    \)\n)", s, re.S)
+    assert m, "reset_basket_random 블록 없음 — 씬이 v3 버전이 아님"
+    evt = f'''
+    reset_distractor_objs = EventTerm(
+        func=reset_distractors,
         mode="reset",
         params={{
-            "asset_name": "{n}",
+            "names": {names!r},
+            "avoid": ["block_red", "basket_black"],
             "base_xy": BLOCK_REACH_BASE_XY,
             "min_dist": BLOCK_REACH_MIN_DIST,
             "max_dist": BLOCK_REACH_MAX_DIST,
             "angle_range": BLOCK_REACH_ANGLE_RANGE,
             "z": BLOCK_SPAWN_Z,
+            "min_sep": 0.08,
         }},
-    )''')
-    # 씬 정의: block_red 선언 뒤에 붙인다
-    anchor = re.search(r"(    block_red\.spawn\.visual_material = sim_utils\.PreviewSurfaceCfg\(\n"
-                       r"        diffuse_color=[^\n]*\n    \)\n)", s)
-    assert anchor, "block_red visual_material 블록 없음"
-    s = s.replace(anchor.group(1), anchor.group(1) + "".join(objs) + "\n")
-    # 리셋 이벤트: 블록 리셋 term 뒤에 붙인다
-    m = re.search(r"(    reset_block_position = EventTerm\(.*?\n    \)\n)", s, re.S)
-    assert m, "reset_block_position 블록 없음"
-    return s.replace(m.group(1), m.group(1) + "".join(evts) + "\n")
+    )
+'''
+    return s.replace(m.group(1), m.group(1) + evt)
 
 
 def main():
