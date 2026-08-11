@@ -31,7 +31,12 @@ CFG="$WORKSHOP/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py"
 BASE="$CFG.v3base"
 TASK="Lerobot-So101-Teleop-Vials-To-Rack-DR-Eval"
 RENAME='{"external_D455": "front", "ego": "wrist"}'
-LANG="Pick up the block and place it in the box"
+# 지시문. 평가 B(언어 일반화)에서 조건마다 바꾼다.
+#   LANG_INSTRUCTION="Grab the cube and put it in the container" ~/blocktask_headless_scenes.sh full 45 31
+# ⚠️ 컨테이너에는 **-e 로 넘긴다**. bash -c 문자열에 직접 박으면 따옴표가 중첩되는데,
+#    이 프로젝트에서 정확히 그 패턴으로 수집 지시문이 "Pick"으로 절단된 사고가 있었다.
+#    지시문에 아포스트로피(robot's)가 들어가면 바로 깨진다.
+LANG="${LANG_INSTRUCTION:-Pick up the block and place it in the box}"
 SRV_LOG="$HOME/blocktask_headless_server.log"
 OUT_HOST="$WORKSHOP/outputs/hl_${COND}_s${SEED}"
 OUT_CT="/workspace/Sim-to-Real-SO-101-Workshop/outputs/hl_${COND}_s${SEED}"
@@ -74,13 +79,14 @@ echo "   저장: $OUT_HOST"
 docker run --name teleop-eval --rm --privileged --gpus all \
   -e ACCEPT_EULA=Y -e PRIVACY_CONSENT=Y --network host \
   -e CAM_X=0.03 -e CAM_Z=0.02 \
+  -e LANG_INSTRUCTION="$LANG" \
   -v "$WORKSHOP/docker/env:/root/env" \
   -v "$WORKSHOP/source:/workspace/Sim-to-Real-SO-101-Workshop/source" \
   -v "$WORKSHOP/outputs:/workspace/Sim-to-Real-SO-101-Workshop/outputs" \
   teleop-docker:latest \
   bash -c "lerobot_eval --task $TASK --num_envs 1 --num_episodes $NUM --seed $SEED --headless \
     --rename_map '$RENAME' --action_horizon 16 \
-    --lang_instruction '$LANG' --save_video_dir $OUT_CT"
+    --lang_instruction \"\$LANG_INSTRUCTION\" --save_video_dir $OUT_CT"
 
 echo
 echo "▶ 영상 $(ls "$OUT_HOST"/*.mp4 2>/dev/null | wc -l)개 · scenes.csv $( [ -f "$OUT_HOST/scenes.csv" ] && echo 있음 || echo 없음 )"

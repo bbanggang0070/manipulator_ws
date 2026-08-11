@@ -11,30 +11,64 @@ SR이 45%에서 움직이지 않았다(베이스 랜덤화가 신호를 덮음).
   · 박스 고정 위치는 원래 기본값(r=0.266, angle=-0.97)을 재현 — 블록 각도범위(-0.7~1.25)
     밖이라 **블록-박스 겹침이 발생하지 않는다**(겹침 12.4% 아티팩트 회피).
 
+일반화 평가 축 추가(2026-08-11, generalization_eval_plan.md):
+  물체 색상(yellow/white) · 형상·크기(small/large/sphere/cylinder/tall) ·
+  박스 색상(gray/brown) · 시각적 방해물(distractor).
+  프리셋을 튜플에서 **딕셔너리 병합**으로 바꿨다 — 축이 늘어도 시그니처가 길어지지 않는다.
+  기존 11개 프리셋은 리팩터 전후 출력이 md5까지 동일함을 확인했다.
+
 사용: python3 configure_scene.py <cfg경로> <프리셋>
+      python3 configure_scene.py --list        # 프리셋 목록
 """
 import re
 import sys
 
+# 프리셋은 **기본값에서 바뀌는 항목만** 적는다(딕셔너리 병합). 축이 늘어나도 튜플이
+# 길어지지 않고, 어떤 조건이 무엇을 바꾸는지가 한눈에 보인다.
+DEFAULT = dict(block="train", box="fixed", phys=False, light=False,
+               color="red", shape="cube", box_color="black", distractor=None)
+
 PRESETS = {
-    # 이름          블록범위  박스     물리   조명   색
-    "ref":         ("train", "fixed", False, False, "red"),
-    "pos_ood":     ("ood",   "fixed", False, False, "red"),
-    "box_rand":    ("train", "train", False, False, "red"),
-    "box_ood":     ("train", "ood",   False, False, "red"),
-    "phys_dr":     ("train", "fixed", True,  False, "red"),
-    "light_dr":    ("train", "fixed", False, True,  "red"),
-    "color_blue":  ("train", "fixed", False, False, "blue"),
-    "color_green": ("train", "fixed", False, False, "green"),
+    # ── 기존 축 (v3 평가) ────────────────────────────────
+    "ref":          {},                                   # 전부 기본값 = 비교의 원점
+    "pos_ood":      {"block": "ood"},
+    "box_rand":     {"box": "train"},
+    "box_ood":      {"box": "ood"},
+    "phys_dr":      {"phys": True},
+    "light_dr":     {"light": True},
+    "color_blue":   {"color": "blue"},
+    "color_green":  {"color": "green"},
     # 학습 분포 그대로(= 배포 현실). 목표 'train SR ≥80%' 판정은 이 조건으로 한다.
-    "full":        ("train", "train", True,  True,  "red"),
-    # ── 진단용(2026-08-06): box_rand의 −40%p가 '위치' 때문인지 '회전(yaw)' 때문인지 분해 ──
-    #   box_pos_only : 위치만 랜덤(yaw 고정) → 위치 기여
-    #   box_yaw_only : 회전만 랜덤(위치 고정) → yaw 기여
-    #   yaw가 병목이면 분포 축소(yaw ±45°)가 데이터 2배보다 싸고 효과적일 수 있다.
-    "box_pos_only": ("train", "pos_only", False, False, "red"),
-    "box_yaw_only": ("train", "yaw_only", False, False, "red"),
+    "full":         {"box": "train", "phys": True, "light": True},
+    # 진단용(2026-08-06): box_rand의 −40%p가 '위치' 때문인지 '회전(yaw)' 때문인지 분해
+    "box_pos_only": {"box": "pos_only"},
+    "box_yaw_only": {"box": "yaw_only"},
+
+    # ── 일반화 평가 축 (2026-08-11 추가, generalization_eval_plan.md) ──
+    # 색상 극단. white는 배경과 유사해 검출 난이도가 가장 높다.
+    "color_yellow": {"color": "yellow"},
+    "color_white":  {"color": "white"},
+    # 물체 형상·크기. ⚠ 구·원기둥은 놓은 뒤 굴러 경계를 벗어나면 성공 판정이 오표기될 수
+    # 있어 영상 전수 확인이 필요하다(계획서 §3-4).
+    "obj_small":    {"shape": "small"},
+    "obj_large":    {"shape": "large"},
+    "obj_sphere":   {"shape": "sphere"},
+    "obj_cylinder": {"shape": "cylinder"},
+    "obj_tall":     {"shape": "tall"},
+    # 씬 외형
+    "box_gray":     {"box_color": "gray"},
+    "box_brown":    {"box_color": "brown"},
+    # 시각적 방해물. ⚠ 빨강 계열 금지 — 분석 스크립트가 빨간 픽셀로 타깃을 찾는다.
+    "dist_blue_cube": {"distractor": ["blue_cube"]},
+    "dist_green_cyl": {"distractor": ["green_cyl"]},
+    "dist_two":       {"distractor": ["blue_cube", "green_cyl"]},
 }
+
+
+def preset(name):
+    assert name in PRESETS, f"알 수 없는 프리셋: {name} (가능: {sorted(PRESETS)})"
+    return {**DEFAULT, **PRESETS[name]}
+
 
 BLOCK = {  # (min, max, angle_range)
     "train": ("0.16", "0.34", "(-0.7, 1.25)"),
@@ -50,7 +84,23 @@ BOX = {  # (min_dist, max_dist, angle_range, yaw_range)
     # 진단용: 위치는 ref와 동일 고정 + yaw만 학습범위 랜덤
     "yaw_only": ("0.266", "0.266", "(-0.97, -0.97)", "(-3.14159, 3.14159)"),
 }
-COLOR = {"red": "(0.9, 0.1, 0.1)", "blue": "(0.1, 0.1, 0.9)", "green": "(0.15, 0.6, 0.15)"}
+COLOR = {"red": "(0.9, 0.1, 0.1)", "blue": "(0.1, 0.1, 0.9)", "green": "(0.15, 0.6, 0.15)",
+         "yellow": "(0.9, 0.85, 0.1)",
+         # 배경(밝은 회색)과 유사 → 검출 난이도 최대. 일반화 평가의 극단 조건.
+         "white": "(0.9, 0.9, 0.9)"}
+BOX_COLOR = {"black": "(0.03, 0.03, 0.03)", "gray": "(0.45, 0.45, 0.45)", "brown": "(0.35, 0.22, 0.12)"}
+# 물체 형상·크기. CuboidCfg를 다른 spawn 타입으로 갈아끼운다.
+# 판정 경계(rack_local_*)는 그대로이므로 물체가 커지면 경계를 넘기 쉬워진다는 점에 유의.
+# 방해물 정의: (색, 형상). ⚠ 빨강 계열 금지 — 분석 스크립트가 빨간 픽셀로 타깃을 찾는다.
+DISTRACTOR = {"blue_cube": ("blue", "cube"), "green_cyl": ("green", "cylinder")}
+SHAPE = {
+    "cube":     ("CuboidCfg",   "size=(0.02, 0.02, 0.02)"),
+    "small":    ("CuboidCfg",   "size=(0.015, 0.015, 0.015)"),
+    "large":    ("CuboidCfg",   "size=(0.028, 0.028, 0.028)"),
+    "tall":     ("CuboidCfg",   "size=(0.02, 0.02, 0.035)"),
+    "sphere":   ("SphereCfg",   "radius=0.01"),
+    "cylinder": ("CylinderCfg", "radius=0.01, height=0.02"),
+}
 
 
 def edit_block(s, mode):
@@ -98,20 +148,102 @@ def edit_color(s, c):
     return re.sub(r"diffuse_color=\(0\.9, 0\.1, 0\.1\)", f"diffuse_color={COLOR[c]}", s)
 
 
+def edit_box_color(s, c):
+    # 박스 기본색 (0.03, 0.03, 0.03). 블록 색과 값이 겹치지 않아 안전하게 치환된다.
+    return re.sub(r"diffuse_color=\(0\.03, 0\.03, 0\.03\)", f"diffuse_color={BOX_COLOR[c]}", s)
+
+
+def edit_shape(s, sh):
+    """블록의 spawn 타입·치수를 바꾼다 (CuboidCfg → SphereCfg/CylinderCfg 등).
+
+    ⚠️ 성공 판정 경계(rack_local_*)는 그대로다. 물체가 커지면 경계를 넘기 쉬워지고,
+       구·원기둥은 놓은 뒤 굴러 나가 **오표기**될 수 있다 → 영상 전수 확인이 필요하다.
+    ⚠️ 그리퍼 접촉 판정(force_threshold=2)이 작은 물체에서 안 걸릴 수 있다 → obj_small은
+       5ep 예비 확인 후 본 측정을 한다.
+    """
+    if sh == "cube":
+        return s
+    cfg, dims = SHAPE[sh]
+    m = re.search(r"spawn=sim_utils\.CuboidCfg\(\n\s*size=BLOCK_SIZE,", s)
+    assert m, "block_base의 CuboidCfg(size=BLOCK_SIZE) 블록 없음 — 씬 구조가 바뀌었다"
+    return s.replace(m.group(0), f"spawn=sim_utils.{cfg}(\n        {dims},")
+
+
+def edit_distractor(s, names):
+    """작업과 무관한 물체를 씬에 추가한다 (시각 grounding 평가).
+
+    성공 판정은 `vials=["block_red"]`만 추적하므로, 모델이 방해물을 집어 박스에 넣어도
+    성공으로 잡히지 않는다(의도된 동작).
+    ⚠️ 빨강 계열은 넣지 않는다 — 분석 스크립트가 빨간 픽셀로 타깃을 찾기 때문에
+       모델뿐 아니라 **계측까지** 교란된다.
+    """
+    if not names:
+        return s
+    assert "block_red = block_base.replace()" in s, "block_red 정의 없음"
+    objs, evts = [], []
+    for i, n in enumerate(names):
+        color, shape = DISTRACTOR[n]
+        cfg, dims = SHAPE[shape]
+        objs.append(f'''
+    {n} = block_base.replace()
+    {n}.prim_path = "{{ENV_REGEX_NS}}/Distractor_{i}"
+    {n}.spawn = sim_utils.{cfg}(
+        {dims},
+        mass_props=sim_utils.MassPropertiesCfg(mass=BLOCK_MASS),
+        rigid_props=sim_utils.RigidBodyPropertiesCfg(
+            solver_position_iteration_count=8, solver_velocity_iteration_count=4),
+        collision_props=sim_utils.CollisionPropertiesCfg(),
+        visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color={COLOR[color]}),
+    )''')
+        # 타깃/박스와 겹치지 않도록 도달 범위 안에서 별도 추첨
+        evts.append(f'''
+    reset_{n} = EventTerm(
+        func=reset_prop_random_reach,
+        mode="reset",
+        params={{
+            "asset_name": "{n}",
+            "base_xy": BLOCK_REACH_BASE_XY,
+            "min_dist": BLOCK_REACH_MIN_DIST,
+            "max_dist": BLOCK_REACH_MAX_DIST,
+            "angle_range": BLOCK_REACH_ANGLE_RANGE,
+            "z": BLOCK_SPAWN_Z,
+        }},
+    )''')
+    # 씬 정의: block_red 선언 뒤에 붙인다
+    anchor = re.search(r"(    block_red\.spawn\.visual_material = sim_utils\.PreviewSurfaceCfg\(\n"
+                       r"        diffuse_color=[^\n]*\n    \)\n)", s)
+    assert anchor, "block_red visual_material 블록 없음"
+    s = s.replace(anchor.group(1), anchor.group(1) + "".join(objs) + "\n")
+    # 리셋 이벤트: 블록 리셋 term 뒤에 붙인다
+    m = re.search(r"(    reset_block_position = EventTerm\(.*?\n    \)\n)", s, re.S)
+    assert m, "reset_block_position 블록 없음"
+    return s.replace(m.group(1), m.group(1) + "".join(evts) + "\n")
+
+
 def main():
-    path, preset = sys.argv[1], sys.argv[2]
-    assert preset in PRESETS, f"알 수 없는 프리셋: {preset} (가능: {list(PRESETS)})"
-    blk, box, phys, light, color = PRESETS[preset]
+    if len(sys.argv) > 1 and sys.argv[1] == "--list":
+        for n in PRESETS:
+            chg = {k: v for k, v in preset(n).items() if v != DEFAULT[k]}
+            print(f"  {n:<16} " + (", ".join(f"{k}={v}" for k, v in chg.items()) or "기본값(ref)"))
+        return
+    path, name = sys.argv[1], sys.argv[2]
+    c = preset(name)
     s = open(path).read()
-    s = edit_block(s, blk)
-    s = edit_box(s, box)
-    s = edit_phys(s, phys)
-    s = edit_light(s, light)
-    if color != "red":
-        s = edit_color(s, color)
+    s = edit_block(s, c["block"])
+    s = edit_box(s, c["box"])
+    s = edit_phys(s, c["phys"])
+    s = edit_light(s, c["light"])
+    if c["shape"] != "cube":
+        s = edit_shape(s, c["shape"])
+    if c["color"] != "red":
+        s = edit_color(s, c["color"])
+    if c["box_color"] != "black":
+        s = edit_box_color(s, c["box_color"])
+    if c["distractor"]:
+        s = edit_distractor(s, c["distractor"])
     open(path, "w").write(s)
-    print(f"[scene] {preset}: block={blk} box={box} phys={'on' if phys else 'off'} "
-          f"light={'on' if light else 'off'} color={color}")
+    chg = {k: v for k, v in c.items() if v != DEFAULT[k]}
+    print(f"[scene] {name}: " + (", ".join(f"{k}={v}" for k, v in chg.items()) or "기본값(ref)"))
 
 
 if __name__ == "__main__":
