@@ -174,6 +174,10 @@ _act_f = open(f"{_LOGDIR}/actions.csv", "w", buffering=1)
 _act_w = _csv.writer(_act_f)
 _act_w.writerow(["chunk", "i", f_ := "t_ms"] + [f"sent_{j}" for j in _JOINTS])
 _VID = {"w": None}
+# 영상 fps. 제어 루프가 30Hz이므로 30의 약수로 두면 실시간 재생과 맞는다.
+# 기본 10 → 3스텝마다 1프레임. 파지 순간 확인에 4fps는 성기다.
+_VIDEO_FPS = int(_os.environ.get("VIDEO_FPS", "10"))
+_VID_EVERY = max(1, round(30 / _VIDEO_FPS))
 _CHUNK = {"n": 0, "t0": None}
 print(f"[LOG] {_LOGDIR}")
 
@@ -190,23 +194,37 @@ def _finalize_video():
 
 
 def _log_chunk(observation_dict, camera_keys, infer_ms):
-    import cv2, time as _t
+    """chunks.csv 한 줄 — 청크 경계의 관측 state + 왕복 지연."""
+    import time as _t
 
     if _CHUNK["t0"] is None:
         _CHUNK["t0"] = _t.perf_counter()
     st = [observation_dict.get(j, float("nan")) for j in _JOINTS]
     _chunk_w.writerow([_CHUNK["n"], f"{infer_ms:.0f}"] + [f"{v:.2f}" for v in st])
-    imgs = [observation_dict[k] for k in camera_keys if k in observation_dict]
-    if imgs:
-        import numpy as _np
-
-        frame = _np.concatenate(imgs, axis=1)
-        if _VID["w"] is None:
-            h, w = frame.shape[:2]
-            _VID["w"] = cv2.VideoWriter(f"{_LOGDIR}/video.mp4",
-                                        cv2.VideoWriter_fourcc(*"mp4v"), 4, (w, h))
-        _VID["w"].write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
     _CHUNK["n"] += 1
+
+
+def _log_video(observation_dict, camera_keys):
+    """video.mp4 한 프레임 (front|wrist 가로 결합).
+
+    csv 기록과 **분리**했다(2026-08-12). 예전에는 _log_chunk가 둘을 함께 처리해
+    청크 경계(8스텝, 약 4fps)로만 프레임이 남았고 **파지 순간을 놓치기 쉬웠다**.
+    이제 VIDEO_FPS(기본 10)로 프레임 간격을 따로 정한다 — csv의 '청크' 의미는 그대로 두면서
+    영상만 촘촘해진다.
+    """
+    import cv2
+
+    imgs = [observation_dict[k] for k in camera_keys if k in observation_dict]
+    if not imgs:
+        return
+    import numpy as _np
+
+    frame = _np.concatenate(imgs, axis=1)
+    if _VID["w"] is None:
+        h, w = frame.shape[:2]
+        _VID["w"] = cv2.VideoWriter(f"{_LOGDIR}/video.mp4",
+                                    cv2.VideoWriter_fourcc(*"mp4v"), _VIDEO_FPS, (w, h))
+    _VID["w"].write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
 
 def _log_action(sent):
@@ -426,9 +444,11 @@ def eval(cfg: EvalConfig):
                 sent = sent if isinstance(sent, dict) else blended
                 _rr_action(sent)
                 _log_action(sent)
-            if t % 8 == 0:  # 30Hz/8 ≈ 4fps — video.mp4 프레임레이트와 일치
+            if t % 8 == 0:  # chunks.csv·rerun 지연 지표는 기존 간격 유지
                 _rr_infer_ms(_sh["infer_ms"])
                 _log_chunk(obs, camera_keys, _sh["infer_ms"])
+            if t % _VID_EVERY == 0:  # 영상만 더 촘촘히 (VIDEO_FPS)
+                _log_video(obs, camera_keys)
             time.sleep(_STEP_DT)
             if t % 30 == 0:
                 _dt = time.perf_counter() - _tl
@@ -485,6 +505,9 @@ def eval(cfg: EvalConfig):
         _wait_ms = (time.perf_counter() - _tw) * 1e3
         _rr_infer_ms(_exec_ms + _wait_ms)
         _log_chunk(obs_next, camera_keys, _exec_ms + _wait_ms)
+        # ENSEMBLE=0 경로는 청크 경계에서만 관측하므로 여기서 함께 프레임을 남긴다
+        # (영상/ csv 분리 후 이 호출이 빠지면 비-ENSEMBLE 모드에서 video.mp4가 비게 된다)
+        _log_video(obs_next, camera_keys)
         # 진단: obs=카메라읽기 / exec=청크실행 / wait=다음청크 대기(정지) — wait·obs가 크면 그게 병목
         print(f"obs={_obs_ms:.0f}  exec={_exec_ms:.0f}  wait(stall)={_wait_ms:.0f} ms  H={cfg.action_horizon}")  # 학습 fps에 맞춰 대기 (STEP_DT env로 조정)
 
