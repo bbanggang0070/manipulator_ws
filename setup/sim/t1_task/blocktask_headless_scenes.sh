@@ -38,8 +38,14 @@ RENAME='{"external_D455": "front", "ego": "wrist"}'
 #    지시문에 아포스트로피(robot's)가 들어가면 바로 깨진다.
 LANG="${LANG_INSTRUCTION:-Pick up the block and place it in the box}"
 SRV_LOG="$HOME/blocktask_headless_server.log"
-OUT_HOST="$WORKSHOP/outputs/hl_${COND}_s${SEED}"
-OUT_CT="/workspace/Sim-to-Real-SO-101-Workshop/outputs/hl_${COND}_s${SEED}"
+# TAG: 씬 조건(COND)과 시드가 같은데 **지시문만 다른** 실행을 구분한다.
+#   평가 B의 언어 축(L0/L3/L5)은 전부 COND=full 이라 태그가 없으면 같은 디렉터리에 쓰고,
+#   스크립트가 출력물을 rm -rf 하므로 앞 결과가 지워진다. 시드를 바꿔 피하면 **씬이 달라져
+#   언어 비교 자체가 오염된다** — 같은 씬에 문장만 바뀌어야 언어 효과가 분리된다.
+#   예: TAG=L3 LANG_INSTRUCTION="Grab the cube ..." ~/blocktask_headless_scenes.sh full 45 31
+_TAG="${TAG:+_$TAG}"
+OUT_HOST="$WORKSHOP/outputs/hl_${COND}${_TAG}_s${SEED}"
+OUT_CT="/workspace/Sim-to-Real-SO-101-Workshop/outputs/hl_${COND}${_TAG}_s${SEED}"
 
 [ -f "$BASE" ] || { echo "❌ 기준본 없음: $BASE (blocktask_gui_cond.sh를 먼저 한 번 실행해 생성)"; exit 1; }
 
@@ -72,14 +78,19 @@ for i in $(seq 1 120); do
 done
 
 docker run --rm -v "$WORKSHOP/outputs:/o" --entrypoint bash real-robot-train8 \
-  -c "rm -rf /o/hl_${COND}_s${SEED}" >/dev/null 2>&1 || true
+  -c "rm -rf /o/hl_${COND}${_TAG}_s${SEED}" >/dev/null 2>&1 || true   # _TAG 누락 시 태그 실행이 안 지워져 이전 판정 파일이 남는다
 
 echo "▶ [3/3] 무인 추론 — [$COND] ${NUM}ep, seed $SEED  (약 $((NUM*70/60))분 예상)"
+echo "   지시문: \"$LANG\"   패널: ${EVAL_PANEL:-0}"
+echo "   배경: ${EVAL_BG:-<없음>}   작업면: ${EVAL_SURFACE_TEX:-<기본>}"
 echo "   저장: $OUT_HOST"
 docker run --name teleop-eval --rm --privileged --gpus all \
   -e ACCEPT_EULA=Y -e PRIVACY_CONSENT=Y --network host \
   -e CAM_X=0.03 -e CAM_Z=0.02 \
   -e LANG_INSTRUCTION="$LANG" \
+  -e EVAL_PANEL="${EVAL_PANEL:-0}" \
+  -e EVAL_BG="${EVAL_BG:-}" -e EVAL_HIDE="${EVAL_HIDE:-}" \
+  -e EVAL_SURFACE_TEX="${EVAL_SURFACE_TEX:-}" -e EVAL_SURFACE_UV="${EVAL_SURFACE_UV:-4}" \
   -v "$WORKSHOP/docker/env:/root/env" \
   -v "$WORKSHOP/source:/workspace/Sim-to-Real-SO-101-Workshop/source" \
   -v "$WORKSHOP/outputs:/workspace/Sim-to-Real-SO-101-Workshop/outputs" \
@@ -88,6 +99,14 @@ docker run --name teleop-eval --rm --privileged --gpus all \
     --rename_map '$RENAME' --action_horizon 16 \
     --lang_instruction \"\$LANG_INSTRUCTION\" --save_video_dir $OUT_CT"
 
+# 실행 설정을 결과 옆에 남긴다. $OUT_HOST는 컨테이너가 root로 만들어 일반 사용자 쓰기가
+# 조용히 실패하므로, 컨테이너를 통해 쓴다.
+#   왜 필요한가: 지시문은 어디에도 기록되지 않아, 나중에 "정말 그 문장으로 돌렸나"를
+#   확인할 방법이 없었다(2026-08-12 실측). 조건 이름만으로는 증거가 되지 못한다.
+META_JSON="{\"cond\":\"$COND\",\"tag\":\"${TAG:-}\",\"seed\":$SEED,\"episodes\":$NUM,\"model\":\"$MODEL\",\"eval_panel\":\"${EVAL_PANEL:-0}\",\"bg\":\"${EVAL_BG:-}\",\"surface_tex\":\"${EVAL_SURFACE_TEX:-}\",\"hide\":\"${EVAL_HIDE:-}\",\"lang\":\"$LANG\",\"finished\":\"$(date -Is)\"}"
+docker run --rm -v "$WORKSHOP/outputs:/o" --entrypoint bash real-robot-train8 \
+  -c "printf '%s\n' '$META_JSON' > '/o/hl_${COND}${_TAG}_s${SEED}/run.json'" >/dev/null 2>&1 || true
+
 echo
 echo "▶ 영상 $(ls "$OUT_HOST"/*.mp4 2>/dev/null | wc -l)개 · scenes.csv $( [ -f "$OUT_HOST/scenes.csv" ] && echo 있음 || echo 없음 )"
-echo "   로컬로:  rsync -a 5090:'$OUT_HOST' ~/manipulator_ws/inf_video/03_v3_GUI/"
+echo "   로컬로:  rsync -a 5090:'$OUT_HOST' ~/manipulator_ws/inf_video/08_evalB_sim/"

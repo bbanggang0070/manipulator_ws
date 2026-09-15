@@ -60,9 +60,52 @@ _JPEG = os.environ.get("JPEG", "1") == "1"
 _JPEG_Q = int(os.environ.get("JPEG_Q", "90"))
 
 # Temporal ensembling: 매 스텝 관측하며 겹치는 청크들을 블렌딩 → 청크 경계 튐 제거(부드러운 모션).
-# ENSEMBLE=0 이면 기존 청크 단위 실행. ENSEMBLE_W: 최신 예측 가중치(클수록 최신만, 0=균등평균).
+# ENSEMBLE=0 이면 기존 청크 단위 실행.
 _ENSEMBLE = os.environ.get("ENSEMBLE", "1") == "1"
 _ENS_W = float(os.environ.get("ENSEMBLE_W", "0.1"))
+
+# ── W 자동 조정 (2026-08-12) ──────────────────────────────────────────
+# 왜 고정 W가 안 되나:
+#   가중치는 exp(W × 청크나이)인데, **같은 시각에 겹치는 청크 수는 추론 속도가 정한다.**
+#   추론이 빨라지면 청크가 촘촘히 쌓여 평균이 더 상쇄되고, 같은 W라도 동작이 달라진다.
+#   실측(2026-08-12): 평가 A OOD는 infer 131ms(간격 4.0스텝)에서 최신 비중 96% → 4/5 성공.
+#   평가 C는 infer 75ms(간격 2.3스텝)로 빨라지며 같은 W=0.8이 84%로 떨어져 → 2/5,
+#   평균 정지 48.8초(교시 데이터는 최장 3.5초). W=1.0으로 올려도 90%까지밖에 안 갔다.
+#
+# 그래서 W가 아니라 **최신 청크 비중을 목표로 고정**하고, 관측된 간격에서 역산한다.
+#   비중 = 1 − exp(−W·간격)  →  W = −ln(1 − 비중) / 간격
+# ENS_TARGET=0 이면 이 기능을 끄고 ENSEMBLE_W를 그대로 쓴다(기존 동작).
+# 기본값 0 = **끔**. 2026-08-12에 목표 0.96으로 3회 돌려봤으나 정지가 줄지 않았다
+# (평균 52.7s, 이전 48.8s와 차이 없음). 청크 간격이 원인이라는 가설이 실측으로 기각됐다.
+# 기능은 남겨두되 기본은 고정 W를 쓴다. 다시 시험하려면 ENS_TARGET=0.96 로 켠다.
+_ENS_TARGET = float(os.environ.get("ENS_TARGET", "0"))        # 0 = 끔(원래 동작)
+_ENS_W_MIN, _ENS_W_MAX = 0.1, 5.0
+# 그리퍼를 블렌딩에 포함할지. 기본 0 = 최신 청크 값 그대로(진동 제거).
+# GRIP_BLEND=1 로 두면 기존처럼 팔과 똑같이 섞는다.
+_GRIP_BLEND = os.environ.get("GRIP_BLEND", "1") == "1"       # 1 = 그리퍼도 함께 블렌딩(원래 동작)
+# 그리퍼 결정을 **시간축에서 붙잡는** 창 길이(스텝). 0이면 끔.
+#   채널 분리만으로는 부족했다(2026-08-12 실측: 개폐 왕복 27.3 → 26.6, 거의 그대로).
+#   최신 청크를 골라 읽어도 그 청크가 2.3스텝마다 갱신되며 마음을 바꾸기 때문이다.
+#   앙상블을 끄면 한 청크를 8스텝 유지하므로 왕복이 7.8로 떨어진다 — 붙잡는 것이 본질이다.
+#   중앙값 창은 단발 뒤집힘을 지우고 진짜 전이는 (창/2)스텝 지연으로 통과시킨다.
+_GRIP_MED = int(os.environ.get("GRIP_MED", "0"))             # 0 = 끔(원래 동작)
+# 청크 경계 크로스페이드(스텝). ENSEMBLE=0 경로에서만 쓴다.
+#   앙상블(매 스텝 재판단)은 정지를 만들고, 청크 단위 실행(8스텝 유지)은 결정을 지키지만
+#   경계에서 튄다(팔 튐 99%tile 11°, 교시 3.0°). 재판단 주기는 유지한 채 **경계만** 섞는다.
+#   앞 청크의 남은 예측과 새 청크의 첫 예측을 CROSSFADE 스텝에 걸쳐 선형 보간한다.
+#   그리퍼는 섞지 않는다 — 섞으면 문턱 근처 진동이 되살아난다(실측 2026-08-12).
+_CROSSFADE = int(os.environ.get("CROSSFADE", "0"))           # 0 = 끔(원래 동작)
+_grip_hist = {}
+
+
+def _adaptive_w(infer_ms, step_dt):
+    """관측된 청크 간격에서 목표 비중을 내는 W를 역산한다. 간격을 모르면 고정값 유지."""
+    if _ENS_TARGET <= 0 or not infer_ms or infer_ms <= 0:
+        return _ENS_W
+    gap = max(infer_ms / 1000.0 / max(step_dt, 1e-6), 0.5)   # 청크 도착 간격(스텝)
+    import math as _m
+    w = -_m.log(max(1.0 - _ENS_TARGET, 1e-6)) / gap
+    return min(max(w, _ENS_W_MIN), _ENS_W_MAX)
 
 
 def _jpeg_encode_videos(obs_dict):
@@ -434,12 +477,38 @@ def eval(cfg: EvalConfig):
                 covering = [(cs, c[t - cs]) for (cs, c) in _sh["chunks"] if cs <= t < cs + len(c)]
                 n_chunks = len(_sh["chunks"])
             if covering:
-                ws = np.array([np.exp(_ENS_W * (cs - t)) for (cs, _) in covering], dtype=np.float64)
+                _w = _adaptive_w(_sh["infer_ms"], _STEP_DT)
+                ws = np.array([np.exp(_w * (cs - t)) for (cs, _) in covering], dtype=np.float64)
                 ws /= ws.sum()
                 blended = {
                     jk: float(sum(w * float(ad.get(jk, 0.0)) for w, (_, ad) in zip(ws, covering)))
                     for jk in robot_state_keys
                 }
+                # 그리퍼는 **블렌딩하지 않고 최신 청크 값을 그대로 쓴다** (GRIP_BLEND=0, 기본).
+                #
+                # 왜 채널을 갈라야 하나(2026-08-12 실측):
+                #   앙상블은 팔에는 이롭고 그리퍼에는 해롭다.
+                #     팔 튐 99%tile   앙상블 켬 2.3°  vs  끔 9~11°   ← 켜야 부드럽다
+                #     정지 중 개폐왕복 앙상블 켬 27.3회 vs 끔 2.7회  ← 꺼야 결정한다
+                #   앙상블 경로는 매 스텝 재판단하므로, 파지·릴리스 시점에서 새 예측이 올 때마다
+                #   '닫을까 말까'가 뒤집혀 문턱 근처에서 진동하고 팔이 멈춘다(평균 정지 48.8초,
+                #   교시 데이터는 최장 3.5초). W를 키워도 안 된다 — W=1.0도, 최신 비중 96%로
+                #   고정한 적응형도 정지가 그대로였다. 섞이는 옛 청크가 아니라 **최신 청크 자체가
+                #   매 스텝 마음을 바꾸는 것**이 원인이기 때문이다.
+                #   앙상블을 끄면(한 청크를 8스텝 유지) 왕복 2.7회로 떨어지고 성공률이 40%→80%로 올랐다.
+                if not _GRIP_BLEND:
+                    _newest = max(covering, key=lambda p: p[0])[1]
+                    for _k in robot_state_keys:
+                        if "gripper" not in _k:
+                            continue
+                        _v = float(_newest.get(_k, blended[_k]))
+                        if _GRIP_MED > 1:
+                            _h = _grip_hist.setdefault(_k, [])
+                            _h.append(_v)
+                            if len(_h) > _GRIP_MED:
+                                del _h[0]
+                            _v = sorted(_h)[len(_h) // 2]      # 중앙값 = 단발 뒤집힘 제거
+                        blended[_k] = _v
                 sent = robot.send_action(blended)
                 sent = sent if isinstance(sent, dict) else blended
                 _rr_action(sent)
@@ -453,7 +522,9 @@ def eval(cfg: EvalConfig):
             if t % 30 == 0:
                 _dt = time.perf_counter() - _tl
                 _tl = time.perf_counter()
-                print(f"[ensemble] step={t} covering={len(covering)} chunks={n_chunks} rate={30/_dt:.0f}Hz")
+                print(f"[ensemble] step={t} covering={len(covering)} chunks={n_chunks} "
+                      f"rate={30/_dt:.0f}Hz infer={_sh['infer_ms']:.0f}ms "
+                      f"W={_adaptive_w(_sh['infer_ms'], _STEP_DT):.2f}(목표 최신 {_ENS_TARGET:.0%})")
             t += 1
 
     # Step 3-CHUNK: 기존 청크 단위 실행 (ENSEMBLE=0)
@@ -470,6 +541,11 @@ def eval(cfg: EvalConfig):
     _rr_obs(observation_dict, camera_keys, robot_state_keys)
     action_chunk = policy.get_action(observation_dict, language_instruction)
 
+    # 크로스페이드용 꼬리는 **루프 밖 변수**에 둔다.
+    # _next 딕셔너리는 프리페치 전용이라 매 루프 _next.clear()로 비워진다 — 거기 담으면
+    # 다음 반복에서 항상 None이 되어 크로스페이드가 한 번도 동작하지 않는다(2026-08-13 확인).
+    _prev_tail = None
+
     while True:
         # 다음 청크용 관측 (카메라 2대 읽기 — 여기가 느리면 청크 경계 정지의 원인)
         _to = time.perf_counter()
@@ -485,13 +561,29 @@ def eval(cfg: EvalConfig):
         # 현재 청크 실행 (이 동안 다음 청크 추론이 백그라운드로 진행)
         _te = time.perf_counter()
         for i in range(cfg.action_horizon):
-            action_dict = action_chunk[i]
+            action_dict = dict(action_chunk[i])
+            # 경계 크로스페이드: 앞 청크가 같은 시각에 무엇을 하려 했는지와 선형 보간.
+            # i가 커질수록 새 청크 비중이 100%로 간다.
+            if _prev_tail is not None and i < _CROSSFADE and i < len(_prev_tail):
+                a = (i + 1) / float(_CROSSFADE + 1)
+                _old = _prev_tail[i]
+                for _k in action_dict:
+                    if "gripper" in _k:
+                        continue                     # 그리퍼는 섞지 않는다
+                    try:
+                        action_dict[_k] = (1 - a) * float(_old[_k]) + a * float(action_dict[_k])
+                    except (KeyError, TypeError, ValueError):
+                        pass
             sent = robot.send_action(action_dict)
             sent = sent if isinstance(sent, dict) else action_dict
             _rr_action(sent)
             _log_action(sent)
             time.sleep(_STEP_DT)
         _exec_ms = (time.perf_counter() - _te) * 1e3
+        # 다음 청크와 겹쳐 쓸 꼬리 — 이 청크가 이어서 하려던 예측
+        #   HORIZON < 청크길이(16) 여야 꼬리가 생긴다. HORIZON=16이면 남는 게 없어 동작하지 않는다.
+        _prev_tail = (action_chunk[cfg.action_horizon:]
+                      if _CROSSFADE > 0 and len(action_chunk) > cfg.action_horizon else None)
 
         # 다음 청크 확보 — 여기서 기다리는 시간(wait)이 크면 추론이 실행을 못 따라감(정지)
         _tw = time.perf_counter()
