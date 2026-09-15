@@ -1,0 +1,331 @@
+ep,objects,boxes,target,dest,instruction
+1,cyan_cube,black,cyan_cube,black,Pick up the block and place it in the box
+2,red_cube,gray,red_cube,gray,Pick up the block and place it in the box
+3,purple_cube,brown,purple_cube,brown,Pick up the block and place it in the box
+4,"green_cube,blue_cube,yellow_cube,marker",black,blue_cube,black,Put the blue block into the black box
+5,green_cube,gray,green_cube,gray,Pick up the block and place it in the box
+6,"red_cube,eraser,yellow_cube,purple_cube","gray,brown",eraser,brown,Pick up the eraser and place it in the brown box
+7,"marker,yellow_cube,cyan_cube,eraser",brown,yellow_cube,brown,Pick up the yellow block and place it in the brown box
+8,"purple_cube,blue_cube,red_cube,marker",black,marker,black,Pick up the marker and place it in the box
+9,"eraser,cyan_cube,red_cube,green_cube","black,gray",red_cube,gray,Grab the red cube and put it in the gray box
+10,eraser,gray,eraser,gray,Pick up the eraser and place it in the box
+11,"blue_cube,purple_cube,yellow_cube,cyan_cube","black,brown",blue_cube,brown,Move the blue block to the brown box
+12,"green_cube,blue_cube,marker,yellow_cube",black,yellow_cube,black,Pick up the yellow block and place it in the box
+13,"purple_cube,green_cube,eraser,marker","gray,black",purple_cube,gray,Pick up the purple cube and place it in the gray box
+14,"red_cube,cyan_cube,blue_cube,green_cube","brown,gray",green_cube,brown,Move the green cube to the brown box
+15,"eraser,cyan_cube,red_cube,marker","brown,black",marker,black,Grab the marker and put it in the black box
+16,"yellow_cube,cyan_cube,purple_cube,blue_cube",gray,cyan_cube,gray,Pick up the cyan block and place it in the gray box
+17,"purple_cube,marker,cyan_cube,green_cube",black,cyan_cube,black,Put the cyan cube into the box
+18,"yellow_cube,red_cube,eraser,blue_cube","gray,brown",red_cube,brown,Pick up the red block and place it in the brown box
+19,"eraser,blue_cube,purple_cube,green_cube","brown,black",eraser,brown,Pick up the eraser and place it in the brown box
+20,"marker,blue_cube,red_cube,eraser","black,gray",blue_cube,black,Put the blue cube into the black box
+21,"purple_cube,green_cube,red_cube,yellow_cube",gray,purple_cube,gray,Put the purple cube into the box
+22,"yellow_cube,cyan_cube,red_cube,marker",brown,marker,brown,Pick up the marker and place it in the box
+23,"green_cube,eraser,marker,yellow_cube","gray,black",yellow_cube,black,Grab the yellow cube and put it in the black box
+24,"purple_cube,green_cube,blue_cube,cyan_cube","gray,brown",green_cube,gray,Pick up the green cube and place it in the gray box
+25,"yellow_cube,red_cube,cyan_cube,eraser","brown,gray",yellow_cube,gray,Pick up the yellow cube and place it in the gray box
+26,"eraser,purple_cube,marker,red_cube",black,purple_cube,black,Pick up the purple block and place it in the box
+27,"green_cube,cyan_cube,blue_cube,yellow_cube",brown,green_cube,brown,Pick up the green cube and place it in the brown box
+28,"blue_cube,purple_cube,marker,red_cube",gray,red_cube,gray,Put the red cube into the gray box
+29,"yellow_cube,blue_cube,marker,cyan_cube","black,brown",marker,black,Pick up the marker and place it in the black box
+30,cyan_cube,brown,cyan_cube,brown,Pick up the block and place it in the box
+31,"purple_cube,blue_cube,eraser,green_cube","gray,black",eraser,gray,Grab the eraser and put it in the gray box
+32,"blue_cube,eraser,red_cube,marker",brown,blue_cube,brown,Pick up the blue block and place it in the box
+33,"green_cube,purple_cube,red_cube,yellow_cube","black,brown",yellow_cube,black,Put the yellow block into the black box
+34,"purple_cube,cyan_cube,green_cube,marker","black,gray",marker,gray,Put the marker into the gray box
+35,"yellow_cube,cyan_cube,red_cube,green_cube","brown,gray",red_cube,brown,Pick up the red block and place it in the brown box
+36,"eraser,cyan_cube,marker,purple_cube","brown,black",cyan_cube,black,Move the cyan cube to the black box
+37,"yellow_cube,blue_cube,green_cube,eraser","gray,brown",eraser,gray,Put the eraser into the gray box
+38,"eraser,red_cube,purple_cube,yellow_cube","black,brown",purple_cube,brown,Pick up the purple cube and place it in the brown box
+39,"blue_cube,red_cube,marker,eraser","black,gray",blue_cube,black,Move the blue block to the black box
+40,"green_cube,red_cube,marker,cyan_cube","brown,gray",green_cube,brown,Pick up the green cube and place it in the brown box
+41,"blue_cube,yellow_cube,purple_cube,red_cube","gray,black",red_cube,black,Grab the red cube and put it in the black box
+42,"purple_cube,blue_cube,cyan_cube,eraser",gray,cyan_cube,gray,Pick up the cyan block and place it in the gray box
+43,"marker,cyan_cube,blue_cube,green_cube",gray,blue_cube,gray,Pick up the blue block and place it in the box
+44,"marker,purple_cube,yellow_cube,eraser","brown,black",purple_cube,brown,Pick up the purple block and place it in the brown box
+45,"purple_cube,yellow_cube,green_cube,marker",black,marker,black,Put the marker into the box
+46,"eraser,red_cube,yellow_cube,green_cube","gray,black",green_cube,black,Grab the green block and put it in the black box
+47,"marker,blue_cube,yellow_cube,cyan_cube",gray,yellow_cube,gray,Put the yellow block into the gray box
+48,"cyan_cube,eraser,blue_cube,green_cube","brown,gray",eraser,brown,Pick up the eraser and place it in the brown box
+49,blue_cube,gray,blue_cube,gray,Pick up the block and place it in the box
+50,"purple_cube,cyan_cube,green_cube,eraser",black,eraser,black,Move the eraser to the black box
+51,"marker,purple_cube,red_cube,cyan_cube",brown,red_cube,brown,Move the red cube to the box
+52,"eraser,marker,yellow_cube,red_cube",black,yellow_cube,black,Pick up the yellow block and place it in the black box
+53,"blue_cube,purple_cube,red_cube,yellow_cube",gray,purple_cube,gray,Grab the purple block and put it in the box
+54,"red_cube,green_cube,eraser,cyan_cube",brown,cyan_cube,brown,Pick up the cyan cube and place it in the box
+55,"purple_cube,marker,green_cube,blue_cube","black,brown",green_cube,brown,Grab the green cube and put it in the brown box
+56,"yellow_cube,eraser,green_cube,marker","brown,gray",marker,gray,Pick up the marker and place it in the gray box
+57,"green_cube,blue_cube,cyan_cube,red_cube",black,red_cube,black,Grab the red block and put it in the box
+58,"yellow_cube,marker,cyan_cube,purple_cube","brown,black",marker,brown,Pick up the marker and place it in the brown box
+59,"blue_cube,yellow_cube,purple_cube,eraser","black,gray",eraser,black,Grab the eraser and put it in the black box
+60,"yellow_cube,red_cube,cyan_cube,eraser",gray,cyan_cube,gray,Put the cyan cube into the box
+61,"red_cube,green_cube,marker,purple_cube",brown,purple_cube,brown,Pick up the purple block and place it in the box
+62,"blue_cube,cyan_cube,green_cube,yellow_cube",black,yellow_cube,black,Put the yellow block into the box
+63,"green_cube,marker,eraser,red_cube",gray,green_cube,gray,Grab the green cube and put it in the gray box
+64,"purple_cube,eraser,blue_cube,red_cube","black,gray",blue_cube,black,Grab the blue cube and put it in the black box
+65,"blue_cube,marker,yellow_cube,cyan_cube","brown,black",marker,brown,Pick up the marker and place it in the brown box
+66,"eraser,red_cube,purple_cube,blue_cube","gray,brown",blue_cube,gray,Pick up the blue cube and place it in the gray box
+67,"red_cube,cyan_cube,purple_cube,green_cube",gray,red_cube,gray,Put the red cube into the gray box
+68,eraser,brown,eraser,brown,Pick up the eraser and place it in the brown box
+69,"green_cube,purple_cube,marker,yellow_cube","black,gray",yellow_cube,black,Pick up the yellow block and place it in the black box
+70,"cyan_cube,purple_cube,eraser,marker","brown,gray",cyan_cube,gray,Pick up the cyan block and place it in the gray box
+71,green_cube,black,green_cube,black,Move the green block to the box
+72,"yellow_cube,purple_cube,blue_cube,cyan_cube","black,brown",purple_cube,brown,Pick up the purple cube and place it in the brown box
+73,"purple_cube,cyan_cube,red_cube,yellow_cube",gray,purple_cube,gray,Pick up the purple cube and place it in the gray box
+74,"blue_cube,marker,red_cube,eraser",black,marker,black,Put the marker into the black box
+75,"marker,yellow_cube,blue_cube,green_cube","brown,black",blue_cube,brown,Pick up the blue block and place it in the brown box
+76,"eraser,cyan_cube,blue_cube,red_cube","gray,black",cyan_cube,black,Pick up the cyan cube and place it in the black box
+77,"yellow_cube,marker,red_cube,green_cube",brown,red_cube,brown,Put the red cube into the box
+78,green_cube,gray,green_cube,gray,Pick up the block and place it in the box
+79,"eraser,cyan_cube,purple_cube,yellow_cube",black,yellow_cube,black,Pick up the yellow cube and place it in the black box
+80,"green_cube,eraser,cyan_cube,blue_cube","brown,gray",eraser,gray,Pick up the eraser and place it in the gray box
+81,"marker,blue_cube,purple_cube,red_cube",brown,blue_cube,brown,Pick up the blue cube and place it in the brown box
+82,"green_cube,yellow_cube,purple_cube,marker","gray,brown",purple_cube,brown,Pick up the purple cube and place it in the brown box
+83,"eraser,cyan_cube,marker,blue_cube","black,brown",marker,black,Move the marker to the black box
+84,"yellow_cube,cyan_cube,eraser,green_cube","black,gray",eraser,gray,Pick up the eraser and place it in the gray box
+85,"purple_cube,cyan_cube,red_cube,marker","brown,gray",cyan_cube,brown,Pick up the cyan block and place it in the brown box
+86,"eraser,red_cube,blue_cube,green_cube","black,gray",green_cube,gray,Pick up the green block and place it in the gray box
+87,"yellow_cube,blue_cube,green_cube,red_cube",black,red_cube,black,Put the red block into the black box
+88,"purple_cube,marker,yellow_cube,eraser","brown,black",yellow_cube,brown,Put the yellow block into the brown box
+89,"eraser,purple_cube,yellow_cube,cyan_cube","gray,black",eraser,gray,Pick up the eraser and place it in the gray box
+90,"marker,blue_cube,red_cube,cyan_cube","brown,black",cyan_cube,black,Put the cyan cube into the black box
+91,"blue_cube,purple_cube,green_cube,marker","brown,black",blue_cube,black,Grab the blue block and put it in the black box
+92,"yellow_cube,red_cube,blue_cube,eraser","brown,gray",yellow_cube,brown,Pick up the yellow cube and place it in the brown box
+93,"cyan_cube,red_cube,green_cube,yellow_cube","gray,brown",red_cube,gray,Pick up the red cube and place it in the gray box
+94,marker,brown,marker,brown,Pick up the marker and place it in the box
+95,"green_cube,eraser,red_cube,purple_cube","gray,black",green_cube,black,Pick up the green block and place it in the black box
+96,"green_cube,cyan_cube,blue_cube,purple_cube","black,gray",purple_cube,gray,Grab the purple cube and put it in the gray box
+97,"cyan_cube,marker,red_cube,eraser","brown,gray",cyan_cube,gray,Put the cyan cube into the gray box
+98,"red_cube,purple_cube,green_cube,yellow_cube",black,red_cube,black,Pick up the red cube and place it in the black box
+99,blue_cube,brown,blue_cube,brown,Pick up the block and place it in the box
+100,"blue_cube,cyan_cube,purple_cube,marker",black,purple_cube,black,Grab the purple block and put it in the box
+101,"eraser,green_cube,marker,yellow_cube",gray,marker,gray,Move the marker to the box
+102,"purple_cube,yellow_cube,cyan_cube,eraser",brown,eraser,brown,Pick up the eraser and place it in the brown box
+103,"eraser,marker,red_cube,green_cube","black,brown",green_cube,brown,Pick up the green cube and place it in the brown box
+104,"yellow_cube,blue_cube,red_cube,marker","gray,black",yellow_cube,black,Grab the yellow block and put it in the black box
+105,"blue_cube,marker,yellow_cube,cyan_cube","gray,brown",marker,gray,Put the marker into the gray box
+106,yellow_cube,gray,yellow_cube,gray,Pick up the block and place it in the box
+107,"purple_cube,eraser,red_cube,blue_cube",black,purple_cube,black,Pick up the purple block and place it in the black box
+108,"eraser,cyan_cube,purple_cube,green_cube",brown,green_cube,brown,Grab the green cube and put it in the box
+109,"purple_cube,red_cube,cyan_cube,green_cube","brown,black",red_cube,black,Pick up the red block and place it in the black box
+110,"eraser,blue_cube,yellow_cube,marker",gray,eraser,gray,Pick up the eraser and place it in the gray box
+111,"red_cube,marker,green_cube,cyan_cube","brown,black",cyan_cube,brown,Move the cyan cube to the brown box
+112,"blue_cube,purple_cube,green_cube,yellow_cube","gray,black",blue_cube,gray,Pick up the blue cube and place it in the gray box
+113,"marker,eraser,cyan_cube,red_cube","brown,gray",cyan_cube,brown,Pick up the cyan block and place it in the brown box
+114,"green_cube,eraser,yellow_cube,blue_cube","brown,black",green_cube,black,Move the green cube to the black box
+115,"red_cube,blue_cube,purple_cube,cyan_cube",gray,blue_cube,gray,Put the blue block into the box
+116,"marker,eraser,yellow_cube,purple_cube",black,eraser,black,Grab the eraser and put it in the box
+117,"marker,purple_cube,green_cube,blue_cube","brown,gray",purple_cube,brown,Put the purple cube into the brown box
+118,"cyan_cube,red_cube,yellow_cube,marker",gray,marker,gray,Move the marker to the box
+119,"green_cube,red_cube,purple_cube,yellow_cube","gray,brown",red_cube,brown,Pick up the red block and place it in the brown box
+120,"yellow_cube,cyan_cube,blue_cube,eraser","black,gray",yellow_cube,black,Move the yellow block to the black box
+121,"blue_cube,red_cube,green_cube,purple_cube",black,red_cube,black,Pick up the red block and place it in the box
+122,"cyan_cube,eraser,green_cube,marker","gray,black",eraser,gray,Grab the eraser and put it in the gray box
+123,"red_cube,yellow_cube,purple_cube,cyan_cube","brown,black",yellow_cube,brown,Pick up the yellow cube and place it in the brown box
+124,"marker,eraser,blue_cube,cyan_cube","gray,brown",blue_cube,brown,Pick up the blue block and place it in the brown box
+125,"purple_cube,eraser,marker,blue_cube",gray,purple_cube,gray,Pick up the purple cube and place it in the box
+126,green_cube,black,green_cube,black,Pick up the block and place it in the box
+127,"cyan_cube,green_cube,red_cube,yellow_cube","black,brown",cyan_cube,brown,Pick up the cyan cube and place it in the brown box
+128,"marker,purple_cube,red_cube,yellow_cube",black,marker,black,Put the marker into the box
+129,"red_cube,eraser,yellow_cube,blue_cube","black,gray",yellow_cube,gray,Grab the yellow block and put it in the gray box
+130,"cyan_cube,blue_cube,marker,green_cube",gray,marker,gray,Pick up the marker and place it in the box
+131,blue_cube,black,blue_cube,black,Pick up the block and place it in the box
+132,"yellow_cube,cyan_cube,eraser,purple_cube","gray,brown",cyan_cube,brown,Move the cyan cube to the brown box
+133,"red_cube,blue_cube,green_cube,marker",gray,red_cube,gray,Grab the red cube and put it in the box
+134,"purple_cube,eraser,green_cube,cyan_cube","black,brown",eraser,brown,Grab the eraser and put it in the brown box
+135,"marker,red_cube,green_cube,eraser","gray,black",green_cube,black,Pick up the green cube and place it in the black box
+136,"eraser,blue_cube,yellow_cube,purple_cube","black,gray",purple_cube,gray,Move the purple cube to the gray box
+137,"eraser,purple_cube,cyan_cube,green_cube","black,brown",eraser,brown,Pick up the eraser and place it in the brown box
+138,green_cube,black,green_cube,black,Pick up the green block and place it in the box
+139,"purple_cube,yellow_cube,red_cube,marker",brown,marker,brown,Pick up the marker and place it in the brown box
+140,"yellow_cube,red_cube,blue_cube,cyan_cube",gray,red_cube,gray,Pick up the red cube and place it in the box
+141,"eraser,red_cube,blue_cube,marker","brown,black",blue_cube,black,Move the blue cube to the black box
+142,"cyan_cube,purple_cube,blue_cube,marker",brown,purple_cube,brown,Pick up the purple cube and place it in the brown box
+143,"red_cube,yellow_cube,cyan_cube,green_cube",gray,cyan_cube,gray,Grab the cyan block and put it in the box
+144,yellow_cube,black,yellow_cube,black,Put the yellow block into the box
+145,"marker,purple_cube,eraser,green_cube","gray,black",green_cube,black,Pick up the green block and place it in the black box
+146,"cyan_cube,eraser,green_cube,yellow_cube","gray,brown",eraser,gray,Put the eraser into the gray box
+147,"marker,purple_cube,red_cube,blue_cube","gray,brown",purple_cube,brown,Pick up the purple block and place it in the brown box
+148,"blue_cube,purple_cube,cyan_cube,red_cube","gray,brown",red_cube,brown,Pick up the red cube and place it in the brown box
+149,"blue_cube,green_cube,yellow_cube,eraser","black,gray",blue_cube,gray,Pick up the blue block and place it in the gray box
+150,"eraser,red_cube,marker,cyan_cube",black,cyan_cube,black,Pick up the cyan cube and place it in the box
+151,"marker,green_cube,purple_cube,yellow_cube",black,marker,black,Pick up the marker and place it in the black box
+152,"yellow_cube,marker,blue_cube,red_cube",gray,yellow_cube,gray,Put the yellow block into the gray box
+153,cyan_cube,brown,cyan_cube,brown,Pick up the cyan cube and place it in the box
+154,"purple_cube,blue_cube,eraser,green_cube","black,brown",blue_cube,black,Put the blue block into the black box
+155,"eraser,purple_cube,cyan_cube,red_cube",gray,purple_cube,gray,Put the purple block into the box
+156,"yellow_cube,red_cube,marker,green_cube",brown,green_cube,brown,Put the green cube into the box
+157,"yellow_cube,cyan_cube,eraser,marker",gray,marker,gray,Put the marker into the box
+158,"purple_cube,green_cube,blue_cube,eraser",black,eraser,black,Grab the eraser and put it in the box
+159,"green_cube,purple_cube,blue_cube,red_cube","brown,gray",red_cube,brown,Pick up the red block and place it in the brown box
+160,"cyan_cube,marker,yellow_cube,blue_cube",gray,yellow_cube,gray,Grab the yellow cube and put it in the box
+161,"cyan_cube,red_cube,green_cube,purple_cube",brown,red_cube,brown,Put the red cube into the box
+162,"blue_cube,marker,yellow_cube,eraser",black,eraser,black,Put the eraser into the box
+163,"marker,eraser,yellow_cube,cyan_cube","black,brown",cyan_cube,brown,Grab the cyan cube and put it in the brown box
+164,"purple_cube,green_cube,cyan_cube,marker","gray,black",marker,gray,Pick up the marker and place it in the gray box
+165,"red_cube,blue_cube,yellow_cube,purple_cube","black,brown",yellow_cube,black,Grab the yellow block and put it in the black box
+166,blue_cube,brown,blue_cube,brown,Pick up the block and place it in the box
+167,"eraser,yellow_cube,green_cube,red_cube",gray,green_cube,gray,Grab the green cube and put it in the box
+168,"cyan_cube,purple_cube,eraser,marker",black,purple_cube,black,Move the purple block to the black box
+169,"red_cube,purple_cube,green_cube,marker","brown,gray",marker,brown,Pick up the marker and place it in the brown box
+170,"red_cube,blue_cube,cyan_cube,yellow_cube",black,yellow_cube,black,Grab the yellow cube and put it in the box
+171,"blue_cube,eraser,purple_cube,green_cube",gray,eraser,gray,Pick up the eraser and place it in the box
+172,"marker,blue_cube,cyan_cube,red_cube",brown,cyan_cube,brown,Pick up the cyan cube and place it in the box
+173,"eraser,green_cube,blue_cube,cyan_cube","gray,black",blue_cube,gray,Pick up the blue block and place it in the gray box
+174,"purple_cube,marker,yellow_cube,eraser",black,purple_cube,black,Move the purple cube to the box
+175,"green_cube,red_cube,yellow_cube,eraser","brown,black",red_cube,brown,Pick up the red cube and place it in the brown box
+176,"marker,green_cube,yellow_cube,cyan_cube","black,gray",green_cube,black,Pick up the green block and place it in the black box
+177,"purple_cube,eraser,blue_cube,red_cube","brown,gray",eraser,gray,Grab the eraser and put it in the gray box
+178,"cyan_cube,yellow_cube,purple_cube,marker","black,brown",purple_cube,brown,Pick up the purple cube and place it in the brown box
+179,"blue_cube,red_cube,cyan_cube,green_cube","gray,black",blue_cube,gray,Grab the blue block and put it in the gray box
+180,"eraser,yellow_cube,purple_cube,red_cube","gray,black",red_cube,black,Put the red cube into the black box
+181,"marker,green_cube,blue_cube,yellow_cube",brown,yellow_cube,brown,Put the yellow block into the box
+182,"purple_cube,cyan_cube,red_cube,eraser","black,brown",cyan_cube,black,Put the cyan cube into the black box
+183,"marker,blue_cube,green_cube,eraser","brown,gray",green_cube,gray,Grab the green block and put it in the gray box
+184,"red_cube,purple_cube,green_cube,marker","brown,gray",marker,brown,Put the marker into the brown box
+185,"cyan_cube,marker,eraser,yellow_cube","black,gray",marker,black,Grab the marker and put it in the black box
+186,"purple_cube,blue_cube,yellow_cube,cyan_cube","brown,gray",purple_cube,gray,Pick up the purple cube and place it in the gray box
+187,"purple_cube,green_cube,yellow_cube,red_cube",brown,yellow_cube,brown,Pick up the yellow cube and place it in the brown box
+188,"blue_cube,cyan_cube,red_cube,green_cube","black,brown",cyan_cube,black,Pick up the cyan cube and place it in the black box
+189,"green_cube,eraser,yellow_cube,marker",gray,green_cube,gray,Pick up the green cube and place it in the gray box
+190,"red_cube,eraser,cyan_cube,blue_cube",brown,eraser,brown,Put the eraser into the box
+191,"yellow_cube,marker,purple_cube,blue_cube","brown,gray",blue_cube,gray,Grab the blue cube and put it in the gray box
+192,"cyan_cube,marker,red_cube,eraser","black,brown",red_cube,black,Grab the red cube and put it in the black box
+193,"purple_cube,red_cube,green_cube,marker",brown,marker,brown,Pick up the marker and place it in the brown box
+194,"purple_cube,cyan_cube,eraser,yellow_cube","gray,black",purple_cube,black,Pick up the purple block and place it in the black box
+195,"green_cube,blue_cube,yellow_cube,eraser","brown,gray",blue_cube,gray,Put the blue block into the gray box
+196,"yellow_cube,blue_cube,purple_cube,red_cube","gray,black",yellow_cube,gray,Pick up the yellow block and place it in the gray box
+197,red_cube,black,red_cube,black,Pick up the block and place it in the box
+198,"blue_cube,cyan_cube,marker,green_cube","brown,black",cyan_cube,brown,Move the cyan block to the brown box
+199,"eraser,green_cube,purple_cube,blue_cube",black,eraser,black,Grab the eraser and put it in the black box
+200,green_cube,gray,green_cube,gray,Pick up the block and place it in the box
+201,blue_cube,brown,blue_cube,brown,Put the blue block into the brown box
+202,"red_cube,yellow_cube,marker,cyan_cube","black,gray",red_cube,black,Grab the red block and put it in the black box
+203,"cyan_cube,purple_cube,eraser,marker","black,brown",eraser,brown,Pick up the eraser and place it in the brown box
+204,"purple_cube,yellow_cube,marker,cyan_cube","brown,gray",purple_cube,gray,Grab the purple block and put it in the gray box
+205,"red_cube,green_cube,blue_cube,cyan_cube","black,gray",cyan_cube,black,Grab the cyan cube and put it in the black box
+206,"red_cube,green_cube,eraser,yellow_cube","black,brown",yellow_cube,brown,Pick up the yellow block and place it in the brown box
+207,"eraser,green_cube,marker,cyan_cube",gray,green_cube,gray,Grab the green block and put it in the gray box
+208,"blue_cube,purple_cube,red_cube,marker","gray,black",marker,black,Grab the marker and put it in the black box
+209,"blue_cube,eraser,purple_cube,marker","gray,brown",marker,gray,Pick up the marker and place it in the gray box
+210,yellow_cube,brown,yellow_cube,brown,Pick up the yellow block and place it in the box
+211,"green_cube,cyan_cube,yellow_cube,eraser",brown,green_cube,brown,Pick up the green block and place it in the box
+212,"red_cube,marker,eraser,purple_cube","black,brown",red_cube,black,Pick up the red cube and place it in the black box
+213,"purple_cube,blue_cube,cyan_cube,yellow_cube","gray,brown",blue_cube,gray,Move the blue block to the gray box
+214,"blue_cube,red_cube,green_cube,eraser",gray,eraser,gray,Pick up the eraser and place it in the gray box
+215,"purple_cube,red_cube,cyan_cube,green_cube",black,cyan_cube,black,Pick up the cyan cube and place it in the box
+216,"marker,cyan_cube,purple_cube,yellow_cube",brown,purple_cube,brown,Put the purple block into the box
+217,"eraser,yellow_cube,blue_cube,purple_cube","black,gray",purple_cube,black,Grab the purple cube and put it in the black box
+218,"yellow_cube,eraser,marker,red_cube",gray,red_cube,gray,Pick up the red block and place it in the gray box
+219,"green_cube,red_cube,blue_cube,yellow_cube",brown,yellow_cube,brown,Move the yellow block to the box
+220,"cyan_cube,blue_cube,green_cube,eraser",brown,eraser,brown,Put the eraser into the brown box
+221,"red_cube,marker,cyan_cube,blue_cube",black,cyan_cube,black,Pick up the cyan cube and place it in the box
+222,"marker,green_cube,red_cube,purple_cube","gray,brown",marker,gray,Pick up the marker and place it in the gray box
+223,"green_cube,yellow_cube,marker,cyan_cube",black,green_cube,black,Grab the green cube and put it in the box
+224,"cyan_cube,eraser,purple_cube,blue_cube","gray,brown",blue_cube,gray,Pick up the blue block and place it in the gray box
+225,"marker,green_cube,purple_cube,yellow_cube","brown,black",green_cube,brown,Grab the green block and put it in the brown box
+226,blue_cube,brown,blue_cube,brown,Move the blue cube to the brown box
+227,"blue_cube,red_cube,eraser,yellow_cube","black,brown",yellow_cube,black,Pick up the yellow block and place it in the black box
+228,"eraser,purple_cube,red_cube,cyan_cube",gray,purple_cube,gray,Pick up the purple cube and place it in the box
+229,"red_cube,marker,cyan_cube,yellow_cube","gray,black",red_cube,gray,Pick up the red block and place it in the gray box
+230,marker,brown,marker,brown,Put the marker into the brown box
+231,"marker,purple_cube,eraser,green_cube","brown,black",eraser,black,Pick up the eraser and place it in the black box
+232,"blue_cube,cyan_cube,green_cube,red_cube",gray,cyan_cube,gray,Pick up the cyan block and place it in the box
+233,"yellow_cube,eraser,purple_cube,cyan_cube",black,purple_cube,black,Pick up the purple block and place it in the black box
+234,"yellow_cube,green_cube,marker,blue_cube",brown,green_cube,brown,Pick up the green block and place it in the box
+235,"purple_cube,blue_cube,cyan_cube,red_cube",gray,cyan_cube,gray,Put the cyan cube into the gray box
+236,"eraser,marker,yellow_cube,blue_cube","gray,brown",blue_cube,brown,Pick up the blue cube and place it in the brown box
+237,"eraser,green_cube,yellow_cube,red_cube",black,red_cube,black,Pick up the red block and place it in the black box
+238,"green_cube,purple_cube,eraser,red_cube",gray,eraser,gray,Move the eraser to the box
+239,"cyan_cube,marker,green_cube,blue_cube","gray,black",marker,black,Move the marker to the black box
+240,"red_cube,yellow_cube,cyan_cube,purple_cube","brown,gray",yellow_cube,brown,Pick up the yellow cube and place it in the brown box
+241,"blue_cube,yellow_cube,purple_cube,green_cube","black,brown",yellow_cube,brown,Move the yellow cube to the brown box
+242,"marker,eraser,cyan_cube,green_cube",gray,green_cube,gray,Pick up the green cube and place it in the box
+243,"eraser,blue_cube,marker,red_cube",black,eraser,black,Pick up the eraser and place it in the box
+244,"blue_cube,red_cube,marker,purple_cube","gray,black",marker,gray,Pick up the marker and place it in the gray box
+245,cyan_cube,brown,cyan_cube,brown,Grab the cyan block and put it in the brown box
+246,"eraser,yellow_cube,marker,red_cube","black,brown",red_cube,black,Grab the red cube and put it in the black box
+247,"cyan_cube,blue_cube,purple_cube,yellow_cube",brown,blue_cube,brown,Move the blue block to the brown box
+248,"purple_cube,eraser,green_cube,marker","black,gray",purple_cube,gray,Pick up the purple block and place it in the gray box
+249,"green_cube,yellow_cube,red_cube,cyan_cube",black,green_cube,black,Grab the green cube and put it in the black box
+250,"purple_cube,cyan_cube,eraser,blue_cube","gray,brown",eraser,brown,Move the eraser to the brown box
+251,"blue_cube,red_cube,yellow_cube,green_cube",gray,yellow_cube,gray,Put the yellow cube into the box
+252,"blue_cube,marker,yellow_cube,eraser",black,blue_cube,black,Pick up the blue cube and place it in the box
+253,"cyan_cube,green_cube,purple_cube,red_cube","brown,gray",cyan_cube,gray,Move the cyan cube to the gray box
+254,purple_cube,black,purple_cube,black,Move the purple cube to the box
+255,"cyan_cube,marker,green_cube,red_cube",brown,marker,brown,Grab the marker and put it in the brown box
+256,"yellow_cube,eraser,red_cube,marker","gray,black",red_cube,gray,Pick up the red block and place it in the gray box
+257,"yellow_cube,eraser,purple_cube,green_cube","brown,black",purple_cube,brown,Move the purple cube to the brown box
+258,"purple_cube,blue_cube,cyan_cube,yellow_cube",black,yellow_cube,black,Pick up the yellow cube and place it in the box
+259,"blue_cube,marker,green_cube,purple_cube",brown,marker,brown,Pick up the marker and place it in the brown box
+260,"cyan_cube,blue_cube,eraser,red_cube","brown,black",cyan_cube,black,Pick up the cyan block and place it in the black box
+261,red_cube,gray,red_cube,gray,Pick up the block and place it in the box
+262,"eraser,green_cube,marker,cyan_cube",brown,eraser,brown,Pick up the eraser and place it in the box
+263,"eraser,marker,green_cube,yellow_cube","brown,gray",green_cube,gray,Grab the green block and put it in the gray box
+264,"cyan_cube,marker,blue_cube,eraser","gray,black",blue_cube,black,Move the blue block to the black box
+265,"purple_cube,blue_cube,green_cube,yellow_cube",black,green_cube,black,Put the green block into the box
+266,"yellow_cube,red_cube,purple_cube,cyan_cube","black,brown",cyan_cube,brown,Move the cyan cube to the brown box
+267,"red_cube,marker,blue_cube,purple_cube","black,gray",marker,gray,Pick up the marker and place it in the gray box
+268,blue_cube,brown,blue_cube,brown,Pick up the block and place it in the box
+269,"eraser,green_cube,marker,purple_cube","gray,brown",purple_cube,gray,Grab the purple cube and put it in the gray box
+270,yellow_cube,black,yellow_cube,black,Pick up the yellow cube and place it in the black box
+271,"eraser,green_cube,red_cube,cyan_cube","black,gray",eraser,black,Pick up the eraser and place it in the black box
+272,"red_cube,yellow_cube,eraser,marker","brown,gray",red_cube,gray,Put the red block into the gray box
+273,"blue_cube,marker,purple_cube,cyan_cube","brown,black",marker,brown,Pick up the marker and place it in the brown box
+274,"green_cube,red_cube,yellow_cube,eraser",black,red_cube,black,Pick up the red block and place it in the box
+275,"blue_cube,green_cube,cyan_cube,purple_cube","gray,black",green_cube,gray,Pick up the green block and place it in the gray box
+276,"purple_cube,red_cube,eraser,yellow_cube","brown,gray",purple_cube,brown,Put the purple block into the brown box
+277,"cyan_cube,marker,eraser,blue_cube","brown,black",blue_cube,black,Grab the blue cube and put it in the black box
+278,yellow_cube,gray,yellow_cube,gray,Pick up the yellow cube and place it in the box
+279,"green_cube,yellow_cube,red_cube,cyan_cube",brown,cyan_cube,brown,Pick up the cyan cube and place it in the box
+280,purple_cube,brown,purple_cube,brown,Pick up the block and place it in the box
+281,"blue_cube,cyan_cube,green_cube,eraser","brown,gray",eraser,gray,Move the eraser to the gray box
+282,red_cube,black,red_cube,black,Pick up the block and place it in the box
+283,"eraser,cyan_cube,purple_cube,blue_cube","black,brown",eraser,brown,Put the eraser into the brown box
+284,"marker,red_cube,purple_cube,green_cube",gray,marker,gray,Move the marker to the gray box
+285,blue_cube,black,blue_cube,black,Grab the blue block and put it in the box
+286,"green_cube,marker,yellow_cube,blue_cube",brown,yellow_cube,brown,Pick up the yellow block and place it in the brown box
+287,"cyan_cube,red_cube,marker,yellow_cube","gray,black",cyan_cube,black,Move the cyan block to the black box
+288,"marker,green_cube,purple_cube,eraser","gray,brown",green_cube,gray,Pick up the green cube and place it in the gray box
+289,"blue_cube,purple_cube,eraser,red_cube",brown,eraser,brown,Pick up the eraser and place it in the brown box
+290,yellow_cube,gray,yellow_cube,gray,Move the yellow cube to the box
+291,"cyan_cube,red_cube,eraser,marker",black,red_cube,black,Grab the red block and put it in the box
+292,green_cube,gray,green_cube,gray,Pick up the block and place it in the box
+293,"purple_cube,blue_cube,cyan_cube,marker",brown,marker,brown,Pick up the marker and place it in the brown box
+294,"green_cube,blue_cube,yellow_cube,red_cube","gray,black",blue_cube,black,Pick up the blue cube and place it in the black box
+295,cyan_cube,black,cyan_cube,black,Put the cyan cube into the black box
+296,"eraser,marker,purple_cube,yellow_cube","gray,brown",purple_cube,gray,Put the purple cube into the gray box
+297,"marker,red_cube,blue_cube,green_cube","black,brown",red_cube,brown,Grab the red block and put it in the brown box
+298,"purple_cube,eraser,yellow_cube,cyan_cube",brown,purple_cube,brown,Put the purple cube into the box
+299,green_cube,black,green_cube,black,Pick up the block and place it in the box
+300,"cyan_cube,purple_cube,blue_cube,yellow_cube","gray,black",yellow_cube,gray,Pick up the yellow block and place it in the gray box
+301,"cyan_cube,red_cube,yellow_cube,green_cube",brown,cyan_cube,brown,Pick up the cyan cube and place it in the box
+302,"purple_cube,blue_cube,red_cube,marker",gray,marker,gray,Pick up the marker and place it in the gray box
+303,"marker,blue_cube,yellow_cube,eraser","black,brown",blue_cube,black,Move the blue block to the black box
+304,"green_cube,cyan_cube,eraser,red_cube","black,gray",eraser,black,Move the eraser to the black box
+305,"marker,purple_cube,green_cube,red_cube",gray,marker,gray,Pick up the marker and place it in the gray box
+306,"yellow_cube,blue_cube,cyan_cube,purple_cube","brown,gray",yellow_cube,brown,Grab the yellow block and put it in the brown box
+307,"red_cube,cyan_cube,marker,eraser",brown,red_cube,brown,Pick up the red cube and place it in the brown box
+308,"green_cube,yellow_cube,eraser,purple_cube",gray,purple_cube,gray,Move the purple block to the box
+309,"green_cube,eraser,cyan_cube,marker","black,brown",cyan_cube,black,Put the cyan cube into the black box
+310,"blue_cube,purple_cube,red_cube,eraser",black,eraser,black,Grab the eraser and put it in the box
+311,"yellow_cube,green_cube,blue_cube,cyan_cube",gray,green_cube,gray,Pick up the green cube and place it in the box
+312,"blue_cube,yellow_cube,marker,eraser","brown,gray",blue_cube,brown,Grab the blue block and put it in the brown box
+313,"green_cube,purple_cube,red_cube,eraser","black,gray",eraser,black,Pick up the eraser and place it in the black box
+314,"blue_cube,yellow_cube,green_cube,marker","black,gray",green_cube,gray,Pick up the green cube and place it in the gray box
+315,"yellow_cube,marker,cyan_cube,purple_cube",brown,purple_cube,brown,Pick up the purple block and place it in the box
+316,"marker,cyan_cube,blue_cube,red_cube","brown,gray",red_cube,gray,Grab the red cube and put it in the gray box
+317,"green_cube,red_cube,eraser,blue_cube",brown,blue_cube,brown,Pick up the blue cube and place it in the box
+318,"yellow_cube,red_cube,purple_cube,cyan_cube","black,brown",yellow_cube,black,Pick up the yellow cube and place it in the black box
+319,"cyan_cube,green_cube,marker,eraser","brown,black",cyan_cube,black,Put the cyan block into the black box
+320,"yellow_cube,marker,red_cube,purple_cube",gray,marker,gray,Grab the marker and put it in the box
+321,"green_cube,cyan_cube,blue_cube,purple_cube","black,brown",green_cube,brown,Pick up the green cube and place it in the brown box
+322,"eraser,purple_cube,marker,green_cube",brown,purple_cube,brown,Move the purple cube to the box
+323,"red_cube,blue_cube,marker,yellow_cube","gray,brown",marker,gray,Pick up the marker and place it in the gray box
+324,"cyan_cube,yellow_cube,green_cube,eraser",black,cyan_cube,black,Pick up the cyan block and place it in the black box
+325,"yellow_cube,red_cube,blue_cube,eraser","black,gray",blue_cube,black,Pick up the blue cube and place it in the black box
+326,red_cube,gray,red_cube,gray,Move the red cube to the gray box
+327,"cyan_cube,eraser,purple_cube,blue_cube",brown,eraser,brown,Pick up the eraser and place it in the brown box
+328,"purple_cube,green_cube,yellow_cube,marker",gray,yellow_cube,gray,Pick up the yellow cube and place it in the gray box
+329,blue_cube,brown,blue_cube,brown,Put the blue block into the box
+330,"purple_cube,green_cube,cyan_cube,yellow_cube",black,yellow_cube,black,Pick up the yellow block and place it in the black box

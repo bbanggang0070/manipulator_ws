@@ -1,5 +1,32 @@
+diff --git a/docker/real/Dockerfile.blackwell b/docker/real/Dockerfile.blackwell
+index 1fb0438..20334a1 100644
+--- a/docker/real/Dockerfile.blackwell
++++ b/docker/real/Dockerfile.blackwell
+@@ -27,8 +27,20 @@ RUN cd /Isaac-GR00T && \
+     python3 -m pip install -e . --break-system-packages
+ RUN cd /Isaac-GR00T/gr00t/eval/real_robot/SO100 && \
+     python3 -m pip install -e . --break-system-packages
+-RUN python3 -m pip uninstall -y torch torchvision torchaudio && python3 -m pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu130
+-RUN export MAX_JOBS=2 && python3 -m pip install flash-attn --no-build-isolation --no-cache-dir
++# torch를 **버전 고정**하고 flash-attn은 **사전 빌드 wheel**을 쓴다 (2026-08-14).
++#   이전에는 `--pre ... --index-url .../nightly/cu130` 으로 nightly를 받고 flash-attn을
++#   소스에서 컴파일했다. 그래서 빌드하는 날짜에 따라 다른 물건이 나온다 —
++#   5090 이미지(7/21 빌드)는 torch 2.8.0+cu128이 됐는데, 8/13에 빌드하니 nightly가
++#   2.14.0.dev20260811로 건너뛰어 flash-attn 2.8.3 컴파일이 실패했다.
++#   아래는 **5090에서 실제로 동작 중인 조합을 그대로 복제**한 것이다.
++#   wheel 파일명의 torch2.8·cp310이 ABI를 보장하므로 컴파일 단계가 아예 사라진다(빌드도 빨라진다).
++#   cu12 wheel을 CUDA 13 베이스에 얹는 것은 문제없다 — wheel이 자체 런타임을 들고 오고,
++#   5090이 그 조합으로 돌고 있다.
++RUN python3 -m pip uninstall -y torch torchvision torchaudio && \
++    python3 -m pip install torch==2.8.0 torchvision==0.23.0 \
++      --index-url https://download.pytorch.org/whl/cu128
++RUN python3 -m pip install \
++      https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp310-cp310-linux_x86_64.whl
+ RUN python3 -m pip install feetech-servo-sdk
+ 
+ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
 diff --git a/source/sim_to_real_so101/mdp/resets.py b/source/sim_to_real_so101/mdp/resets.py
-index 126512e..ddd9221 100644
+index 126512e..827942e 100644
 --- a/source/sim_to_real_so101/mdp/resets.py
 +++ b/source/sim_to_real_so101/mdp/resets.py
 @@ -338,6 +338,7 @@ def reset_prop_random_reach(
@@ -23,8 +50,715 @@ index 126512e..ddd9221 100644
  
      asset.write_root_pose_to_sim(torch.cat([world_pos, orientation], dim=-1), env_ids=env_ids)
      zero_velocity = torch.zeros((len(env_ids), 6), device=asset.device)
+@@ -434,3 +441,706 @@ def reset_vials_rack(
+             _, _ = random_asset_pose(env, env_ids, v, pose_range_z_fixed, pos_offset)
+             zero_velocity = torch.zeros((len(env_ids), 6), device=v.device)
+             v.write_root_velocity_to_sim(zero_velocity, env_ids=env_ids)
++
++
++def reset_block_near_box(
++        env,
++        env_ids: torch.Tensor,
++        block_name: str,
++        box_name: str,
++        base_xy: tuple[float, float],
++        # 박스: 기존 reset_basket_random과 동일 사양
++        box_min_dist: float,
++        box_max_dist: float,
++        box_angle_range: tuple[float, float],
++        box_yaw_range: tuple[float, float],
++        box_z: float,
++        # 블록: 박스로부터의 '거리'를 직접 지정 (핵심)
++        block_dist_range: tuple[float, float],
++        block_min_dist: float,
++        block_max_dist: float,
++        block_angle_range: tuple[float, float],
++        block_z: float,
++        neg_theta_frac: float = 0.5,
++        max_tries: int = 200,
++):
++    """박스를 먼저 놓고, **그 주변 지정 거리대**에 블록을 놓는다 (v4 타깃 수집용).
++
++    왜 필요한가(2026-08-06):
++      v3@40k의 실패가 '블록이 박스에 가까운 배치'에 몰려 있었다(근접 39% vs 원거리 83%).
++      그런데 수집 때 겹침 ep를 제외하면서 **유효 근접 구간까지 함께 걸러져**, 학습 데이터의
++      근접 비율이 자연 분포의 절반이 안 됐다(19.2% vs 43.2%).
++      기존처럼 블록·박스를 독립 추첨하면 목표 구간이 자연 발생률 30%라 **65ep를 얻으려고
++      200ep를 시연**해야 한다. 사람 시간이 비싸므로 조건부 추첨으로 해결한다.
++
++    왜 term 하나로 합쳤나:
++      이벤트가 base(블록) → 하위(박스) 순서라 "박스 기준으로 블록을 뽑기"가 불가능하다.
++      순서에 의존하지 않도록 **두 리셋을 한 term에서** 처리한다.
++
++    거리는 `block_dist_range`에서 **균등**하게 뽑는다(면적 균등이 아니다). 거리축을 고르게
++    덮는 것이 목적이고, 면적 균등으로 뽑으면 먼 쪽에 쏠려 정작 취약한 근거리가 적어진다.
++
++    도달 범위(block_min/max_dist, block_angle_range) 밖이면 재추첨한다. `neg_theta_frac`
++    만큼은 θ<0(로봇 오른쪽)을 목표로 하는데, 근접+오른쪽 조합이 SR 25%로 가장 취약했다.
++    수용률은 실측 36%(θ 부호까지 요구하면 14.5%)라 200회면 실패 확률이 사실상 0이다.
++    `max_tries`의 절반까지는 θ 부호를 요구하고, 그 뒤에는 풀어 거리 조건을 우선한다.
++    """
++    block: RigidObject = env.scene[block_name]
++    box: RigidObject = env.scene[box_name]
++    device = block.device
++    n = len(env_ids)
++
++    # ── 1) 박스 배치 (기존 reset_basket_random과 동일) ──
++    b_ang = math_utils.sample_uniform(box_angle_range[0], box_angle_range[1], (n,), device=device)
++    b_r = torch.sqrt(math_utils.sample_uniform(box_min_dist ** 2, box_max_dist ** 2, (n,), device=device))
++    box_x = base_xy[0] + b_r * torch.cos(b_ang)
++    box_y = base_xy[1] + b_r * torch.sin(b_ang)
++
++    box_default = box.data.default_root_state[env_ids].clone()
++    box_orient = box_default[:, 3:7]
++    yaw = math_utils.sample_uniform(box_yaw_range[0], box_yaw_range[1], (n,), device=device)
++    zeros = torch.zeros_like(yaw)
++    box_orient = math_utils.quat_mul(box_orient, math_utils.quat_from_euler_xyz(zeros, zeros, yaw))
++    box_pos = torch.stack([box_x, box_y, torch.full((n,), box_z, device=device)], dim=-1)
++    box.write_root_pose_to_sim(
++        torch.cat([box_pos + env.scene.env_origins[env_ids], box_orient], dim=-1), env_ids=env_ids)
++    box.write_root_velocity_to_sim(torch.zeros((n, 6), device=device), env_ids=env_ids)
++
++    # ── 2) 블록을 박스 주변 지정 거리대에 배치 (거부 샘플링) ──
++    want_neg = torch.rand((n,), device=device) < neg_theta_frac
++    bx = torch.zeros((n,), device=device)
++    by = torch.zeros((n,), device=device)
++    done = torch.zeros((n,), dtype=torch.bool, device=device)
++
++    for attempt in range(max_tries):
++        d = math_utils.sample_uniform(block_dist_range[0], block_dist_range[1], (n,), device=device)
++        phi = math_utils.sample_uniform(-3.14159265, 3.14159265, (n,), device=device)
++        cx = box_x + d * torch.cos(phi)
++        cy = box_y + d * torch.sin(phi)
++
++        rr = torch.sqrt((cx - base_xy[0]) ** 2 + (cy - base_xy[1]) ** 2)
++        th = torch.atan2(cy - base_xy[1], cx - base_xy[0])
++        ok = (rr >= block_min_dist) & (rr <= block_max_dist) \
++            & (th >= block_angle_range[0]) & (th <= block_angle_range[1])
++        # 절반 지점을 넘어가면 θ 부호 목표를 포기한다(도달 범위 충족이 우선).
++        if attempt < max_tries // 2:
++            ok = ok & (want_neg == (th < 0))
++
++        take = ok & (~done)
++        bx = torch.where(take, cx, bx)
++        by = torch.where(take, cy, by)
++        done = done | take
++        if bool(done.all()):
++            break
++
++    if not bool(done.all()):
++        # 최후 폴백: 도달 범위 안에서만 추첨(거리 조건 미충족 가능) — 씬이 멈추지 않게.
++        f_ang = math_utils.sample_uniform(block_angle_range[0], block_angle_range[1], (n,), device=device)
++        f_r = torch.sqrt(math_utils.sample_uniform(block_min_dist ** 2, block_max_dist ** 2, (n,), device=device))
++        bx = torch.where(done, bx, base_xy[0] + f_r * torch.cos(f_ang))
++        by = torch.where(done, by, base_xy[1] + f_r * torch.sin(f_ang))
++        print(f"[near] 거부 샘플링 실패 {int((~done).sum())}/{n}env — 도달범위 추첨으로 폴백")
++
++    blk_default = block.data.default_root_state[env_ids].clone()
++    blk_pos = torch.stack([bx, by, torch.full((n,), block_z, device=device)], dim=-1)
++    block.write_root_pose_to_sim(
++        torch.cat([blk_pos + env.scene.env_origins[env_ids], blk_default[:, 3:7]], dim=-1), env_ids=env_ids)
++    block.write_root_velocity_to_sim(torch.zeros((n, 6), device=device), env_ids=env_ids)
++
++
++def reset_distractors(
++        env,
++        env_ids: torch.Tensor,
++        names: list[str],
++        avoid: list[str],
++        base_xy: tuple[float, float],
++        min_dist: float,
++        max_dist: float,
++        angle_range: tuple[float, float],
++        z: float,
++        min_sep: float = 0.08,
++        max_tries: int = 200,
++):
++    """방해물을 **타깃·박스·다른 방해물과 겹치지 않게** 배치한다 (시각 grounding 평가용).
++
++    왜 별도 함수인가(2026-08-11):
++      처음엔 방해물도 `reset_prop_random_reach`로 독립 추첨했는데, 실제 캡처에서
++      **방해물끼리 붙거나 타깃을 가리는 배치**가 잦았다(3ep 중 2ep). 그러면 측정하려던
++      "타깃에 집중하는가"가 아니라 "가려진 물체를 찾는가"를 재게 되어 조건이 무의미해진다.
++
++    `avoid`에 든 에셋의 **현재 위치**를 읽어 그 반경 `min_sep` 밖에서만 뽑는다. 따라서 이 term은
++    타깃·박스 리셋보다 **뒤에** 실행돼야 한다(DR cfg의 reset_basket_random 다음에 삽입).
++
++    거부 샘플링이 `max_tries` 안에 실패하면 마지막 후보를 그대로 쓰고 경고를 남긴다 —
++    씬이 멈추는 것보다 낫고, 로그로 발생 빈도를 추적할 수 있다.
++    """
++    device = env.scene[names[0]].device
++    n = len(env_ids)
++    org = env.scene.env_origins[env_ids]
++
++    # 피해야 할 좌표(월드 → env 로컬)
++    occupied = []
++    for a in avoid:
++        occupied.append(env.scene[a].data.root_pos_w[env_ids, :2] - org[:, :2])
++
++    for name in names:
++        asset: RigidObject = env.scene[name]
++        px = torch.zeros((n,), device=device)
++        py = torch.zeros((n,), device=device)
++        done = torch.zeros((n,), dtype=torch.bool, device=device)
++        for _ in range(max_tries):
++            ang = math_utils.sample_uniform(angle_range[0], angle_range[1], (n,), device=device)
++            r = torch.sqrt(math_utils.sample_uniform(min_dist ** 2, max_dist ** 2, (n,), device=device))
++            cx = base_xy[0] + r * torch.cos(ang)
++            cy = base_xy[1] + r * torch.sin(ang)
++            ok = torch.ones((n,), dtype=torch.bool, device=device)
++            for occ in occupied:
++                ok &= torch.sqrt((cx - occ[:, 0]) ** 2 + (cy - occ[:, 1]) ** 2) >= min_sep
++            take = ok & (~done)
++            px = torch.where(take, cx, px)
++            py = torch.where(take, cy, py)
++            done |= take
++            if bool(done.all()):
++                break
++            # 마지막 후보를 보관해 두어 전량 실패 시에도 좌표가 비지 않게 한다
++            px = torch.where(done, px, cx)
++            py = torch.where(done, py, cy)
++        if not bool(done.all()):
++            print(f"[distractor] {name}: 거부 샘플링 실패 {int((~done).sum())}/{n}env "
++                  f"— 겹칠 수 있으니 해당 ep는 확인할 것")
++        default = asset.data.default_root_state[env_ids].clone()
++        pos = torch.stack([px, py, torch.full((n,), z, device=device)], dim=-1)
++        asset.write_root_pose_to_sim(torch.cat([pos + org, default[:, 3:7]], dim=-1), env_ids=env_ids)
++        asset.write_root_velocity_to_sim(torch.zeros((n, 6), device=device), env_ids=env_ids)
++        # 다음 방해물은 이번에 놓은 것도 피한다
++        occupied.append(torch.stack([px, py], dim=-1))
++
++
++def reset_box_and_block_clear(
++        env,
++        env_ids: torch.Tensor,
++        block_name: str,
++        box_name: str,
++        base_xy: tuple[float, float],
++        box_min_dist: float,
++        box_max_dist: float,
++        box_angle_range: tuple[float, float],
++        box_yaw_range: tuple[float, float],
++        box_z: float,
++        block_min_dist: float,
++        block_max_dist: float,
++        block_angle_range: tuple[float, float],
++        block_z: float,
++        box_half_extent: tuple[float, float] = (0.040, 0.082),
++        clearance: float = 0.03,
++        max_tries: int = 200,
++):
++    """박스를 놓고, **그 박스와 겹치지 않는** 자리에 블록을 놓는다 (평가 전용, 2026-08-12).
++
++    왜 term 하나로 합쳤나:
++      이벤트 실행 순서가 base(블록) → 하위(박스)라, 블록 리셋 시점에는 박스가 아직 이번
++      에피소드 자리로 옮겨지지 않았다. 그래서 '박스를 읽고 피해서 뽑기'가 성립하지 않는다.
++      실측(seed 31, 10ep): 분리된 term으로는 3/10이 겹침권에 남았다.
++      reset_block_near_box(v4 수집용)가 같은 이유로 이미 합쳐져 있다 — 같은 처방을 쓴다.
++
++    왜 중심거리가 아니라 사각형 간격인가:
++      박스는 (4.0, 8.2)cm 직사각형이고 yaw가 ±180° 무작위다. 중심거리 하나로 자르면 긴 변
++      쪽은 여전히 겹치고 짧은 변 쪽은 **유효한 근접 배치까지 걸린다** — v3 병목이 그 과잉
++      필터였다(학습 근접 19.2% vs 자연 43.2%). 박스 로컬로 변환해 재면 근접을 살린 채
++      겹침만 막는다.
++
++    ※ 블록 표집은 기존과 같은 **환형 균일**이다. 거리대를 직접 뽑는 near 방식과 달리
++       공간 분포를 바꾸지 않는다 — 평가 분포를 건드리지 않기 위해서다.
++    """
++    block: RigidObject = env.scene[block_name]
++    box: RigidObject = env.scene[box_name]
++    n = len(env_ids)
++    dev = block.device
++
++    # ── 1) 박스: 기존 reset_basket_random과 동일 사양 ──
++    b_ang = math_utils.sample_uniform(box_angle_range[0], box_angle_range[1], (n,), device=dev)
++    b_r = torch.sqrt(math_utils.sample_uniform(box_min_dist ** 2, box_max_dist ** 2, (n,), device=dev))
++    bx = base_xy[0] + b_r * torch.cos(b_ang)
++    by = base_xy[1] + b_r * torch.sin(b_ang)
++    b_yaw = math_utils.sample_uniform(box_yaw_range[0], box_yaw_range[1], (n,), device=dev)
++
++    box_state = box.data.default_root_state[env_ids].clone()
++    zeros = torch.zeros_like(b_yaw)
++    dq = math_utils.quat_from_euler_xyz(zeros, zeros, b_yaw)
++    box_quat = math_utils.quat_mul(box_state[:, 3:7], dq)
++    box_pos = torch.stack([bx, by, torch.full((n,), box_z, device=dev)], dim=-1)
++    box.write_root_pose_to_sim(
++        torch.cat([box_pos + env.scene.env_origins[env_ids], box_quat], dim=-1), env_ids=env_ids)
++    box.write_root_velocity_to_sim(torch.zeros((n, 6), device=dev), env_ids=env_ids)
++
++    # ── 2) 블록: 환형 균일 + 박스 사각형 기각 (방금 뽑은 값을 그대로 쓴다 = 버퍼 갱신 무관) ──
++    hx = box_half_extent[0] + clearance
++    hy = box_half_extent[1] + clearance
++    c, s_ = torch.cos(-b_yaw), torch.sin(-b_yaw)
++    x = torch.zeros((n,), device=dev)
++    y = torch.zeros((n,), device=dev)
++    pending = torch.ones((n,), dtype=torch.bool, device=dev)
++    cx = cy = None
++    for _ in range(max_tries):
++        if not pending.any():
++            break
++        ang = math_utils.sample_uniform(block_angle_range[0], block_angle_range[1], (n,), device=dev)
++        r = torch.sqrt(math_utils.sample_uniform(block_min_dist ** 2, block_max_dist ** 2, (n,), device=dev))
++        cx = base_xy[0] + r * torch.cos(ang)
++        cy = base_xy[1] + r * torch.sin(ang)
++        dx, dy = cx - bx, cy - by
++        lx = (dx * c - dy * s_).abs()
++        ly = (dx * s_ + dy * c).abs()
++        ok = (lx > hx) | (ly > hy)
++        take = pending & ok
++        x = torch.where(take, cx, x)
++        y = torch.where(take, cy, y)
++        pending = pending & ~ok
++    if pending.any():
++        # 도달 영역이 박스로 거의 덮인 극단 배치에서만 발생. 멈추는 것보다 낫고,
++        # scenes.csv에 거리가 남으므로 사후 제외가 가능하다.
++        x = torch.where(pending, cx, x)
++        y = torch.where(pending, cy, y)
++
++    blk_pos = torch.stack([x, y, torch.full((n,), block_z, device=dev)], dim=-1)
++    blk_quat = block.data.default_root_state[env_ids].clone()[:, 3:7]
++    block.write_root_pose_to_sim(
++        torch.cat([blk_pos + env.scene.env_origins[env_ids], blk_quat], dim=-1), env_ids=env_ids)
++    block.write_root_velocity_to_sim(torch.zeros((n, 6), device=dev), env_ids=env_ids)
++
++
++def reset_prop_clear_of_box(
++        env,
++        env_ids: torch.Tensor,
++        asset_name: str,
++        box_name: str,
++        base_xy: tuple[float, float],
++        min_dist: float,
++        max_dist: float,
++        angle_range: tuple[float, float],
++        z: float,
++        box_half_extent: tuple[float, float] = (0.040, 0.082),
++        clearance: float = 0.03,
++        max_tries: int = 200,
++):
++    """reset_prop_random_reach와 같되, **박스와 겹치는 표본을 기각**한다.
++
++    왜 필요한가(2026-08-12):
++      평가 씬에서 박스와 블록을 독립 추첨하다 보니 블록이 박스 안이나 벽에 붙어 스폰되는
++      에피소드가 나온다. 실측(seed 999): 블록-박스 중심거리 4.7cm — 박스 반경이 (4.0, 8.2)cm이므로
++      **블록이 박스 안에 들어가 있다**. 이런 ep는 시행 자체가 성립하지 않는데도 분모에 들어가
++      성공률을 끌어내린다. 지금까지는 scenes.csv의 block_box_dist로 사후 제외해 왔지만,
++      45ep 중 몇 개가 버려질지 미리 알 수 없어 유효 표본이 들쭉날쭉했다. 표집에서 막는다.
++
++    왜 중심거리 임계값이 아니라 사각형 간격인가:
++      박스는 (4.0, 8.2)cm의 **직사각형**이고 yaw가 ±180° 무작위다. 중심거리 하나로 자르면
++      긴 변 쪽(8.2cm)에서는 여전히 겹치고, 짧은 변 쪽(4.0cm)에서는 **유효한 근접 배치까지
++      함께 걸러진다** — v3의 병목이 정확히 그 과잉 필터였다(학습 근접 비율 19.2% vs 자연 43.2%).
++      박스 로컬 좌표로 변환해 사각형 표면까지의 거리를 재면 근접 구간을 살린 채 겹침만 막는다.
++
++    clearance=0.03: 블록 반크기 1cm를 빼면 벽면과 약 2cm — 그리퍼가 들어갈 최소 폭.
++    """
++    asset: RigidObject = env.scene[asset_name]
++    box: RigidObject = env.scene[box_name]
++    n = len(env_ids)
++    dev = asset.device
++
++    # 박스는 이 시점에 이미 배치돼 있다(reset_basket_random이 먼저 선언돼 있어야 한다).
++    box_pos = box.data.root_pos_w[env_ids] - env.scene.env_origins[env_ids]
++    box_quat = box.data.root_quat_w[env_ids]
++    _, _, box_yaw = math_utils.euler_xyz_from_quat(box_quat)
++
++    hx = box_half_extent[0] + clearance
++    hy = box_half_extent[1] + clearance
++
++    x = torch.zeros((n,), device=dev)
++    y = torch.zeros((n,), device=dev)
++    pending = torch.ones((n,), dtype=torch.bool, device=dev)
++    for _ in range(max_tries):
++        if not pending.any():
++            break
++        angle = math_utils.sample_uniform(angle_range[0], angle_range[1], (n,), device=dev)
++        r = torch.sqrt(math_utils.sample_uniform(min_dist ** 2, max_dist ** 2, (n,), device=dev))
++        cx = base_xy[0] + r * torch.cos(angle)
++        cy = base_xy[1] + r * torch.sin(angle)
++        # 박스 로컬 좌표로 회전 변환 → 축정렬 사각형과의 관계로 단순화
++        dx = cx - box_pos[:, 0]
++        dy = cy - box_pos[:, 1]
++        c, s = torch.cos(-box_yaw), torch.sin(-box_yaw)
++        lx = (dx * c - dy * s).abs()
++        ly = (dx * s + dy * c).abs()
++        ok = (lx > hx) | (ly > hy)          # 확장 사각형 밖이면 채택
++        take = pending & ok
++        x = torch.where(take, cx, x)
++        y = torch.where(take, cy, y)
++        pending = pending & ~ok
++    if pending.any():
++        # 전부 실패하면 마지막 표본을 그대로 쓴다 — 멈추는 것보다 낫고, scenes.csv에 거리가 남아
++        # 사후 제외가 가능하다. 도달 영역이 박스로 거의 덮인 극단 배치에서만 발생한다.
++        x = torch.where(pending, cx, x)
++        y = torch.where(pending, cy, y)
++
++    z_t = torch.full((n,), z, device=dev)
++    world_pos = torch.stack([x, y, z_t], dim=-1) + env.scene.env_origins[env_ids]
++    orientation = asset.data.default_root_state[env_ids].clone()[:, 3:7]
++    asset.write_root_pose_to_sim(torch.cat([world_pos, orientation], dim=-1), env_ids=env_ids)
++    asset.write_root_velocity_to_sim(torch.zeros((n, 6), device=dev), env_ids=env_ids)
++
++
++def reset_fixed_panel(
++        env,
++        env_ids: torch.Tensor,
++        block_name: str,
++        box_name: str,
++        base_xy: tuple[float, float],
++        panel: list,
++        block_z: float,
++        box_z: float,
++):
++    """미리 정한 배치 목록을 **에피소드 순서대로 재생**한다 (평가 전용, 2026-08-12).
++
++    왜 필요한가:
++      평가 B가 묻는 것은 '색·형상·문장이 바뀌어도 되는가'인데, 매 에피소드 위치가 새로
++      뽑히면 조건 간 차이에 **위치 난이도가 섞인다**. 실측으로 그 크기가 컸다 —
++      같은 모델·같은 조건인데 시드만 바꾸니 70%(seed 31 구패널)와 30%(신패널)로 갈렸다.
++      배치를 고정하면 조건 간 차이가 오직 바뀐 축에서만 온다.
++
++    panel: [[block_r, block_theta, box_r, box_theta, box_yaw], ...] (로봇 base 기준 극좌표)
++      성공∧비겹침 에피소드에서 근접/원거리 × 좌/중/우 균등하게 뽑은 10개.
++      ※ 성공 씬만 골랐으므로 **기준선(L0)은 정의상 천장**이다. 절대 성공률의 추정치가
++        아니라 '조건을 바꾸면 몇 개가 무너지는가'를 보는 척도다.
++
++    에피소드 인덱스는 env에 카운터를 달아 센다. len(panel)을 넘으면 순환한다.
++    """
++    block: RigidObject = env.scene[block_name]
++    box: RigidObject = env.scene[box_name]
++    dev = block.device
++    n = len(env_ids)
++
++    # 리셋 이벤트는 **에피소드당 두 번** 불린다(실측 2026-08-12: 사용된 인덱스가
++    # 0,2,4,6,8,0,2,… 로 5개만 두 번씩 재생됐다). 단순 증가 카운터를 쓰면 절반이 건너뛰어진다.
++    # 같은 스텝에서 다시 불리면 직전 인덱스를 그대로 재사용해 중복 호출을 흡수한다.
++    if not hasattr(env, "_panel_idx"):
++        env._panel_idx = torch.zeros(env.num_envs, dtype=torch.long, device=dev)
++        env._panel_last = torch.full((env.num_envs,), -1, dtype=torch.long, device=dev)
++    step = int(getattr(env, "common_step_counter", 0))
++    same = env._panel_last[env_ids] == step
++    cur = env._panel_idx[env_ids]
++    idx = torch.where(same, cur - 1, cur) % len(panel)
++    env._panel_idx[env_ids] = torch.where(same, cur, cur + 1)
++    env._panel_last[env_ids] = step
++
++    tbl = torch.tensor(panel, dtype=torch.float32, device=dev)   # (P, 5)
++    row = tbl[idx]                                               # (n, 5)
++    br, bt, xr, xt, xyaw = row[:, 0], row[:, 1], row[:, 2], row[:, 3], row[:, 4]
++
++    bx = base_xy[0] + xr * torch.cos(xt)
++    by = base_xy[1] + xr * torch.sin(xt)
++    box_state = box.data.default_root_state[env_ids].clone()
++    zeros = torch.zeros_like(xyaw)
++    dq = math_utils.quat_from_euler_xyz(zeros, zeros, xyaw)
++    box_quat = math_utils.quat_mul(box_state[:, 3:7], dq)
++    box_pos = torch.stack([bx, by, torch.full((n,), box_z, device=dev)], dim=-1)
++    box.write_root_pose_to_sim(
++        torch.cat([box_pos + env.scene.env_origins[env_ids], box_quat], dim=-1), env_ids=env_ids)
++    box.write_root_velocity_to_sim(torch.zeros((n, 6), device=dev), env_ids=env_ids)
++
++    kx = base_xy[0] + br * torch.cos(bt)
++    ky = base_xy[1] + br * torch.sin(bt)
++    blk_pos = torch.stack([kx, ky, torch.full((n,), block_z, device=dev)], dim=-1)
++    blk_quat = block.data.default_root_state[env_ids].clone()[:, 3:7]
++    block.write_root_pose_to_sim(
++        torch.cat([blk_pos + env.scene.env_origins[env_ids], blk_quat], dim=-1), env_ids=env_ids)
++    block.write_root_velocity_to_sim(torch.zeros((n, 6), device=dev), env_ids=env_ids)
++
++
++# ── 배경·작업면 교체 (평가 B, 2026-08-12) ─────────────────────────────
++SURFACE_PRIMS = (
++    "/World/envs/env_0/LightStudio/LightBox/Base",   # 라이트박스 바닥
++    "/World/envs/env_0/Mat",                         # 그 위 매트 = 실제 작업면
++)
++
++
++def apply_scene_dressing(env, env_ids, bg="", hide="", surface_tex="",
++                         surface_uv=4.0, bg_pos=(0.0, 0.0, 0.0), bg_scale=1.0):
++    """배경 USD를 얹고 라이트박스 벽을 숨기고 작업면 재질을 바꾼다. **mode="startup"** 전용.
++
++    ⚠ env_ids에 기본값을 주면 안 된다. IsaacLab EventManager가 그것을 '호출자가 넘겨야 할
++      선택 파라미터'로 분류해, params에 없다고 ValueError를 낸다(실측 2026-08-12).
++      startup 모드에서는 매니저가 env_ids=None을 위치 인자로 넘긴다.
++
++    왜 startup인가:
++      재질 바인딩·prim 삽입은 stage가 만들어진 뒤에만 가능하다. cfg의 __post_init__
++      단계에서는 stage가 없다. reset마다 하면 매번 셰이더를 다시 만들어 낭비다.
++
++    왜 라이트박스를 지우지 않고 숨기는가:
++      top 카메라와 RectLight가 `LightStudio/LightBox` 하위에 매달려 있다. 지우면 시점과
++      조명이 함께 바뀌어, '배경 픽셀의 영향'과 '시점·조명 변화'가 뒤섞인다.
++
++    ⚠ 이름은 **전체 일치**로 맞춘다. 부분 문자열이면 "Back"이 카메라 케이스 "Case_back"까지
++      걸어 D455 모델 일부가 사라진다(실측 2026-08-12).
++    """
++    import omni.usd
++    from pxr import Gf, Sdf, UsdGeom, UsdShade
++
++    stage = omni.usd.get_context().get_stage()
++
++    if hide:
++        needles = [h.strip().lower() for h in hide.split(",") if h.strip()]
++        root = "/World/envs/env_0/LightStudio/LightBox"
++        n = 0
++        for pr in stage.Traverse():
++            path = str(pr.GetPath())
++            if not path.startswith(root):
++                continue
++            name = pr.GetName()
++            if name.lower() in needles:
++                if pr.GetTypeName() in ("Camera", "RectLight") or "camera" in name.lower():
++                    continue
++                im = UsdGeom.Imageable(pr)
++                if im:
++                    im.MakeInvisible()
++                    n += 1
++        print(f"[dress] 벽 숨김 {n}개", flush=True)
++
++    if surface_tex:
++        mat = UsdShade.Material.Define(stage, "/World/Looks/SurfaceMat")
++        sh = UsdShade.Shader.Define(stage, "/World/Looks/SurfaceMat/PBR")
++        sh.CreateIdAttr("UsdPreviewSurface")
++        sh.CreateInput("roughness", Sdf.ValueTypeNames.Float).Set(0.7)
++        sh.CreateInput("metallic", Sdf.ValueTypeNames.Float).Set(0.0)
++        rd = UsdShade.Shader.Define(stage, "/World/Looks/SurfaceMat/stReader")
++        rd.CreateIdAttr("UsdPrimvarReader_float2")
++        rd.CreateInput("varname", Sdf.ValueTypeNames.Token).Set("st")
++        rd.CreateOutput("result", Sdf.ValueTypeNames.Float2)
++        if surface_uv != 1.0:
++            rd.CreateInput("scale", Sdf.ValueTypeNames.Float2).Set(Gf.Vec2f(surface_uv, surface_uv))
++        tx = UsdShade.Shader.Define(stage, "/World/Looks/SurfaceMat/Tex")
++        tx.CreateIdAttr("UsdUVTexture")
++        tx.CreateInput("file", Sdf.ValueTypeNames.Asset).Set(surface_tex)
++        tx.CreateInput("wrapS", Sdf.ValueTypeNames.Token).Set("repeat")
++        tx.CreateInput("wrapT", Sdf.ValueTypeNames.Token).Set("repeat")
++        tx.CreateInput("st", Sdf.ValueTypeNames.Float2).ConnectToSource(rd.ConnectableAPI(), "result")
++        tx.CreateOutput("rgb", Sdf.ValueTypeNames.Float3)
++        sh.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).ConnectToSource(
++            tx.ConnectableAPI(), "rgb")
++        sh.CreateOutput("surface", Sdf.ValueTypeNames.Token)
++        mat.CreateSurfaceOutput().ConnectToSource(sh.ConnectableAPI(), "surface")
++        for t in SURFACE_PRIMS:
++            pr = stage.GetPrimAtPath(t)
++            if pr and pr.IsValid():
++                UsdShade.MaterialBindingAPI.Apply(pr)
++                UsdShade.MaterialBindingAPI(pr).Bind(mat)
++                print(f"[dress] 작업면 바인딩 {t}", flush=True)
++
++    if bg:
++        prim = stage.DefinePrim("/World/Background", "Xform")
++        prim.GetReferences().AddReference(bg)
++        x = UsdGeom.Xformable(prim)
++        x.ClearXformOpOrder()
++        # ClearXformOpOrder는 순서만 지운다 — 기존 속성이 double3라 float으로 만들면 예외
++        x.AddTranslateOp(UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*bg_pos))
++        x.AddScaleOp(UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(bg_scale, bg_scale, bg_scale))
++        print(f"[dress] 배경 {bg}", flush=True)
++
++
++# ── 언어 조건화 씬 리셋 (2026-09-14, language_conditioning_sim_plan.md §3-2) ──────────
++_LANG_PLAN_CACHE = {}
++
++
++def _load_lang_plan(path):
++    """에피소드 계획표(CSV)를 읽어 리스트로 돌려준다. 같은 경로는 한 번만 읽는다.
++
++    계획표가 없으면 빈 리스트를 주고, 호출부가 '카탈로그에서 무작위 4개'로 되돌린다.
++    평가는 계획표 없이 EVAL_* 환경변수로 도는 경우가 있어 그 경로를 막으면 안 된다.
++    """
++    if path in _LANG_PLAN_CACHE:
++        return _LANG_PLAN_CACHE[path]
++    rows = []
++    if path and os.path.exists(path):
++        import csv
++        with open(path) as f:
++            for r in csv.DictReader(f):
++                rows.append({
++                    "objects": [x for x in r["objects"].split(",") if x],
++                    "boxes": [x for x in r["boxes"].split(",") if x],
++                    "target": r["target"],
++                    "dest": r["dest"],
++                    "instruction": r.get("instruction", ""),
++                })
++        print(f"[lang] 계획표 {len(rows)}행 로드: {path}", flush=True)
++    else:
++        print(f"[lang] ⚠ 계획표 없음({path!r}) — 카탈로그에서 무작위 배치로 진행", flush=True)
++    _LANG_PLAN_CACHE[path] = rows
++    return rows
++
++
++def _box_gap(px, py, bx, by, yaw, hx, hy):
++    """점과 박스(회전 사각형) 사이의 간격. 박스 안이면 음수.
++
++    왜 중심거리가 아닌가: 박스 반장축이 7cm(0.7배 축소 기준)라 중심거리 8cm로 자르면
++    **박스 안에 물체가 들어간다.** reset_box_and_block_clear가 같은 이유로 사각형 판정을 쓴다.
++    """
++    dx, dy = px - bx, py - by
++    c, s = torch.cos(-yaw), torch.sin(-yaw)
++    lx = dx * c - dy * s
++    ly = dx * s + dy * c
++    gx = torch.abs(lx) - hx
++    gy = torch.abs(ly) - hy
++    outside = torch.sqrt(torch.clamp(gx, min=0.0) ** 2 + torch.clamp(gy, min=0.0) ** 2)
++    inside = -torch.minimum(torch.abs(gx), torch.abs(gy))
++    return torch.where((gx < 0) & (gy < 0), inside, outside)
++
++
++def reset_lang_scene(
++        env,
++        env_ids: torch.Tensor,
++        plan_csv: str,
++        objects: dict,
++        boxes: dict,
++        park_xy: tuple[float, float],
++        base_xy: tuple[float, float],
++        obj_min_dist: float,
++        obj_max_dist: float,
++        obj_angle_range: tuple[float, float],
++        obj_z: float,
++        box_min_dist: float,
++        box_max_dist: float,
++        box_angle_range: tuple[float, float],
++        box_yaw_range: tuple[float, float],
++        box_z: float,
++        box_min_ang_sep: float,
++        box_half_extent: tuple[float, float],
++        box_clear: float,
++        min_sep: float,
++        max_tries: int = 200,
++):
++    """계획표의 현재 행대로 **박스를 먼저, 물체를 그 다음에** 놓고 나머지는 전부 주차한다.
++
++    왜 이 순서인가:
++      물체가 박스를 피하려면 박스 위치가 먼저 확정돼야 한다. reset_distractors가 `avoid`의
++      **현재 좌표**를 읽는 것과 같은 이유이고, 분리된 term으로는 성립하지 않는다는 것이
++      이미 실측으로 확인됐다(reset_box_and_block_clear 주석: seed 31에서 3/10이 겹침권).
++
++    왜 주차가 필요한가:
++      색은 스폰 시점에 구워지므로 카탈로그를 전부 스폰해 두고 쓸 것만 꺼내는 구조다.
++      쓰지 않는 물체는 **화각 밖 + 매트 아래**로 보낸다. 한 프레임이라도 화면에 남으면
++      "미학습 색은 본 적 없다"는 전제가 깨져 일반화 평가가 통째로 무효가 된다.
++
++    이 term 하나가 reset_block_position·reset_basket_random을 대신한다(둘은 None 처리).
++    """
++    all_objs = list(objects.values())
++    all_boxes = list(boxes.values())
++    dev = env.scene[all_objs[0]].device
++    n = len(env_ids)
++    org = env.scene.env_origins[env_ids]
++
++    # ── 에피소드 인덱스 — 리셋 이벤트는 **에피소드당 두 번** 불린다 ──
++    #   reset_fixed_panel에서 실측된 현상(사용된 인덱스가 0,2,4,… 로 절반이 건너뛰어졌다).
++    #   같은 step에서 다시 불리면 직전 인덱스를 재사용해 중복 호출을 흡수한다.
++    plan = _load_lang_plan(plan_csv)
++    if not hasattr(env, "_lang_idx"):
++        env._lang_idx = torch.zeros(env.num_envs, dtype=torch.long, device=dev)
++        env._lang_last = torch.full((env.num_envs,), -1, dtype=torch.long, device=dev)
++    step = int(getattr(env, "common_step_counter", 0))
++    same = env._lang_last[env_ids] == step
++    cur = env._lang_idx[env_ids]
++    idx = torch.where(same, cur - 1, cur)
++    env._lang_idx[env_ids] = torch.where(same, cur, cur + 1)
++    env._lang_last[env_ids] = step
++
++    # 단일 env 전제(수집·평가 모두 --num_envs 1). 여러 env면 첫 번째 행을 공유한다.
++    row_i = int(idx[0].item())
++    if plan:
++        row = plan[row_i % len(plan)]
++        use_objs = [objects[o] for o in row["objects"] if o in objects]
++        use_boxes = [boxes[b] for b in row["boxes"] if b in boxes]
++        tgt, dst = row["target"], row["dest"]
++        instr = row["instruction"]
++    else:
++        # 계획표가 없으면 카탈로그에서 무작위 4개 + 박스 2개(평가·검증용 폴백)
++        import random as _rnd
++        keys = [k for k in objects if not k.startswith(("white", "pink"))]
++        pick = _rnd.sample(keys, min(4, len(keys)))
++        bkeys = [b for b in boxes if b != "white"]
++        bpick = _rnd.sample(bkeys, min(2, len(bkeys)))
++        use_objs = [objects[o] for o in pick]
++        use_boxes = [boxes[b] for b in bpick]
++        tgt, dst, instr = pick[0], bpick[0], ""
++
++    # 다음 단계(recorder·scenes.csv)가 읽을 수 있게 이번 행을 env에 남긴다.
++    env._lang_row = {"index": row_i, "objects": use_objs, "boxes": use_boxes,
++                     "target": tgt, "dest": dst, "instruction": instr}
++
++    # ── 1) 박스 — 각분리 ≥ box_min_ang_sep ──
++    #   r=0.31에서 0.8rad이면 중심거리 241mm로, 장축이 마주 보는 최악(필요 ~190mm)에도 겹치지 않는다.
++    box_pose = []
++    for bi, bname in enumerate(use_boxes):
++        asset: RigidObject = env.scene[bname]
++        for _ in range(max_tries):
++            ang = math_utils.sample_uniform(box_angle_range[0], box_angle_range[1], (n,), device=dev)
++            if not box_pose:
++                break
++            gap = torch.stack([torch.abs(ang - a) for a, _, _ in box_pose], dim=0).min(dim=0).values
++            if bool((gap >= box_min_ang_sep).all()):
++                break
++        else:
++            print(f"[lang] ⚠ 박스 각분리 확보 실패({bname}) — 이 ep는 건너뛸 것", flush=True)
++        r = math_utils.sample_uniform(box_min_dist, box_max_dist, (n,), device=dev)
++        yaw = math_utils.sample_uniform(box_yaw_range[0], box_yaw_range[1], (n,), device=dev)
++        bx = base_xy[0] + r * torch.cos(ang)
++        by = base_xy[1] + r * torch.sin(ang)
++        default = asset.data.default_root_state[env_ids].clone()
++        zeros = torch.zeros_like(yaw)
++        dq = math_utils.quat_from_euler_xyz(zeros, zeros, yaw)
++        quat = math_utils.quat_mul(default[:, 3:7], dq)
++        pos = torch.stack([bx, by, torch.full((n,), box_z, device=dev)], dim=-1)
++        asset.write_root_pose_to_sim(torch.cat([pos + org, quat], dim=-1), env_ids=env_ids)
++        asset.write_root_velocity_to_sim(torch.zeros((n, 6), device=dev), env_ids=env_ids)
++        box_pose.append((ang, (bx, by), yaw))
++
++    # ── 2) 물체 — 박스(사각형 간격)와 서로(중심거리)를 피해 거부 표집 ──
++    hx, hy = box_half_extent
++    placed = []
++    for oname in use_objs:
++        asset: RigidObject = env.scene[oname]
++        px = torch.zeros((n,), device=dev)
++        py = torch.zeros((n,), device=dev)
++        done = torch.zeros((n,), dtype=torch.bool, device=dev)
++        for _ in range(max_tries):
++            ang = math_utils.sample_uniform(obj_angle_range[0], obj_angle_range[1], (n,), device=dev)
++            r = torch.sqrt(math_utils.sample_uniform(obj_min_dist ** 2, obj_max_dist ** 2, (n,), device=dev))
++            cx = base_xy[0] + r * torch.cos(ang)
++            cy = base_xy[1] + r * torch.sin(ang)
++            ok = torch.ones((n,), dtype=torch.bool, device=dev)
++            for _a, (bx, by), yaw in box_pose:
++                ok &= _box_gap(cx, cy, bx, by, yaw, hx, hy) >= box_clear
++            for qx, qy in placed:
++                ok &= torch.sqrt((cx - qx) ** 2 + (cy - qy) ** 2) >= min_sep
++            take = ok & (~done)
++            px = torch.where(take, cx, px)
++            py = torch.where(take, cy, py)
++            done |= take
++            if bool(done.all()):
++                break
++            # 전량 실패해도 좌표가 비지 않게 마지막 후보를 보관한다
++            px = torch.where(done, px, cx)
++            py = torch.where(done, py, cy)
++        if not bool(done.all()):
++            # 조용히 넘기지 않는다 — 조작자가 R로 건너뛸 수 있게 로그를 남긴다
++            print(f"[lang] ⚠ 거부 샘플링 실패 {oname} — 겹칠 수 있으니 이 ep는 건너뛸 것", flush=True)
++        default = asset.data.default_root_state[env_ids].clone()
++        pos = torch.stack([px, py, torch.full((n,), obj_z, device=dev)], dim=-1)
++        asset.write_root_pose_to_sim(torch.cat([pos + org, default[:, 3:7]], dim=-1), env_ids=env_ids)
++        asset.write_root_velocity_to_sim(torch.zeros((n, 6), device=dev), env_ids=env_ids)
++        placed.append((px, py))
++
++    # ── 3) 주차 — 쓰지 않는 물체·박스는 화각 밖 + 매트 아래로 ──
++    #   간격을 두고 늘어놓는다(한 점에 겹쳐 쌓으면 물리 해석기가 폭발한다).
++    park = [o for o in all_objs if o not in use_objs] + [b for b in all_boxes if b not in use_boxes]
++    for i, name in enumerate(park):
++        asset: RigidObject = env.scene[name]
++        default = asset.data.default_root_state[env_ids].clone()
++        pos = torch.tensor([park_xy[0] - 0.06 * i, park_xy[1], -0.30], device=dev).repeat(n, 1)
++        asset.write_root_pose_to_sim(torch.cat([pos + org, default[:, 3:7]], dim=-1), env_ids=env_ids)
++        asset.write_root_velocity_to_sim(torch.zeros((n, 6), device=dev), env_ids=env_ids)
 diff --git a/source/sim_to_real_so101/scripts/lerobot_agent.py b/source/sim_to_real_so101/scripts/lerobot_agent.py
-index fec012f..f516696 100644
+index fec012f..4680b5b 100644
 --- a/source/sim_to_real_so101/scripts/lerobot_agent.py
 +++ b/source/sim_to_real_so101/scripts/lerobot_agent.py
 @@ -63,6 +63,12 @@ parser.add_argument(
@@ -48,7 +782,35 @@ index fec012f..f516696 100644
  
  
  import isaaclab_tasks  # noqa: F401
-@@ -130,6 +137,12 @@ def main():
+@@ -93,6 +100,27 @@ from sim_to_real_so101.utils.lerobot_interface import LeRobotSO101Interface
+ from sim_to_real_so101.utils.lerobot_recorder import LeRobotRecorder
+ 
+ 
++def _sync_lang_instruction(env, recorder):
++    """리셋 후, 이번 에피소드의 지시문을 recorder에 물리고 조작자에게 보여준다.
++
++    씬(reset_lang_scene)과 recorder가 **같은 계획표 행**을 보게 하는 유일한 연결 고리다.
++    여기가 끊기면 영상에 찍힌 씬과 저장된 문장이 어긋나고, 그 데이터는
++    "언어를 무시해도 된다"를 가르치는 반례가 된다 — 수집 전체가 무효다.
++
++    계획표 없이 도는 경우(--task_name만 준 기존 수집)는 아무것도 하지 않는다.
++    """
++    row = getattr(env.unwrapped, "_lang_row", None)
++    if not row or not row.get("instruction"):
++        return
++    if recorder is not None:
++        recorder.task_name = row["instruction"]
++    print("\n" + "─" * 62)
++    print(f" ep {row['index'] + 1}   목표: {row['target'].upper()}  →  {row['dest'].upper()} BOX")
++    print(f" 물체: {', '.join(row['objects'])}")
++    print(f' "{row["instruction"]}"')
++    print("─" * 62 + "\n", flush=True)
++
++
+ def main():
+ 
+     keyboard_control = KeyboardControl()
+@@ -130,6 +158,12 @@ def main():
      if len(cameras) == 0:
          print(f"[Info]: No cameras found - videos will not be recorded")
  
@@ -61,7 +823,17 @@ index fec012f..f516696 100644
      robot_iface = LeRobotSO101Interface(
          device=env.unwrapped.device,
          port=args_cli.port,
-@@ -182,6 +195,20 @@ def main():
+@@ -171,6 +205,9 @@ def main():
+             env.close()
+             simulation_app.close()
+ 
++    # 계획표 기반 수집이면 첫 에피소드의 지시문을 바로 물린다(언어 조건화 수집).
++    _sync_lang_instruction(env, recorder if recording_mode else None)
++
+     while simulation_app.is_running():
+         # run everything in inference mode
+         with torch.inference_mode():
+@@ -182,9 +219,25 @@ def main():
  
              obs, _, _, _, _ = env.step(actions)
  
@@ -82,8 +854,13 @@ index fec012f..f516696 100644
              if keyboard_control.reset_world:
                  keyboard_control.reset_world = False
                  env.reset()
++                # 씬이 바뀌었으므로 지시문도 이번 행으로 갱신한다
++                _sync_lang_instruction(env, recorder if recording_mode else None)
+                 continue
+ 
+             if recording_mode and keyboard_control.recording:
 diff --git a/source/sim_to_real_so101/scripts/lerobot_eval.py b/source/sim_to_real_so101/scripts/lerobot_eval.py
-index 349a4c0..dc56528 100644
+index 349a4c0..6e609df 100644
 --- a/source/sim_to_real_so101/scripts/lerobot_eval.py
 +++ b/source/sim_to_real_so101/scripts/lerobot_eval.py
 @@ -14,11 +14,33 @@
@@ -124,11 +901,11 @@ index 349a4c0..dc56528 100644
      help="Language instruction for the policy",
  )
  parser.add_argument("--rerun", action="store_true", default=False, help="Enable Rerun visualization")
-+parser.add_argument("--save_video_dir", type=str, default=None, help="설정 시 에피소드별 front 카메라 롤아웃을 mp4로 저장(headless 검증용)")
++parser.add_argument("--save_video_dir", type=str, default=None, help="설정 시 에피소드별 롤아웃을 mp4로 저장(top|wrist 가로 결합, headless 검증용)")
  
  # append AppLauncher cli args
  AppLauncher.add_app_launcher_args(parser)
-@@ -168,10 +191,23 @@ def main():
+@@ -168,11 +191,122 @@ def main():
  
      pbar = None
  
@@ -137,22 +914,121 @@ index 349a4c0..dc56528 100644
 +        os.makedirs(save_video_dir, exist_ok=True)
 +    episode_frames = []
 +
++    # ── 씬 좌표 기록(2026-08-06) ─────────────────────────────────────────
++    # 실패 ep가 '어느 배치'에서 났는지 사후에 알 수 없어 타깃 재수집 설계가 불가능했다.
++    # → 에피소드 시작 시 블록·박스의 실제 좌표를 남겨 scenes.csv로 저장한다.
++    # 좌표계는 씬 설정(configure_scene.py)과 동일한 로봇 base 기준 극좌표(r, θ).
++    _BASE_XY = (-0.05, 0.0)   # BLOCK_REACH_BASE_XY
++
++    def _scene_pose():
++        """블록·박스의 base 기준 극좌표 + 박스 yaw. 실패해도 평가를 막지 않는다."""
++        try:
++            sc = env.unwrapped.scene
++            org = sc.env_origins[0].detach().cpu().numpy()
++            out = {}
++            for key, name in (("block", "block_red"), ("box", "basket_black")):
++                p = sc[name].data.root_pos_w[0].detach().cpu().numpy() - org
++                dx, dy = float(p[0]) - _BASE_XY[0], float(p[1]) - _BASE_XY[1]
++                out[f"{key}_r"] = round(float(np.hypot(dx, dy)), 4)
++                out[f"{key}_theta"] = round(float(np.arctan2(dy, dx)), 4)
++                out[f"{key}_x"] = round(float(p[0]), 4)
++                out[f"{key}_y"] = round(float(p[1]), 4)
++            q = sc["basket_black"].data.root_quat_w[0].detach().cpu().numpy()  # (w,x,y,z)
++            out["box_yaw"] = round(float(np.arctan2(
++                2.0 * (q[0] * q[3] + q[1] * q[2]),
++                1.0 - 2.0 * (q[2] ** 2 + q[3] ** 2))), 4)
++            # 블록-박스 중심 거리: 겹침(파지 불가) 씬 사후 판별용
++            out["block_box_dist"] = round(float(np.hypot(
++                out["block_x"] - out["box_x"], out["block_y"] - out["box_y"])), 4)
++            return out
++        except Exception as e:
++            print(f"[scene] 좌표 기록 실패(무시): {e}")
++            return {}
++
++    # ── 언어 조건화 씬(2026-09-14): 배치된 **물체·박스 전부**의 좌표를 남긴다 ───────────
++    #   판정을 영상이 아니라 좌표로 하기 위해서다. 종료 시 최종 좌표를 남기면
++    #   정답 / 물체 오선택 / 목적지 오선택 / 미완수가 사람 없이 갈린다.
++    #   ⚠ 빠뜨리면 "어느 물체가 어느 박스에 들어갔나"를 영상으로 세야 하고, 조건이 늘면 감당이 안 된다.
++    def _lang_pose(prefix=""):
++        row = getattr(env.unwrapped, "_lang_row", None)
++        if not row:
++            return {}
++        try:
++            sc = env.unwrapped.scene
++            org = sc.env_origins[0].detach().cpu().numpy()
++            out = {}
++            if not prefix:
++                out["target"] = row.get("target", "")
++                out["dest"] = row.get("dest", "")
++                out["lang"] = (row.get("instruction", "") or "").replace(",", " ")
++                out["n_obj"] = len(row.get("objects", []))
++                out["n_box"] = len(row.get("boxes", []))
++            for i, name in enumerate(row.get("objects", [])[:4]):
++                p = sc[name].data.root_pos_w[0].detach().cpu().numpy() - org
++                out[f"{prefix}o{i}"] = name
++                for a, v in zip("xyz", p):
++                    out[f"{prefix}o{i}{a}"] = round(float(v), 4)
++            for i, name in enumerate(row.get("boxes", [])[:2]):
++                p = sc[name].data.root_pos_w[0].detach().cpu().numpy() - org
++                q = sc[name].data.root_quat_w[0].detach().cpu().numpy()
++                out[f"{prefix}b{i}"] = name
++                for a, v in zip("xyz", p):
++                    out[f"{prefix}b{i}{a}"] = round(float(v), 4)
++                out[f"{prefix}b{i}yaw"] = round(float(np.arctan2(
++                    2.0 * (q[0] * q[3] + q[1] * q[2]),
++                    1.0 - 2.0 * (q[2] ** 2 + q[3] ** 2))), 4)
++            return out
++        except Exception as e:
++            print(f"[lang] 좌표 기록 실패(무시): {e}")
++            return {}
++
++    _scene_csv = os.path.join(save_video_dir, "scenes.csv") if save_video_dir else None
++    _COLS = ["ep", "outcome", "steps", "block_r", "block_theta", "block_x", "block_y",
++             "box_r", "box_theta", "box_x", "box_y", "box_yaw", "block_box_dist"]
++    # 시작 좌표(o*/b*)와 **종료 좌표(f*)** 를 함께 둔다. 판정에 필요한 것은 종료 좌표이고,
++    # 시작 좌표는 "어느 배치에서 실패했나"를 되짚는 데 쓴다.
++    _COLS += ["target", "dest", "lang", "n_obj", "n_box"]
++    for i in range(4):
++        _COLS += [f"o{i}", f"o{i}x", f"o{i}y", f"o{i}z", f"fo{i}x", f"fo{i}y", f"fo{i}z"]
++    for i in range(2):
++        _COLS += [f"b{i}", f"b{i}x", f"b{i}y", f"b{i}z", f"b{i}yaw",
++                  f"fb{i}x", f"fb{i}y", f"fb{i}z", f"fb{i}yaw"]
++    if _scene_csv:
++        with open(_scene_csv, "w") as _f:
++            _f.write(",".join(_COLS) + "\n")
++    _ep_scene = {}
++    # ────────────────────────────────────────────────────────────────────
++
      while simulation_app.is_running():
          # run everything in inference mode
          with torch.inference_mode():
  
 +            if save_video_dir:
 +                try:
-+                    vkey = "rgb_external_D455" if "rgb_external_D455" in obs["visual"] else "rgb_ego"
-+                    fr = obs["visual"][vkey][0].detach().cpu().numpy()
-+                    episode_frames.append(np.clip(fr, 0, 255).astype(np.uint8))
++                    # top(external_D455) | wrist(ego) 를 **가로로 결합**해 한 파일에 담는다.
++                    #   전에는 둘 중 하나만 골라 저장해서, 실패 원인을 보려면 top만 보고
++                    #   판단해야 했다. 파지 순간이나 가려진 구간은 wrist가 있어야 갈린다
++                    #   (실기 평가에서 왼쪽 가림을 이 조합으로 확인했다).
++                    fs = []
++                    for _k in ("rgb_external_D455", "rgb_ego"):
++                        if _k in obs["visual"]:
++                            _a = obs["visual"][_k][0].detach().cpu().numpy()
++                            fs.append(np.clip(_a, 0, 255).astype(np.uint8))
++                    if fs:
++                        if len(fs) > 1 and fs[0].shape[0] == fs[1].shape[0]:
++                            episode_frames.append(np.concatenate(fs, axis=1))
++                        else:
++                            episode_frames.append(fs[0])
 +                except Exception:
 +                    pass
 +
              if step == 0:
++                _ep_scene = _scene_pose()   # 리셋 직후 배치를 이 에피소드의 씬으로 기록
++                _ep_scene.update(_lang_pose())
                  pbar = tqdm(
                      total=env.unwrapped.max_episode_length,
-@@ -189,6 +225,21 @@ def main():
+                     desc=f"Rollout (ep {num_episodes + 1}, success: {success_rate:.1f}%)",
+@@ -189,6 +323,21 @@ def main():
  
              obs, rewards, terminated, truncated, info = env.step(actions)
  
@@ -174,19 +1050,27 @@ index 349a4c0..dc56528 100644
              step += 1
  
              # Update progress bar
-@@ -211,6 +262,11 @@ def main():
+@@ -211,6 +360,19 @@ def main():
  
                  success_rate = (num_successes / num_episodes) * 100
  
++                outcome = "success" if (is_terminated and not is_truncated) else "fail"
 +                if save_video_dir and episode_frames:
-+                    outcome = "success" if (is_terminated and not is_truncated) else "fail"
 +                    _write_mp4(os.path.join(save_video_dir, f"ep{num_episodes:02d}_{outcome}.mp4"), episode_frames)
++                # 씬 좌표 1행 추가. outcome은 termination 기준이라 육안 판정과 다를 수 있음
++                # (성공했는데 grasp_history 창을 놓쳐 fail로 남는 경우 확인됨) → 육안 결과로 덮어쓸 것.
++                if _scene_csv:
++                    # 종료 좌표(f*)가 판정의 근거다 — 지시 물체가 지시 박스 안인가.
++                    row = {"ep": num_episodes, "outcome": outcome, "steps": step,
++                           **_ep_scene, **_lang_pose("f")}
++                    with open(_scene_csv, "a") as _f:
++                        _f.write(",".join(str(row.get(c, "")) for c in _COLS) + "\n")
 +                episode_frames = []
 +
                  # Reset for next episode
                  obs, _ = env.reset()
                  policy.reset()
-@@ -226,6 +282,7 @@ def main():
+@@ -226,6 +388,7 @@ def main():
                      pbar = None
  
                  print(f"[MANUAL RESET] Episode interrupted at step {step}")
@@ -194,6 +1078,26 @@ index 349a4c0..dc56528 100644
                  obs, _ = env.reset()
                  policy.reset()
                  step = 0
+diff --git a/source/sim_to_real_so101/tasks/__init__.py b/source/sim_to_real_so101/tasks/__init__.py
+index b5ca421..032385e 100644
+--- a/source/sim_to_real_so101/tasks/__init__.py
++++ b/source/sim_to_real_so101/tasks/__init__.py
+@@ -95,3 +95,15 @@ gym.register(
+     },
+ )
+ 
++
++
++# v4 타깃 수집 전용(2026-08-06): 블록을 박스 주변 0.08~0.18m에 배치.
++# 기존 수집/평가 task는 그대로 두고 **분리**한다 — 검증된 경로를 건드리지 않기 위함.
++gym.register(
++    id="Lerobot-So101-Teleop-Vials-To-Rack-Near",
++    entry_point="isaaclab.envs:ManagerBasedRLEnv",
++    disable_env_checker=True,
++    kwargs={
++        "env_cfg_entry_point": f"{__name__}.vials_to_rack_env_cfg:VialsToRackNearEnvCfg",
++    },
++)
 diff --git a/source/sim_to_real_so101/tasks/task_env_cfg.py b/source/sim_to_real_so101/tasks/task_env_cfg.py
 index 2f27635..4666f14 100644
 --- a/source/sim_to_real_so101/tasks/task_env_cfg.py
@@ -246,10 +1150,21 @@ index 2f27635..4666f14 100644
          },
      )
 diff --git a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
-index 170026d..2e9ce34 100644
+index 170026d..8ca997c 100644
 --- a/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
 +++ b/source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py
-@@ -41,6 +41,10 @@ from sim_to_real_so101.mdp import (
+@@ -33,6 +33,10 @@ from sim_to_real_so101.assets.so101 import S0101_CONTACT_GRASP_CFG
+ from sim_to_real_so101.mdp import (
+     reset_prop_poses,
+     reset_prop_random_reach,
++    reset_box_and_block_clear,
++    reset_fixed_panel,
++    apply_scene_dressing,
++    reset_block_near_box,
+     randomize_sky_light,
+     ROBOT_COLORS,
+     randomize_mat_rotation,
+@@ -41,6 +45,10 @@ from sim_to_real_so101.mdp import (
      vial_placed_on_rack,
      vial_placed_on_rack_termination,
      time_out,
@@ -260,7 +1175,7 @@ index 170026d..2e9ce34 100644
  )
  
  from .so101_env_cfg import EventCfg
-@@ -79,7 +83,7 @@ BLOCK_MASS = 0.005  # 5g
+@@ -79,7 +87,7 @@ BLOCK_MASS = 0.005  # 5g
  # task_env_cfg.py's mat.init_state), not on the world ground plane at z=0.
  # Half height alone spawns them embedded under the mat with nothing to catch
  # them, which makes the physics solver eject them and they fall out of frame.
@@ -269,7 +1184,7 @@ index 170026d..2e9ce34 100644
  
  # On each reset, the block is placed at a random point within an annulus around the
  # robot base (env-local (-0.05, 0.0), see so101.py's SO101_CFG.init_state.pos) so it's
-@@ -92,9 +96,9 @@ BLOCK_SPAWN_Z = 0.045  # mat top (0.035) + half height (0.01) + small clearance
+@@ -92,9 +100,9 @@ BLOCK_SPAWN_Z = 0.045  # mat top (0.035) + half height (0.01) + small clearance
  # that side, wider on the clear side, both bounds keeping the point on the Mat and clear
  # of the basket's footprint with margin.
  BLOCK_REACH_BASE_XY = (-0.05, 0.0)
@@ -282,7 +1197,7 @@ index 170026d..2e9ce34 100644
  
  block_base = RigidObjectCfg(
      prim_path="{ENV_REGEX_NS}/Block",
-@@ -124,12 +128,32 @@ BOX_SIZE = (0.10, 0.20, 0.075)  # 100mm (x) x 200mm (y) x 75mm (z), baked into b
+@@ -124,12 +132,38 @@ BOX_SIZE = (0.10, 0.20, 0.075)  # 100mm (x) x 200mm (y) x 75mm (z), baked into b
  # Its root origin sits at the base of the box (not its center), so unlike the
  # primitive-shape props above, the spawn z here is the resting surface height
  # itself (mat top, see BLOCK_SPAWN_Z), not a half-height offset.
@@ -298,7 +1213,13 @@ index 170026d..2e9ce34 100644
 +        vials=["block_red"],
 +        rack_name="basket_black",
 +        warmup_steps=30,
-+        grasp_history_window=20,
++        # 20 → 1000 (2026-08-06). 성공 조건은 "최근 N step 내 파지 이력 & 지금은 놓음 & 경계 안"인데,
++        # N=20이면 그리퍼가 떨어진 뒤 20 step 안에 블록이 이미 경계 안에 있어야만 성공이 잡혔다.
++        # 놓인 뒤 튀거나 굴러 20 step을 넘기면 이력이 만료돼 **영구 미판정**(플래그는 재평가 안 됨).
++        # 실측: full 40ep 중 3ep(1984-ep06/ep17, s7-ep06)가 박스 안에 100+ step 있었는데 fail 처리.
++        # 1000(에피소드 최대 900 초과)이면 링버퍼가 에피소드 전체를 덮어 "이번 ep에 한 번이라도
++        # 잡았는가"가 되고, 리셋 시 clear되므로 ep 간 누수는 없다.
++        grasp_history_window=1000,
 +        force_threshold=2,
 +        rack_local_x_min=-0.042,   # 박스 0.85배 축소 반영 (기존 ±0.05)
 +        rack_local_x_max=0.042,
@@ -316,7 +1237,7 @@ index 170026d..2e9ce34 100644
          mass_props=sim_utils.MassPropertiesCfg(mass=0.15),
          rigid_props=sim_utils.RigidBodyPropertiesCfg(
              solver_position_iteration_count=8,
-@@ -165,6 +189,32 @@ class VialsToRackSceneCfg(SO101TaskSceneCfg):
+@@ -165,6 +199,32 @@ class VialsToRackSceneCfg(SO101TaskSceneCfg):
      basket_black.prim_path = "{ENV_REGEX_NS}/Basket_Black"
      basket_black.init_state.pos = (0.10, -0.22, BASKET_SPAWN_Z)
  
@@ -349,7 +1270,7 @@ index 170026d..2e9ce34 100644
  
  @configclass
  class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
-@@ -187,6 +237,9 @@ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
+@@ -187,6 +247,9 @@ class VialsToRackDRSceneCfg(VialsToRackSceneCfg):
  class VialsToRackEventCfg(TaskEventCfg):
      """Configuration for events."""
  
@@ -359,7 +1280,7 @@ index 170026d..2e9ce34 100644
      # Robot arm color for this task only (base EventCfg defaults to orange).
      reset_set_robot_visual_material = EventTerm(
          func=randomize_robot_color,
-@@ -227,7 +280,7 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+@@ -227,7 +290,7 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
          func=randomize_robot_color,
          mode="reset",
          params={
@@ -368,7 +1289,7 @@ index 170026d..2e9ce34 100644
          },
      )
  
-@@ -242,12 +295,47 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
+@@ -242,12 +305,47 @@ class VialsToRackEventDRCfg(VialsToRackEventCfg):
          },
      )
  
@@ -420,7 +1341,7 @@ index 170026d..2e9ce34 100644
          },
      )
  
-@@ -260,6 +348,22 @@ class VialsToRackObservationsCfg(TaskObservationsCfg):
+@@ -260,6 +358,22 @@ class VialsToRackObservationsCfg(TaskObservationsCfg):
      class SubtaskCfg(ObsGroup):
          """Observations for subtask tracking."""
  
@@ -443,7 +1364,7 @@ index 170026d..2e9ce34 100644
          def __post_init__(self) -> None:
              self.enable_corruption = False
              self.concatenate_terms = False
-@@ -276,6 +380,14 @@ class VialsToRackTerminationsCfg:
+@@ -276,6 +390,14 @@ class VialsToRackTerminationsCfg:
          time_out=True,
      )
  
@@ -458,7 +1379,45 @@ index 170026d..2e9ce34 100644
  
  
  @configclass
-@@ -307,7 +419,7 @@ class VialsToRackEvalEnvCfg(VialsToRackEnvCfg):
+@@ -298,6 +420,37 @@ class VialsToRackDREnvCfg(VialsToRackEnvCfg):
+ 
+ 
+ 
++
++# ── 평가 B 고정 패널 (2026-08-12) ──────────────────────────────────────
++# EVAL_PANEL=1 이면 평가 씬을 매번 새로 뽑지 않고 아래 10배치를 순서대로 재생한다.
++#
++# 왜: 평가 B가 묻는 건 '색·형상·문장이 바뀌어도 되는가'인데, 위치가 매번 새로 뽑히면
++#     조건 간 차이에 위치 난이도가 섞인다. 실측으로 그 크기가 컸다 — 같은 모델·같은
++#     조건인데 시드만 바꾸니 70%와 30%로 갈렸다.
++# 선정: 72ep(성공 60%)에서 **성공∧비겹침** 41개를 뽑아 근접/원거리 × 좌/중/우 6칸에
++#     균등 배분(우4·중3·좌3 / 근접5·원거리5). 같은 칸 안에서는 블록각·거리·박스각·yaw를
++#     좌표로 보고 서로 가장 먼 배치를 골라 사실상 중복인 씬을 배제했다.
++# ⚠ 성공 씬만 골랐으므로 **L0 기준선은 정의상 천장**이다. 절대 성공률의 추정치가 아니라
++#   '조건을 바꾸면 몇 개가 무너지는가'를 재는 척도로만 읽어야 한다.
++#   출처 에피소드·좌표: inf_video/08_evalB_sim/panel10_selected/panel.csv
++#   ⚠ #6은 원래 θ=-0.493(원거리·우)이었는데 **블록이 top 카메라에 전혀 안 잡혔다**
++#     (팔·시야 밖). 그 씬은 어떤 정책도 풀 수 없어 조건 비교에 무의미하므로
++#     θ=-0.231짜리로 교체했다. 도달 영역의 오른쪽 끝은 관측 자체가 안 되는 구간이 있고,
++#     이것이 우측 성공률이 낮은(근접·우 50%, 원거리·우 25%) 이유의 일부로 보인다.
++EVAL_PANEL_10 = [
++    # block_r, block_theta, box_r, box_theta, box_yaw
++    [0.2079, -0.6574, 0.2867, -0.1412, +3.0392],   #  1 근접·우  d=0.147
++    [0.2752, -0.3870, 0.3182, +0.0350, +0.7274],   #  2 근접·우  d=0.131
++    [0.2678, -0.1259, 0.2929, -0.8047, -2.1500],   #  3 근접·중  d=0.188
++    [0.2702, -0.1040, 0.3203, -0.6761, +2.4999],   #  4 근접·중  d=0.173
++    [0.1863, +1.0559, 0.2873, +0.3030, +0.4500],   #  5 근접·좌  d=0.198
++    [0.3096, -0.2310, 0.3268, +0.7553, -0.3834],   #  6 원거리·중  d=0.302
++    [0.2755, -0.3599, 0.3156, +0.6085, +3.0436],   #  7 원거리·우  d=0.277
++    [0.3118, -0.1478, 0.2837, +1.0464, +0.0374],   #  8 원거리·중  d=0.336
++    [0.3273, +0.9970, 0.2871, -0.9301, +0.3709],   #  9 원거리·좌  d=0.505
++    [0.3308, +0.9971, 0.3365, +0.3556, -2.6214],   # 10 원거리·좌  d=0.210
++]
++
+ @configclass
+ class VialsToRackEvalEnvCfg(VialsToRackEnvCfg):
+     """
+@@ -307,7 +460,7 @@ class VialsToRackEvalEnvCfg(VialsToRackEnvCfg):
  
      def __post_init__(self) -> None:
          super().__post_init__()
@@ -467,12 +1426,118 @@ index 170026d..2e9ce34 100644
  
  
  @configclass
-@@ -319,4 +431,4 @@ class VialsToRackEvalDREnvCfg(VialsToRackDREnvCfg):
+@@ -319,4 +472,110 @@ class VialsToRackEvalDREnvCfg(VialsToRackDREnvCfg):
  
      def __post_init__(self) -> None:
          super().__post_init__()
 -        self.episode_length_s = 450 / 60.0
 +        self.episode_length_s = 900 / 60.0
++
++        # 박스와 블록을 **한 term에서** 뽑아 겹침을 막는다 (2026-08-12).
++        #   이벤트 순서가 base(블록) → 하위(박스)라, 블록 리셋 시점엔 박스가 아직 이번
++        #   에피소드 자리로 안 옮겨져 있다. 그래서 두 term을 분리한 채로는 '박스를 피해 뽑기'가
++        #   성립하지 않는다 — 실측(seed 31, 10ep)에서 3/10이 겹침권에 남았다.
++        #   reset_basket_random 자리에 합친 term을 얹는다(순서 유지). configure_scene.py가
++        #   방해물 term을 **이 term 바로 뒤에** 삽입하므로, 방해물도 갱신된 박스를 읽는다.
++        #   ※ 평가 전용. 수집(Near/DR)은 그대로 둔다 — 학습 분포를 바꾸지 않기 위해서다.
++        self.events.reset_block_position = None
++        self.events.reset_basket_random.func = reset_box_and_block_clear
++        self.events.reset_basket_random.params = {
++            "block_name": "block_red",
++            "box_name": "basket_black",
++            "base_xy": BLOCK_REACH_BASE_XY,
++            "box_min_dist": 0.28,
++            "box_max_dist": 0.34,
++            "box_angle_range": (-1.15, 1.15),
++            "box_yaw_range": (-3.14159, 3.14159),
++            "box_z": BASKET_SPAWN_Z,
++            "block_min_dist": BLOCK_REACH_MIN_DIST,
++            "block_max_dist": BLOCK_REACH_MAX_DIST,
++            "block_angle_range": BLOCK_REACH_ANGLE_RANGE,
++            "block_z": BLOCK_SPAWN_Z,
++            "clearance": 0.03,
++        }
++
++        # 배경·작업면 교체 (평가 B 배경 축, 2026-08-12).
++        #   학습 씬은 흰 라이트박스가 사방을 감싸 배경 픽셀이 거의 균일하다. 실제 책상처럼
++        #   주변이 바뀌어도 되는지 보려면 배경만 갈고 나머지는 고정해야 한다.
++        #   ※ mode="startup" — 재질 바인딩·prim 삽입은 stage 생성 뒤에만 가능하고,
++        #     reset마다 하면 셰이더를 매번 다시 만든다.
++        #   실측 교훈: 방(Simple_Room 등)만 갈면 정책 시점 픽셀이 거의 안 바뀐다.
++        #     top 카메라 화각이 좁아 **작업면(Base+Mat)이 화면의 대부분**이기 때문이다.
++        #     그래서 EVAL_SURFACE_TEX 쪽이 실제 지렛대다.
++        if os.environ.get("EVAL_BG") or os.environ.get("EVAL_SURFACE_TEX"):
++            self.events.apply_dressing = EventTerm(
++                func=apply_scene_dressing,
++                mode="startup",
++                params={
++                    "bg": os.environ.get("EVAL_BG", ""),
++                    "hide": os.environ.get("EVAL_HIDE", ""),
++                    "surface_tex": os.environ.get("EVAL_SURFACE_TEX", ""),
++                    "surface_uv": float(os.environ.get("EVAL_SURFACE_UV", "4")),
++                    # IsaacLab의 EventTerm은 params가 함수 서명과 **정확히 일치**해야 한다.
++                    # 기본값이 있어도 빠지면 ValueError가 난다(실측 2026-08-12).
++                    "bg_pos": tuple(float(v) for v in os.environ.get("EVAL_BG_POS", "0,0,0").split(",")),
++                    "bg_scale": float(os.environ.get("EVAL_BG_SCALE", "1")),
++                },
++            )
++
++        # EVAL_PANEL=1 → 위 10배치를 순서대로 재생 (위치 난이도를 조건 간 상수로 만든다)
++        if os.environ.get("EVAL_PANEL") == "1":
++            self.events.reset_basket_random.func = reset_fixed_panel
++            self.events.reset_basket_random.params = {
++                "block_name": "block_red",
++                "box_name": "basket_black",
++                "base_xy": BLOCK_REACH_BASE_XY,
++                "panel": EVAL_PANEL_10,
++                "block_z": BLOCK_SPAWN_Z,
++                "box_z": BASKET_SPAWN_Z,
++            }
++
++
++# ── v4 타깃 수집 (2026-08-06) ───────────────────────────────────────────
++# 블록을 박스 주변 0.08~0.18m에 놓는 전용 구성. 나머지(박스 랜덤·물리 DR)는 DR과 동일.
++# 배경: v3@40k가 근접 배치에서 39%(원거리 83%)였고, 수집 때 겹침 제외가 유효 근접까지
++#       걸러 학습 근접 비율이 19.2%(자연 43.2%)에 그쳤다. → 그 구간만 집중 수집한다.
++BLOCK_NEAR_DIST_RANGE = (0.08, 0.18)   # 박스 중심으로부터. <0.08은 겹침권(파지 불가)
++BLOCK_NEAR_NEG_THETA_FRAC = 0.5        # θ<0(오른쪽) 목표 비율. 근접+오른쪽이 SR 25%로 최악
++
++
++@configclass
++class VialsToRackEventNearCfg(VialsToRackEventDRCfg):
++    """블록·박스를 **함께** 배치해 둘 사이 거리를 통제한다.
++
++    기존 두 term을 끄고 하나로 합치는 이유: 이벤트가 base(블록) → 하위(박스) 순서라
++    '박스 기준으로 블록 뽑기'가 불가능하다. 순서 의존을 없앤다.
++    """
++    reset_block_position = None   # base의 독립 추첨 해제
++    reset_basket_random = None    # DR의 독립 추첨 해제
++    reset_block_and_box_near = EventTerm(
++        func=reset_block_near_box,
++        mode="reset",
++        params={
++            "block_name": "block_red",
++            "box_name": "basket_black",
++            "base_xy": BLOCK_REACH_BASE_XY,
++            "box_min_dist": 0.28,
++            "box_max_dist": 0.34,
++            "box_angle_range": (-1.15, 1.15),
++            "box_yaw_range": (-3.14159, 3.14159),
++            "box_z": BASKET_SPAWN_Z,
++            "block_dist_range": BLOCK_NEAR_DIST_RANGE,
++            "block_min_dist": BLOCK_REACH_MIN_DIST,
++            "block_max_dist": BLOCK_REACH_MAX_DIST,
++            "block_angle_range": BLOCK_REACH_ANGLE_RANGE,
++            "block_z": BLOCK_SPAWN_Z,
++            "neg_theta_frac": BLOCK_NEAR_NEG_THETA_FRAC,
++        },
++    )
++
++
++@configclass
++class VialsToRackNearEnvCfg(VialsToRackDREnvCfg):
++    """v4 타깃 수집 전용. 씬·물리·조명은 DR과 동일하고 **배치 규칙만** 다르다."""
++    events: VialsToRackEventNearCfg = VialsToRackEventNearCfg()
 diff --git a/source/sim_to_real_so101/utils/keyboard.py b/source/sim_to_real_so101/utils/keyboard.py
 index e970fbe..fec967f 100644
 --- a/source/sim_to_real_so101/utils/keyboard.py
@@ -539,7 +1604,7 @@ index 37d122d..1c33f10 100644
          mapped_deg = raw_values * 180 / torch.pi
  
 diff --git a/source/sim_to_real_so101/utils/lerobot_recorder.py b/source/sim_to_real_so101/utils/lerobot_recorder.py
-index 82a4df2..6adb66a 100644
+index 82a4df2..0848ca0 100644
 --- a/source/sim_to_real_so101/utils/lerobot_recorder.py
 +++ b/source/sim_to_real_so101/utils/lerobot_recorder.py
 @@ -125,7 +125,7 @@ class LeRobotRecorder:
@@ -551,7 +1616,37 @@ index 82a4df2..6adb66a 100644
          self.current_frame = 0
  
          self.action_buffers_tensor = None
-@@ -314,10 +314,11 @@ class LeRobotRecorder:
+@@ -258,11 +258,17 @@ class LeRobotRecorder:
+ 
+         self.current_frame += 1
+ 
+-    def add_dataset_frame(self, action, observation, rgb_buffers, frame_index):
++    def add_dataset_frame(self, action, observation, rgb_buffers, frame_index, task=None):
++        # ⚠️ task는 **반드시 인자로 받는다.** self.task_name을 여기서 읽으면 안 된다 —
++        #   이 메서드는 async_episode_processor(별도 스레드)에서 프레임마다 불리는데,
++        #   그 사이 메인 루프가 리셋하며 task_name을 바꾸면 **한 에피소드에 지시문이 2~3개** 섞인다.
++        #   실측(2026-09-14 예행 5회): 6ep 중 4ep이 지시문 2~3개를 갖고 저장됐다.
++        #   지시문이 상수였던 기존 수집에서는 드러나지 않던 결함이고, 언어 조건화 수집에서는
++        #   **라벨이 통째로 무의미해지는** 치명적 버그다.
+         frame = {
+             "action": action,
+             "observation.state": observation,
+-            "task": self.task_name,
++            "task": task if task is not None else self.task_name,
+         }
+         for camera_name in self.cameras.keys():
+             frame[f"observation.images.{camera_name}"] = rgb_buffers[camera_name]
+@@ -290,6 +296,9 @@ class LeRobotRecorder:
+                 "observation_buffer_tensor": cpu_obs_buffer_tensor.copy(),
+                 "rgb_buffer_tensors": cpu_rgb_buffer_tensors.copy(),
+                 "total_frames": self.current_frame,
++                # 저장 요청 시점의 지시문을 **박제**한다. 쓰기는 비동기라, 나중에 읽으면
++                # 다음 에피소드의 문장이 섞인다(add_dataset_frame 주석 참고).
++                "task_name": self.task_name,
+             }
+ 
+             if self.depth:
+@@ -314,10 +323,11 @@ class LeRobotRecorder:
  
              self.action_buffers_tensor = None
              self.observation_buffer_tensor = None
@@ -564,7 +1659,7 @@ index 82a4df2..6adb66a 100644
              print("[INFO]: Cleared buffers")
  
      def cancel_recording(self, event: Event):
-@@ -325,8 +326,11 @@ class LeRobotRecorder:
+@@ -325,8 +335,11 @@ class LeRobotRecorder:
              print(f"[INFO]: Cancelled recording.")
              self.action_buffers_tensor = None
              self.observation_buffer_tensor = None
@@ -577,3 +1672,21 @@ index 82a4df2..6adb66a 100644
              print("[INFO]: Cleared buffers")
              print(f"[INFO]: Episode cancelled.")
  
+@@ -341,6 +354,9 @@ class LeRobotRecorder:
+                 rgb_buffer_tensors = episode["rgb_buffer_tensors"]
+                 
+                 total_frames = episode["total_frames"]
++                # 큐에 들어갈 때 박제한 지시문을 쓴다 (없으면 기존 동작으로 폴백)
++                episode_task = episode.get("task_name", self.task_name)
++                print(f"[INFO]: [ASYNC] task=\"{episode_task}\"")
+ 
+                 for frame_index in tqdm(range(total_frames), desc="Processing frames", unit="frame"):
+                     rgb_buffers = {}
+@@ -352,6 +368,7 @@ class LeRobotRecorder:
+                         observation_buffer_tensor[frame_index],
+                         rgb_buffers,
+                         frame_index,
++                        task=episode_task,
+                     )
+ 
+                 # Save depth and RGB videos for each camera (once per episode, after processing all frames)
