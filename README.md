@@ -122,7 +122,7 @@ sim-only → co-training                  음성 양방향 (STT+TTS)
 
 ### 추론(배포) 파이프라인
 
-<a href="docs/diagrams/D3_infer_pipeline.png"><img src="docs/diagrams/D3_infer_pipeline.png" width="700" alt="D3 추론(배포) 파이프라인"></a>
+<a href="docs/diagrams/D3_infer_pipeline.png"><img src="docs/diagrams/D3_infer_pipeline.png" width="880" alt="D3 추론(배포) 파이프라인"></a>
 
 <sub>클릭하면 원본 크기 · 📐 편집: [Figma — D3 추론(배포) 파이프라인](https://www.figma.com/board/4iKjT0Ngfm8IKmiFttKaKc?node-id=41-476)</sub>
 

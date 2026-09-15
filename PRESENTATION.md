@@ -93,7 +93,7 @@ Phase 1에서 **정책이 언어를 사실상 무시한다**는 것이 sim·실�
 
 ### 추론(배포) 흐름
 
-<a href="docs/diagrams/D3_infer_pipeline.png"><img src="docs/diagrams/D3_infer_pipeline.png" width="700" alt="추론 파이프라인"></a>
+<a href="docs/diagrams/D3_infer_pipeline.png"><img src="docs/diagrams/D3_infer_pipeline.png" width="880" alt="추론 파이프라인"></a>
 
 마이크·카메라는 모두 **로컬 5070 Ti 한 대**에 붙는다. 음성은 STT를 거쳐 영어 지시문이 되고,
 **영상 2채널 + 로봇의 관절 상태**와 함께 GR00T 정책에 들어간다. 정책이 내놓은 16-step 행동 청크를
