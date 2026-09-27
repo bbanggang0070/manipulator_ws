@@ -1,0 +1,522 @@
+[
+  {
+    "label": "v4_200@86k (기준선)",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 0.20568047616957807,
+        "max_deg": 1.1505826024545565,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 0.20684363055321833,
+        "max_deg": 1.1688296147104766,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 0.20519928857973155,
+        "max_deg": 1.1355449346204598,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 0.20487858173882056,
+        "max_deg": 1.0811196917461023,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 0.22283009797223105,
+        "max_deg": 1.1674067866471078,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  },
+  {
+    "label": "lang@2000",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 1.165986391645533,
+        "max_deg": 5.311352008229329,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 1.2976473031410327,
+        "max_deg": 5.887174473040634,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 1.294522978631964,
+        "max_deg": 6.301763005554676,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 1.4197361360240193,
+        "max_deg": 6.702592590202888,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 1.2705069658348898,
+        "max_deg": 6.016473136117889,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  },
+  {
+    "label": "lang@4000",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 1.08113327597449,
+        "max_deg": 5.5534465834498405,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 1.632056914970195,
+        "max_deg": 7.672955417798625,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 1.1511937553047675,
+        "max_deg": 5.8142429279784364,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 1.0464107775213456,
+        "max_deg": 5.462114142460956,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 1.2293253260098735,
+        "max_deg": 6.1488255564537315,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  },
+  {
+    "label": "lang@6000",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 1.6543128341864457,
+        "max_deg": 6.658414030447602,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 1.8521896503112254,
+        "max_deg": 7.560717114454342,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 1.4704240227256378,
+        "max_deg": 6.3471045856260595,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 1.5137131815111284,
+        "max_deg": 6.506977065155904,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 1.3981386593332799,
+        "max_deg": 6.36107130555643,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  },
+  {
+    "label": "lang@10000",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 1.3292000040295737,
+        "max_deg": 6.163218677768277,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 1.6970542951469219,
+        "max_deg": 7.720488005059047,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 1.11308410824996,
+        "max_deg": 5.230522242271238,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 1.154607964850018,
+        "max_deg": 5.657486736050083,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 1.1446691415547927,
+        "max_deg": 5.197698646328515,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  },
+  {
+    "label": "lang@16000",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 0.7538546255045933,
+        "max_deg": 3.9902602980016835,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 0.9995375541876353,
+        "max_deg": 5.311671459012562,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 0.8559159510372006,
+        "max_deg": 4.770682401127285,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 0.9311907712654729,
+        "max_deg": 5.232692840198676,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 1.0498668527267,
+        "max_deg": 4.9395758915278645,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  },
+  {
+    "label": "lang@25000",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 0.813369105983131,
+        "max_deg": 4.533612958259052,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 0.9110887932777081,
+        "max_deg": 4.848480439537929,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 0.7805173171826836,
+        "max_deg": 4.2328275264137325,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 0.7394385269643357,
+        "max_deg": 3.6567427350415125,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 0.45480279925929307,
+        "max_deg": 2.755412755947974,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  },
+  {
+    "label": "langB@2000",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 2.521668407702075,
+        "max_deg": 11.525418474442429,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 2.7727017533528855,
+        "max_deg": 12.336483157343334,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 2.6962415855285746,
+        "max_deg": 13.150886956395375,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 2.4961022208768964,
+        "max_deg": 11.315538203033308,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 2.2866764756742564,
+        "max_deg": 9.937715572615465,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  },
+  {
+    "label": "langB@4000",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 1.7774004150794807,
+        "max_deg": 8.447498712067803,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 2.2347189156915794,
+        "max_deg": 10.065183936514789,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 1.9537127713746385,
+        "max_deg": 9.582173647772935,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 1.9704015372530392,
+        "max_deg": 9.282676256365246,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 1.672063054774238,
+        "max_deg": 8.022906811183525,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  },
+  {
+    "label": "langB@6000",
+    "dataset": "sim_so101_blocktask_lang",
+    "episodes": [
+      0,
+      39,
+      79,
+      119,
+      159,
+      199,
+      239,
+      279
+    ],
+    "fracs": [
+      0.05,
+      0.15,
+      0.3
+    ],
+    "repeats": 3,
+    "results": {
+      "잡음 하한 (같은 문장 2회)": {
+        "mean_deg": 1.5558428390433416,
+        "max_deg": 7.505687971081999,
+        "n": 72,
+        "threshold": null
+      },
+      "색 (red ↔ blue)": {
+        "mean_deg": 2.3860632679986242,
+        "max_deg": 10.855494291107687,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "이름 (eraser ↔ marker)": {
+        "mean_deg": 1.3154458326898748,
+        "max_deg": 6.746604363744457,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "목적지 (black ↔ brown box)": {
+        "mean_deg": 1.3063632947789705,
+        "max_deg": 6.518910318664792,
+        "n": 72,
+        "threshold": 5.0
+      },
+      "패러프레이즈 (동의어)": {
+        "mean_deg": 1.6977980098751788,
+        "max_deg": 7.919705998152494,
+        "n": 72,
+        "threshold": null
+      }
+    }
+  }
+]
