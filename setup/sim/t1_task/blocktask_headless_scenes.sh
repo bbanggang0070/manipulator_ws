@@ -82,6 +82,7 @@ docker run --rm -v "$WORKSHOP/outputs:/o" --entrypoint bash real-robot-train8 \
 
 echo "▶ [3/3] 무인 추론 — [$COND] ${NUM}ep, seed $SEED  (약 $((NUM*70/60))분 예상)"
 echo "   지시문: \"$LANG\"   패널: ${EVAL_PANEL:-0}"
+echo "   판정대상: ${EVAL_TARGET:-<기본 red>} → ${EVAL_DEST:-<기본 black>}   계획표: ${LANG_PLAN:-<없음>}"
 echo "   배경: ${EVAL_BG:-<없음>}   작업면: ${EVAL_SURFACE_TEX:-<기본>}"
 echo "   저장: $OUT_HOST"
 docker run --name teleop-eval --rm --privileged --gpus all \
@@ -89,6 +90,9 @@ docker run --name teleop-eval --rm --privileged --gpus all \
   -e CAM_X=0.03 -e CAM_Z=0.02 \
   -e LANG_INSTRUCTION="$LANG" \
   -e EVAL_PANEL="${EVAL_PANEL:-0}" \
+  -e EVAL_TARGET="${EVAL_TARGET:-}" -e EVAL_DEST="${EVAL_DEST:-}" \
+  -e LANG_PLAN="${LANG_PLAN:+/workspace/lang_eval_plan.csv}" \
+  ${LANG_PLAN:+-v "$LANG_PLAN:/workspace/lang_eval_plan.csv:ro"} \
   -e EVAL_BG="${EVAL_BG:-}" -e EVAL_HIDE="${EVAL_HIDE:-}" \
   -e EVAL_SURFACE_TEX="${EVAL_SURFACE_TEX:-}" -e EVAL_SURFACE_UV="${EVAL_SURFACE_UV:-4}" \
   -v "$WORKSHOP/docker/env:/root/env" \
