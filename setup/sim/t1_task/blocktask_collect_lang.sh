@@ -86,7 +86,13 @@ if [ "$MODE" = "record" ]; then
   fi
   # --task_name은 **폴백**이다. 실제 문장은 계획표에서 와서 에피소드마다 갱신된다
   # (_sync_lang_instruction). 이 인자가 없으면 recorder 자체가 켜지지 않는다.
-  INNER="lerobot_agent --task $TASK_ID --num_envs 1 --rerun \
+  # Rerun 뷰어는 켜고 끌 수 있게 둔다(RERUN=0으로 끈다).
+  #   긴 수집에서 뷰어가 부담이 된다 — 5시간 세션에서 CPU 136%, RAM 약 19GB
+  #   (LEROBOT_RERUN_MEMORY_LIMIT 30%)를 계속 물고 있었고, 그 상태에서 영상 인코딩이
+  #   멈춰 172번째 뒤로 진행이 끊겼다(2026-09-23). 카메라 시점은 Isaac Sim 창으로도 보이므로
+  #   장시간 수집에서는 꺼두는 편이 안전하다. 배치·구도 확인이 필요할 때만 켠다.
+  RERUN_FLAG=""; [ "${RERUN:-1}" = "1" ] && RERUN_FLAG="--rerun"
+  INNER="lerobot_agent --task $TASK_ID --num_envs 1 $RERUN_FLAG \
     --port /dev/ttyLEADER --robot_id leader \
     --repo_id heongyu/$DSNAME \
     --repo_root /workspace/Sim-to-Real-SO-101-Workshop/datasets/$DSNAME \

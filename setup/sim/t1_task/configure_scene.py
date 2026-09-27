@@ -180,7 +180,16 @@ LANG_OBJECTS = {
     "purple_cube": ("obj_purple", "Cuboid",   "size=(0.02, 0.02, 0.02)",      "purple", False, None),
     # 지우개는 주황. 흰색이면 흰 작업면과 대비가 거의 없어 **정책이 볼 수가 없다**(캡처 확인).
     "eraser":      ("obj_eraser", "Cuboid",   "size=(0.04, 0.02, 0.012)",     "orange", False, None),
-    "marker":      ("obj_marker", "Cylinder", "radius=0.0065, height=0.07",   "marker", True,  _LIE_FLAT),
+    # ⚠️ 원기둥이 아니라 **캡슐**이다. Cylinder로 뒀더니 수집 중 그리퍼에 자석처럼
+    #    달라붙었다(2026-09-16). 각감쇠를 100 → 5로 낮춰도 그대로였고, 크기대가 비슷한
+    #    지우개(직육면체)는 멀쩡했다 — 원인은 크기도 감쇠도 아니고 **충돌 형상**이다.
+    #    PhysX의 기본 도형은 구·캡슐·박스뿐이라 USD Cylinder는 custom geometry(또는
+    #    볼록 껍질)로 근사되고, 그 경로에서 접촉 생성이 끈적해진다. 캡슐은 PhysX 기본
+    #    도형이라 접촉이 해석적으로 정확하다.
+    #    치수: USD 캡슐의 height는 **원통부 길이**이고 전체 길이는 height + 2r이다.
+    #    전체 70mm를 맞추려면 0.07 - 0.013 = 0.057. 파지 폭은 Ø13 그대로(합격선 12~25mm).
+    #    끝이 둥근 것은 실물 마커에 오히려 가깝다.
+    "marker":      ("obj_marker", "Capsule",  "radius=0.0065, height=0.057",  "marker", True,  _LIE_FLAT),
     # ⚠️ 아래 둘은 **평가 전용**. 수집 계획표에 들어가면 미학습 색 일반화가 통째로 무효가 된다.
     "white_cube":  ("obj_white",  "Cuboid",   "size=(0.02, 0.02, 0.02)",      "white",  False, None),
     "pink_cube":   ("obj_pink",   "Cuboid",   "size=(0.02, 0.02, 0.02)",      "pink",   False, None),
@@ -380,7 +389,17 @@ def edit_box_scale(s, scale):
 def _obj_spawn_block(name):
     """카탈로그 한 항목의 RigidObjectCfg 코드를 만든다."""
     entity, kind, dims, color, rolling, rot = LANG_OBJECTS[name]
-    roll = ("\n            angular_damping=100.0," if rolling else "")
+    # 각감쇠 — 구르는 물체(마커)가 굴러 달아나는 것만 막는다.
+    #   워크숍 vial을 따라 100.0을 쓰다가 수집 중 **그리퍼에 자석처럼 달라붙는 현상**을
+    #   만났다(2026-09-16, 마커만. 각감쇠가 없는 지우개는 멀쩡했다).
+    #   100은 회전을 사실상 동결시킨다 — dt=1/120에서 스텝당 ω가 55%로 깎여 몇 스텝이면 0이다.
+    #   그러면 턱에 닿아도 구르거나 비껴나지 못하고 마찰만으로 손가락 면에 붙어 버티고,
+    #   들어 올려도 중력 토크로 기울지 않아 막대가 용접된 것처럼 매달린다.
+    #   vial은 랙에 꽂아 두는 물체라 동결이 무해했지만, **집어야 하는** 물체에는 과하다.
+    #   5.0이면 시정수 약 0.2s — 굴러 달아나는 것은 여전히 막으면서 파지 중 회전은 남는다.
+    #   ⚠️ obj_sphere/obj_cylinder 프리셋(edit_block_shape)은 100.0을 그대로 둔다.
+    #      과거 형상 일반화 측정이 그 값에서 나왔고, 바꾸면 비교가 끊긴다.
+    roll = ("\n            angular_damping=5.0," if rolling else "")
     spawn = (f"sim_utils.{kind}Cfg(\n"
              f"        {dims},\n"
              "        mass_props=sim_utils.MassPropertiesCfg(mass=BLOCK_MASS),\n"
@@ -439,10 +458,16 @@ def edit_lang_scene(s):
         s = edit_box_scale(s, LANG_BOX_SCALE)
 
     # ── ④ 판정 대상 전환. 이름은 계획표와 같은 것을 쓰고(red_cube), 내부에서 prim으로 옮긴다 ──
+    # 물체 이름 → 씬 엔티티, 그리고 → **prim 경로**. prim 경로가 따로 필요한 이유는 아래 ⑦.
+    primpath = {k: ("Block_Red" if v[0] == "block_red"
+                    else "".join(w.capitalize() for w in v[0].split("_")))
+                for k, v in LANG_OBJECTS.items()}
     lookup = ("LANG_OBJ_PRIM = " + repr({k: v[0] for k, v in LANG_OBJECTS.items()}) + "\n"
               "LANG_BOX_PRIM = " + repr(dict(LANG_BOXES)) + "\n"
+              "LANG_OBJ_PRIMPATH = " + repr(primpath) + "\n"
               '_EVAL_TARGET = LANG_OBJ_PRIM.get(os.environ.get("EVAL_TARGET", ""), "block_red")\n'
-              '_EVAL_DEST = LANG_BOX_PRIM.get(os.environ.get("EVAL_DEST", ""), "basket_black")\n\n\n')
+              '_EVAL_DEST = LANG_BOX_PRIM.get(os.environ.get("EVAL_DEST", ""), "basket_black")\n'
+              '_EVAL_TARGET_PRIMPATH = LANG_OBJ_PRIMPATH.get(os.environ.get("EVAL_TARGET", ""), "Block_Red")\n\n\n')
     marker = "def _block_place_params():"
     assert s.count(marker) == 1
     s = s.replace(marker, lookup + marker, 1)
@@ -537,6 +562,25 @@ def edit_lang_scene(s):
     # (조합이 같으면 난수 소비 순서가 같아 배치가 재현된다).
     s = s.replace('if os.environ.get("EVAL_PANEL") == "1":',
                   'if os.environ.get("EVAL_PANEL") == "1" and not LANG_SCENE:')
+
+    # ── ⑦ 성공 판정을 **타깃 물체**에 맞춘다 (2026-09-26, 평가 결과 무효화 후 수정) ──
+    #   결함 1: 접촉 센서가 Block_Red 하나만 필터했다.
+    #     vial_placed_on_rack는 `contact_per_filter[:, vial_idx]`로 파지를 본다.
+    #     vials=[_EVAL_TARGET]는 1개짜리라 vial_idx=0 → **필터 0번(=빨간 큐브)의 힘**을 읽는다.
+    #     그래서 파랑·지우개·마커를 아무리 완벽히 집어 넣어도 "잡은 적 없음"이 되고
+    #     성공 조건이 영원히 안 걸렸다 — 실패가 전부 900스텝 타임아웃이었던 이유다.
+    #     실측(10조건×30ep): 빨강이 들어간 조건만 0이 아니었다(15/30, 7/30), 나머지 0~1/30.
+    #     → 필터를 **타깃 하나**로 바꾼다. vials와 순서가 1:1이어야 인덱스가 맞는다.
+    #
+    #   결함 2: 수직 검사. 원본이 시험관을 랙에 꽂는 태스크라 `abs(up_z) > threshold`가 있다.
+    #     마커는 _LIE_FLAT으로 **눕혀 놓으므로** 로컬 z축이 수평이고 up_z ≈ 0이다.
+    #     threshold 0.0에 대해 경계값이라 판정이 불안정하다 → -1.0으로 검사 자체를 무력화한다.
+    #     큐브·지우개·마커 어디에도 '수직'이라는 개념이 없다.
+    s = s.replace('filter_prim_paths_expr=["{ENV_REGEX_NS}/Block_Red"],',
+                  'filter_prim_paths_expr=["{ENV_REGEX_NS}/" + _EVAL_TARGET_PRIMPATH],')
+    assert "_EVAL_TARGET_PRIMPATH]" in s, "접촉 센서 필터 교체 실패"
+    s = s.replace("        vertical_threshold=0.0,\n", "        vertical_threshold=-1.0,\n")
+
     return s
 
 
