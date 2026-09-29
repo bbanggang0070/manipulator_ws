@@ -38,6 +38,26 @@ PANELS = {
     "P3": {"objects": ["green_cube", "cyan_cube", "eraser", "marker"],
            "boxes": ["black", "gray"],
            "note": "조건 7 — 물체 + 목적지 동시"},
+
+    # ── 일반화 패널 (§7-4). 여기 물체·상자 색은 **학습에 0회** 등장한다 ──
+    #   함정: 미학습 대상을 하나만 놓으면 이름을 전혀 몰라도 '혼자 낯선 것'을 고르면 맞는다.
+    #   신기성 편향을 일반화로 오독하게 된다 → **미학습 2개를 함께 놓고** 그중 하나를 지시하고,
+    #   같은 배치에서 **아는 것도 지시해** 낯선 쪽으로만 가지 않는지 확인한다.
+    "P4": {"objects": ["white_cube", "pink_cube", "red_cube", "blue_cube"],
+           "boxes": ["black"],
+           "note": "G1 — 미학습 물체색. 흰·분홍을 함께 놓는다"},
+    "P5": {"objects": ["red_cube", "blue_cube", "eraser", "marker"],
+           "boxes": ["black", "white"],
+           "note": "G2 — 미학습 목적지색. 흰 상자를 흑 상자와 함께 둔다"},
+    "P6": {"objects": ["white_cube", "pink_cube", "yellow_cube", "marker"],
+           "boxes": ["black", "white"],
+           "note": "G3 — 물체색·목적지색 둘 다 미학습"},
+    # 미학습 **물체**. bottle은 세워 둔 통(카탈로그에 서 있는 물체가 없다),
+    # hex_prism은 눕는 육각기둥(구르지 않는다). marker(학습됨)를 같이 둬
+    # "pencil"이 prism으로 가는지 marker로 가는지 가른다 — 의미 근접성 시험.
+    "P7": {"objects": ["bottle", "hex_prism", "red_cube", "marker"],
+           "boxes": ["black"],
+           "note": "G4~G7 — 미학습 물체 2종 + 아는 물체 2종(대조)"},
 }
 
 # 조건 정의 — (번호, 패널, 지시문, EVAL_TARGET, EVAL_DEST, 무엇을 보나)

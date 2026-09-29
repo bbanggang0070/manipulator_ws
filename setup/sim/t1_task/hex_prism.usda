@@ -1,0 +1,33 @@
+#usda 1.0
+(
+    defaultPrim = "hex_prism"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+# 육각기둥 — 미학습 물체 일반화 평가 전용 (2026-09-29)
+#   맞변 16mm × 길이 70mm. 파지 폭 합격 구간(12~25mm) 안이고, 길이는 박스 단변 84mm 안이다.
+#   **평평한 면으로 눕는다** — 원기둥과 달리 구르지 않으므로 재파지가 필요 없다.
+#   교정 시연이 데이터에 거의 없어(covariate shift) 구르는 물체는 측정 축이 섞인다.
+#   학습 카탈로그(정육면체·납작한 판·누운 캡슐) 어디에도 없는 형상이다.
+def Xform "hex_prism" (
+    prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysxRigidBodyAPI", "PhysicsMassAPI"]
+    kind = "component"
+)
+{
+    bool physics:kinematicEnabled = 0
+    bool physics:rigidBodyEnabled = 1
+
+    def Mesh "body" (
+        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+    )
+    {
+        int[] faceVertexCounts = [6, 6, 4, 4, 4, 4, 4, 4]
+        int[] faceVertexIndices = [0, 1, 2, 3, 4, 5, 6, 11, 10, 9, 8, 7, 0, 1, 7, 6, 1, 2, 8, 7, 2, 3, 9, 8, 3, 4, 10, 9, 4, 5, 11, 10, 5, 0, 6, 11]
+        point3f[] points = [(0.0092376, 0.0000000, 0.0350000), (0.0046188, 0.0080000, 0.0350000), (-0.0046188, 0.0080000, 0.0350000), (-0.0092376, 0.0000000, 0.0350000), (-0.0046188, -0.0080000, 0.0350000), (0.0046188, -0.0080000, 0.0350000), (0.0092376, 0.0000000, -0.0350000), (0.0046188, 0.0080000, -0.0350000), (-0.0046188, 0.0080000, -0.0350000), (-0.0092376, 0.0000000, -0.0350000), (-0.0046188, -0.0080000, -0.0350000), (0.0046188, -0.0080000, -0.0350000)]
+        color3f[] primvars:displayColor = [(0.55, 0.75, 0.30)]
+        uniform token subdivisionScheme = "none"
+        bool physics:collisionEnabled = 1
+        uniform token physics:approximation = "convexHull"
+    }
+}

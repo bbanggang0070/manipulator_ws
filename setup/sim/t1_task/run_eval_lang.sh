@@ -44,6 +44,19 @@ CONDS=(
   "8|P1|blue_cube|black|Grab the blue cube and put it in the container"
   "9|LEGACY|||Pick up the block and place it in the box"
   "10|P1|red_cube|black|Pick up the cube and place it in the box"
+  # ── 일반화 (§7-4). 보너스 지표이고 주 판정선이 아니다 ──
+  #   11~13: 미학습 **색**. 14~17: 미학습 **물체**.
+  #   16·17은 같은 배치의 **대조**다 — 아는 물체를 지시했을 때도 되는지 봐야
+  #   "낯선 것으로만 간다"(신기성 편향)를 반증할 수 있다.
+  #   15의 "pencil"은 학습에 없는 명사다. 같은 화면에 marker(학습됨)가 있어,
+  #   pencil이 육각기둥으로 가는지 marker로 가는지가 의미 근접성의 시험이 된다.
+  "11|P4|white_cube|black|Pick up the white block and place it in the box"
+  "12|P5|red_cube|white|Pick up the red block and place it in the white box"
+  "13|P6|pink_cube|white|Pick up the pink block and place it in the white box"
+  "14|P7|bottle|black|Pick up the bottle and place it in the box"
+  "15|P7|hex_prism|black|Pick up the pencil and place it in the box"
+  "16|P7|red_cube|black|Pick up the red block and place it in the box"
+  "17|P7|marker|black|Pick up the marker and place it in the box"
 )
 
 mkdir -p "$DEST"
@@ -68,8 +81,14 @@ done
 rsync -a "$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/sim_to_real_so101/mdp/" \
   "$HOST:~/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/sim_to_real_so101/mdp/" \
   || { echo "❌ mdp 전송 실패"; exit 1; }
+# USD 자산도 보낸다. 언어 씬은 **매 실행에 카탈로그 전체를 스폰**하므로, 카탈로그에
+# 자산 기반 물체를 하나라도 추가하면 그 파일이 없는 머신에서는 전부 죽는다
+# (2026-09-29 실측: hex_prism.usda 미배포로 곡선 평가 5개 지점이 FileNotFoundError로 날아갔다).
+rsync -a "$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/sim_to_real_so101/assets/usd/" \
+  "$HOST:~/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/sim_to_real_so101/assets/usd/" \
+  || { echo "❌ usd 자산 전송 실패"; exit 1; }
 ssh "$HOST" "mkdir -p ~/lang_eval_plans && chmod +x ~/blocktask_headless_scenes.sh"
-scp -q "$PLANDIR"/lang_eval_P?.csv "$HOST:~/lang_eval_plans/" || exit 1
+scp -q "$PLANDIR"/lang_eval_P[0-9].csv "$HOST:~/lang_eval_plans/" || exit 1
 
 T0=$(date +%s)
 for c in "${CONDS[@]}"; do

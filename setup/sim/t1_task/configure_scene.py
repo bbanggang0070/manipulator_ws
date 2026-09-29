@@ -193,6 +193,23 @@ LANG_OBJECTS = {
     # ⚠️ 아래 둘은 **평가 전용**. 수집 계획표에 들어가면 미학습 색 일반화가 통째로 무효가 된다.
     "white_cube":  ("obj_white",  "Cuboid",   "size=(0.02, 0.02, 0.02)",      "white",  False, None),
     "pink_cube":   ("obj_pink",   "Cuboid",   "size=(0.02, 0.02, 0.02)",      "pink",   False, None),
+    # ⚠️ 아래 둘도 **평가 전용** — 학습에 0회 등장해야 미학습 물체 일반화가 성립한다.
+    #   bottle: 원본 워크숍의 바이알(Ø34×116mm)을 0.6배로 줄여 Ø20×70mm.
+    #     파지 폭 합격 구간(12~25mm) 안이고 높이는 박스 단변 84mm 안이다.
+    #     **세워 둔다** — 카탈로그에 서 있는 물체가 하나도 없어 시각적으로 즉시 갈린다.
+    #     물리가 검증된 자산이라(원본 태스크가 이것으로 돌았다) 새로 만들 위험이 없다.
+    #   hex_prism: 맞변 16mm × 길이 70mm 육각기둥. **평평한 면으로 눕는다** —
+    #     ⚠️ 자산 정본은 repo의 `setup/sim/t1_task/hex_prism.usda`다. 워크숍 저장소의
+    #        `assets/usd/`에 복사해야 씬이 뜬다(평가 러너가 5090으로는 자동 배포한다).
+    #        빠뜨리면 카탈로그 전체 스폰이 FileNotFoundError로 죽는다 — 2026-09-29 실측.
+    #     구르지 않으므로 재파지가 필요 없다(교정 시연 부족으로 구르는 물체는 축이 섞인다).
+    #     정육면체·납작한 판·누운 캡슐 어디에도 없는 형상이다.
+    "bottle":      ("obj_bottle", "Usd",
+                    'usd_path=f"{assets_path}/usd/Vial_opaque.usda", scale=(0.6, 0.6, 0.6)',
+                    "cyan", False, None),
+    "hex_prism":   ("obj_prism",  "Usd",
+                    'usd_path=f"{assets_path}/usd/hex_prism.usda", scale=(1.0, 1.0, 1.0)',
+                    "green", True,  _LIE_FLAT),
 }
 # 박스 색 → 씬 엔티티 이름. black은 기존 basket_black.
 LANG_BOXES = {"black": "basket_black", "brown": "box_brown", "gray": "box_gray",
@@ -400,6 +417,25 @@ def _obj_spawn_block(name):
     #   ⚠️ obj_sphere/obj_cylinder 프리셋(edit_block_shape)은 100.0을 그대로 둔다.
     #      과거 형상 일반화 측정이 그 값에서 나왔고, 바꾸면 비교가 끊긴다.
     roll = ("\n            angular_damping=5.0," if rolling else "")
+    if kind == "Usd":
+        # 자산 파일에서 스폰한다(미학습 물체 일반화용). dims에 usd_path·scale을 준다.
+        #   프리미티브와 달리 색은 자산이 들고 있으므로 visual_material로 덮어쓴다.
+        spawn = (f"sim_utils.UsdFileCfg(\n"
+                 f"        {dims},\n"
+                 "        mass_props=sim_utils.MassPropertiesCfg(mass=BLOCK_MASS),\n"
+                 "        rigid_props=sim_utils.RigidBodyPropertiesCfg(\n"
+                 "            solver_position_iteration_count=8,\n"
+                 f"            solver_velocity_iteration_count=4,{roll}\n"
+                 "        ),\n"
+                 f"        visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color={LANG_COLOR[color]}),\n"
+                 "    )")
+        prim = "".join(w.capitalize() for w in entity.split("_"))
+        out = (f"\n    {entity} = block_base.replace()\n"
+               f'    {entity}.prim_path = "{{ENV_REGEX_NS}}/{prim}"\n'
+               f"    {entity}.spawn = {spawn}\n")
+        if rot:
+            out += f"    {entity}.init_state.rot = {rot}\n"
+        return out
     spawn = (f"sim_utils.{kind}Cfg(\n"
              f"        {dims},\n"
              "        mass_props=sim_utils.MassPropertiesCfg(mass=BLOCK_MASS),\n"
