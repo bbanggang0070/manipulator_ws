@@ -1,0 +1,251 @@
+ep,n_objects,objects,target,boxes,dest,dest_named,instruction
+1,3,"yellow cube, blue cube, orange cube",yellow cube,"gray, black",gray,gray,Pick up the yellow cube and place it in the gray box
+2,3,"orange cube, yellow cube, blue cube",orange cube,"brown, black",brown,brown,Put the orange cube into the brown box
+3,1,orange cube,orange cube,"gray, brown",brown,,Grab the orange cube and put it in the box
+4,3,"orange cube, red cube, blue cube",orange cube,"black, brown",brown,,Pick up the orange cube and place it in the box
+5,2,"marker, red cube",marker,"black, gray",black,black,Pick up the marker and place it in the black box
+6,4,"eraser, marker, green cube, blue cube",eraser,"brown, black",black,black,Pick up the eraser and place it in the black box
+7,4,"orange cube, eraser, red cube, green cube",green cube,"black, brown",brown,,Grab the green cube and put it in the box
+8,3,"blue cube, eraser, marker",blue cube,"black, gray",black,black,Pick up the blue cube and place it in the black box
+9,2,"red cube, green cube",red cube,"black, gray",gray,gray,Grab the red cube and put it in the gray box
+10,1,blue cube,blue cube,"brown, black",brown,,Put the blue cube into the box
+11,2,"marker, orange cube",orange cube,"brown, gray",brown,,Put the orange cube into the box
+12,3,"red cube, green cube, purple cube",green cube,"brown, gray",brown,brown,Pick up the green cube and place it in the brown box
+13,4,"eraser, red cube, marker, purple cube",red cube,"gray, brown",brown,brown,Put the red cube into the brown box
+14,3,"purple cube, orange cube, red cube",orange cube,"gray, brown",gray,gray,Put the orange cube into the gray box
+15,1,blue cube,blue cube,"gray, brown",gray,gray,Put the blue cube into the gray box
+16,1,orange cube,orange cube,"black, gray",black,,Pick up the block and place it in the box
+17,4,"purple cube, red cube, green cube, eraser",green cube,"gray, black",gray,gray,Put the green cube into the gray box
+18,2,"marker, purple cube",purple cube,"brown, black",brown,,Pick up the purple cube and place it in the box
+19,4,"eraser, yellow cube, red cube, purple cube",purple cube,"black, gray",gray,,Grab the purple cube and put it in the box
+20,4,"orange cube, green cube, blue cube, marker",orange cube,"black, gray",gray,gray,Grab the orange cube and put it in the gray box
+21,4,"green cube, orange cube, marker, yellow cube",green cube,"gray, brown",gray,,Put the green cube into the box
+22,1,green cube,green cube,"brown, black",brown,brown,Put the green cube into the brown box
+23,2,"yellow cube, eraser",yellow cube,"brown, black",brown,brown,Put the yellow cube into the brown box
+24,2,"eraser, red cube",eraser,"gray, black",gray,,Put the eraser into the box
+25,1,eraser,eraser,"brown, black",black,black,Grab the eraser and put it in the black box
+26,3,"purple cube, blue cube, green cube",purple cube,"gray, black",black,black,Pick up the purple cube and place it in the black box
+27,4,"red cube, green cube, marker, eraser",eraser,"gray, brown",brown,brown,Grab the eraser and put it in the brown box
+28,3,"marker, yellow cube, blue cube",yellow cube,"brown, black",black,,Grab the yellow cube and put it in the box
+29,4,"green cube, purple cube, blue cube, red cube",red cube,"brown, gray",brown,brown,Put the red cube into the brown box
+30,3,"marker, blue cube, orange cube",orange cube,"brown, gray",brown,brown,Grab the orange cube and put it in the brown box
+31,4,"green cube, blue cube, purple cube, yellow cube",green cube,"gray, black",black,black,Grab the green cube and put it in the black box
+32,3,"eraser, yellow cube, marker",yellow cube,"brown, gray",gray,,Put the yellow cube into the box
+33,1,blue cube,blue cube,"gray, brown",brown,brown,Pick up the blue cube and place it in the brown box
+34,3,"eraser, red cube, marker",red cube,"gray, black",black,black,Pick up the red cube and place it in the black box
+35,3,"purple cube, yellow cube, green cube",yellow cube,"black, brown",black,black,Pick up the yellow cube and place it in the black box
+36,3,"orange cube, yellow cube, blue cube",orange cube,"black, brown",brown,brown,Put the orange cube into the brown box
+37,3,"marker, eraser, yellow cube",marker,"brown, gray",brown,brown,Grab the marker and put it in the brown box
+38,1,eraser,eraser,"brown, gray",gray,,Pick up the block and place it in the box
+39,3,"purple cube, red cube, eraser",purple cube,"gray, black",gray,gray,Grab the purple cube and put it in the gray box
+40,4,"green cube, purple cube, marker, red cube",green cube,"gray, brown",gray,gray,Grab the green cube and put it in the gray box
+41,4,"marker, yellow cube, purple cube, orange cube",marker,"gray, brown",brown,,Grab the marker and put it in the box
+42,4,"marker, blue cube, green cube, purple cube",blue cube,"gray, brown",brown,brown,Grab the blue cube and put it in the brown box
+43,3,"yellow cube, green cube, red cube",yellow cube,"brown, gray",gray,,Pick up the yellow cube and place it in the box
+44,3,"blue cube, eraser, yellow cube",eraser,"black, gray",gray,gray,Pick up the eraser and place it in the gray box
+45,4,"purple cube, marker, eraser, red cube",eraser,"brown, black",brown,,Pick up the eraser and place it in the box
+46,3,"marker, yellow cube, orange cube",yellow cube,"black, brown",black,black,Grab the yellow cube and put it in the black box
+47,3,"blue cube, yellow cube, eraser",yellow cube,"gray, brown",brown,brown,Pick up the yellow cube and place it in the brown box
+48,4,"marker, orange cube, blue cube, red cube",marker,"gray, black",black,,Put the marker into the box
+49,3,"red cube, blue cube, eraser",eraser,"black, brown",brown,brown,Pick up the eraser and place it in the brown box
+50,1,purple cube,purple cube,"black, gray",black,,Grab the purple cube and put it in the box
+51,3,"blue cube, orange cube, marker",blue cube,"brown, black",brown,brown,Put the blue cube into the brown box
+52,3,"red cube, purple cube, green cube",purple cube,"black, gray",black,,Grab the purple cube and put it in the box
+53,3,"red cube, blue cube, purple cube",blue cube,"brown, gray",gray,gray,Put the blue cube into the gray box
+54,4,"green cube, purple cube, eraser, marker",eraser,"gray, brown",brown,brown,Pick up the eraser and place it in the brown box
+55,2,"blue cube, green cube",green cube,"brown, black",black,black,Put the green cube into the black box
+56,3,"orange cube, green cube, marker",orange cube,"gray, black",black,,Pick up the orange cube and place it in the box
+57,1,yellow cube,yellow cube,"brown, gray",gray,gray,Put the yellow cube into the gray box
+58,3,"marker, red cube, orange cube",marker,"gray, black",gray,gray,Put the marker into the gray box
+59,2,"marker, blue cube",marker,"gray, black",gray,gray,Put the marker into the gray box
+60,4,"red cube, orange cube, eraser, blue cube",eraser,"black, gray",gray,gray,Pick up the eraser and place it in the gray box
+61,4,"blue cube, eraser, red cube, green cube",green cube,"gray, black",black,,Pick up the green cube and place it in the box
+62,1,red cube,red cube,"brown, black",brown,,Pick up the block and place it in the box
+63,1,green cube,green cube,"brown, gray",gray,,Pick up the block and place it in the box
+64,3,"marker, purple cube, blue cube",marker,"brown, black",brown,brown,Pick up the marker and place it in the brown box
+65,4,"green cube, yellow cube, purple cube, marker",purple cube,"gray, black",gray,,Pick up the purple cube and place it in the box
+66,4,"yellow cube, red cube, orange cube, green cube",green cube,"black, brown",black,black,Pick up the green cube and place it in the black box
+67,2,"marker, orange cube",orange cube,"brown, gray",brown,,Pick up the orange cube and place it in the box
+68,3,"marker, blue cube, red cube",red cube,"brown, gray",gray,gray,Grab the red cube and put it in the gray box
+69,4,"purple cube, marker, eraser, yellow cube",eraser,"black, gray",gray,gray,Put the eraser into the gray box
+70,1,orange cube,orange cube,"brown, gray",gray,gray,Pick up the orange cube and place it in the gray box
+71,2,"blue cube, eraser",blue cube,"black, gray",black,,Put the blue cube into the box
+72,3,"blue cube, marker, eraser",marker,"gray, brown",gray,gray,Pick up the marker and place it in the gray box
+73,4,"purple cube, yellow cube, marker, orange cube",purple cube,"brown, black",black,black,Pick up the purple cube and place it in the black box
+74,1,marker,marker,"brown, gray",brown,,Pick up the block and place it in the box
+75,1,red cube,red cube,"gray, black",gray,gray,Grab the red cube and put it in the gray box
+76,3,"green cube, yellow cube, blue cube",blue cube,"brown, black",brown,brown,Pick up the blue cube and place it in the brown box
+77,3,"yellow cube, red cube, green cube",yellow cube,"black, gray",gray,gray,Pick up the yellow cube and place it in the gray box
+78,4,"purple cube, yellow cube, eraser, marker",purple cube,"brown, gray",gray,gray,Put the purple cube into the gray box
+79,4,"purple cube, red cube, yellow cube, marker",yellow cube,"black, gray",gray,gray,Grab the yellow cube and put it in the gray box
+80,4,"green cube, orange cube, eraser, marker",orange cube,"brown, black",brown,brown,Grab the orange cube and put it in the brown box
+81,2,"yellow cube, eraser",eraser,"brown, black",black,black,Grab the eraser and put it in the black box
+82,2,"orange cube, red cube",red cube,"black, gray",gray,gray,Pick up the red cube and place it in the gray box
+83,4,"yellow cube, red cube, blue cube, orange cube",orange cube,"gray, brown",brown,brown,Grab the orange cube and put it in the brown box
+84,1,blue cube,blue cube,"black, gray",gray,,Put the blue cube into the box
+85,4,"blue cube, marker, red cube, eraser",eraser,"brown, gray",brown,,Grab the eraser and put it in the box
+86,3,"yellow cube, orange cube, red cube",orange cube,"black, gray",black,black,Put the orange cube into the black box
+87,3,"marker, eraser, green cube",marker,"gray, black",gray,,Grab the marker and put it in the box
+88,2,"blue cube, purple cube",purple cube,"gray, brown",brown,brown,Pick up the purple cube and place it in the brown box
+89,4,"green cube, orange cube, marker, red cube",green cube,"gray, black",gray,,Put the green cube into the box
+90,4,"eraser, blue cube, orange cube, yellow cube",orange cube,"black, gray",black,black,Grab the orange cube and put it in the black box
+91,4,"eraser, red cube, orange cube, blue cube",eraser,"black, brown",black,black,Grab the eraser and put it in the black box
+92,4,"green cube, yellow cube, red cube, orange cube",green cube,"black, gray",black,black,Pick up the green cube and place it in the black box
+93,4,"purple cube, green cube, eraser, marker",marker,"gray, black",black,black,Pick up the marker and place it in the black box
+94,3,"blue cube, purple cube, yellow cube",purple cube,"gray, black",gray,gray,Grab the purple cube and put it in the gray box
+95,2,"red cube, purple cube",purple cube,"gray, black",black,,Grab the purple cube and put it in the box
+96,3,"marker, orange cube, red cube",orange cube,"black, gray",black,black,Grab the orange cube and put it in the black box
+97,1,yellow cube,yellow cube,"black, brown",brown,brown,Pick up the yellow cube and place it in the brown box
+98,4,"red cube, orange cube, yellow cube, blue cube",red cube,"black, brown",black,black,Put the red cube into the black box
+99,1,marker,marker,"black, gray",gray,,Pick up the block and place it in the box
+100,1,purple cube,purple cube,"brown, gray",brown,,Put the purple cube into the box
+101,3,"eraser, blue cube, yellow cube",blue cube,"gray, black",black,,Pick up the blue cube and place it in the box
+102,2,"orange cube, green cube",orange cube,"black, brown",black,black,Pick up the orange cube and place it in the black box
+103,3,"red cube, marker, green cube",red cube,"black, gray",black,black,Pick up the red cube and place it in the black box
+104,2,"marker, eraser",marker,"gray, black",black,black,Put the marker into the black box
+105,3,"eraser, yellow cube, purple cube",yellow cube,"black, gray",black,black,Pick up the yellow cube and place it in the black box
+106,3,"orange cube, eraser, purple cube",eraser,"black, brown",black,,Pick up the eraser and place it in the box
+107,3,"red cube, marker, green cube",marker,"gray, black",gray,gray,Grab the marker and put it in the gray box
+108,3,"eraser, blue cube, green cube",blue cube,"black, gray",black,black,Pick up the blue cube and place it in the black box
+109,2,"blue cube, purple cube",blue cube,"black, gray",gray,gray,Put the blue cube into the gray box
+110,4,"red cube, green cube, marker, blue cube",blue cube,"black, brown",brown,brown,Pick up the blue cube and place it in the brown box
+111,1,eraser,eraser,"black, gray",gray,gray,Put the eraser into the gray box
+112,2,"red cube, marker",red cube,"brown, black",black,,Grab the red cube and put it in the box
+113,3,"blue cube, green cube, red cube",red cube,"black, brown",black,black,Grab the red cube and put it in the black box
+114,4,"red cube, marker, eraser, purple cube",red cube,"brown, black",brown,brown,Put the red cube into the brown box
+115,4,"marker, eraser, orange cube, red cube",red cube,"brown, black",brown,brown,Put the red cube into the brown box
+116,2,"blue cube, yellow cube",blue cube,"brown, gray",gray,,Put the blue cube into the box
+117,1,blue cube,blue cube,"gray, black",gray,,Put the blue cube into the box
+118,4,"marker, red cube, yellow cube, orange cube",marker,"brown, gray",brown,,Pick up the marker and place it in the box
+119,3,"marker, yellow cube, blue cube",blue cube,"gray, brown",gray,gray,Pick up the blue cube and place it in the gray box
+120,4,"eraser, orange cube, blue cube, purple cube",blue cube,"black, gray",black,black,Grab the blue cube and put it in the black box
+121,1,eraser,eraser,"brown, black",black,,Pick up the block and place it in the box
+122,3,"blue cube, eraser, purple cube",purple cube,"gray, brown",gray,gray,Grab the purple cube and put it in the gray box
+123,1,marker,marker,"black, gray",black,black,Grab the marker and put it in the black box
+124,1,blue cube,blue cube,"brown, black",black,black,Put the blue cube into the black box
+125,3,"orange cube, marker, eraser",eraser,"gray, brown",gray,gray,Put the eraser into the gray box
+126,4,"green cube, purple cube, marker, blue cube",purple cube,"brown, gray",brown,,Put the purple cube into the box
+127,2,"red cube, green cube",red cube,"brown, gray",brown,brown,Grab the red cube and put it in the brown box
+128,2,"green cube, marker",green cube,"black, gray",black,black,Put the green cube into the black box
+129,1,orange cube,orange cube,"brown, gray",brown,,Pick up the block and place it in the box
+130,3,"eraser, orange cube, green cube",eraser,"gray, black",gray,gray,Pick up the eraser and place it in the gray box
+131,1,orange cube,orange cube,"brown, gray",brown,,Pick up the orange cube and place it in the box
+132,1,blue cube,blue cube,"gray, brown",gray,gray,Pick up the blue cube and place it in the gray box
+133,2,"marker, blue cube",marker,"brown, black",black,black,Put the marker into the black box
+134,3,"yellow cube, eraser, orange cube",orange cube,"brown, gray",brown,,Put the orange cube into the box
+135,2,"eraser, purple cube",purple cube,"brown, black",black,black,Grab the purple cube and put it in the black box
+136,3,"yellow cube, green cube, marker",green cube,"brown, black",black,,Put the green cube into the box
+137,3,"red cube, eraser, purple cube",purple cube,"black, brown",brown,brown,Pick up the purple cube and place it in the brown box
+138,2,"marker, blue cube",blue cube,"gray, black",gray,,Grab the blue cube and put it in the box
+139,3,"green cube, orange cube, marker",green cube,"black, gray",black,black,Put the green cube into the black box
+140,3,"yellow cube, eraser, red cube",yellow cube,"gray, black",black,black,Pick up the yellow cube and place it in the black box
+141,2,"orange cube, eraser",eraser,"black, brown",black,,Put the eraser into the box
+142,3,"red cube, orange cube, purple cube",red cube,"black, gray",black,black,Put the red cube into the black box
+143,4,"yellow cube, purple cube, marker, blue cube",purple cube,"black, brown",black,black,Grab the purple cube and put it in the black box
+144,3,"blue cube, orange cube, purple cube",blue cube,"brown, gray",gray,gray,Pick up the blue cube and place it in the gray box
+145,1,red cube,red cube,"black, gray",gray,gray,Grab the red cube and put it in the gray box
+146,4,"blue cube, orange cube, purple cube, yellow cube",blue cube,"gray, black",black,black,Put the blue cube into the black box
+147,1,orange cube,orange cube,"brown, black",black,black,Put the orange cube into the black box
+148,3,"yellow cube, green cube, red cube",red cube,"brown, black",black,black,Grab the red cube and put it in the black box
+149,4,"green cube, eraser, blue cube, marker",blue cube,"black, gray",gray,gray,Put the blue cube into the gray box
+150,3,"orange cube, eraser, blue cube",eraser,"brown, gray",brown,,Pick up the eraser and place it in the box
+151,1,red cube,red cube,"black, brown",black,,Pick up the block and place it in the box
+152,4,"red cube, marker, yellow cube, blue cube",yellow cube,"gray, brown",gray,,Put the yellow cube into the box
+153,2,"purple cube, marker",purple cube,"black, gray",black,,Pick up the purple cube and place it in the box
+154,4,"red cube, marker, purple cube, eraser",marker,"gray, brown",brown,brown,Put the marker into the brown box
+155,3,"orange cube, red cube, eraser",eraser,"gray, black",black,black,Grab the eraser and put it in the black box
+156,4,"eraser, yellow cube, green cube, orange cube",orange cube,"brown, black",black,black,Grab the orange cube and put it in the black box
+157,3,"red cube, yellow cube, orange cube",red cube,"black, gray",gray,gray,Pick up the red cube and place it in the gray box
+158,3,"green cube, marker, orange cube",green cube,"black, brown",black,black,Grab the green cube and put it in the black box
+159,4,"green cube, blue cube, eraser, red cube",blue cube,"brown, gray",brown,brown,Put the blue cube into the brown box
+160,3,"yellow cube, marker, red cube",red cube,"brown, black",black,black,Grab the red cube and put it in the black box
+161,4,"red cube, blue cube, eraser, marker",marker,"black, brown",black,black,Grab the marker and put it in the black box
+162,4,"orange cube, red cube, green cube, eraser",eraser,"brown, black",brown,brown,Grab the eraser and put it in the brown box
+163,4,"blue cube, purple cube, eraser, marker",marker,"brown, black",brown,brown,Grab the marker and put it in the brown box
+164,4,"yellow cube, marker, eraser, blue cube",marker,"gray, brown",gray,gray,Pick up the marker and place it in the gray box
+165,4,"purple cube, yellow cube, eraser, red cube",red cube,"brown, gray",brown,,Put the red cube into the box
+166,4,"blue cube, green cube, orange cube, eraser",eraser,"black, gray",gray,gray,Grab the eraser and put it in the gray box
+167,4,"red cube, blue cube, yellow cube, purple cube",yellow cube,"gray, black",gray,gray,Pick up the yellow cube and place it in the gray box
+168,2,"eraser, marker",eraser,"brown, gray",gray,,Grab the eraser and put it in the box
+169,1,blue cube,blue cube,"black, brown",brown,,Pick up the block and place it in the box
+170,3,"purple cube, orange cube, eraser",purple cube,"brown, gray",brown,brown,Pick up the purple cube and place it in the brown box
+171,3,"yellow cube, marker, red cube",yellow cube,"black, gray",black,black,Put the yellow cube into the black box
+172,3,"orange cube, purple cube, blue cube",blue cube,"black, brown",black,black,Grab the blue cube and put it in the black box
+173,4,"marker, eraser, yellow cube, orange cube",marker,"gray, brown",gray,,Put the marker into the box
+174,4,"orange cube, marker, red cube, yellow cube",yellow cube,"black, gray",gray,gray,Grab the yellow cube and put it in the gray box
+175,4,"green cube, marker, orange cube, eraser",green cube,"gray, black",black,black,Put the green cube into the black box
+176,2,"yellow cube, purple cube",yellow cube,"black, gray",gray,gray,Grab the yellow cube and put it in the gray box
+177,1,eraser,eraser,"brown, black",brown,,Pick up the block and place it in the box
+178,3,"yellow cube, green cube, eraser",green cube,"gray, black",black,,Put the green cube into the box
+179,3,"red cube, purple cube, green cube",red cube,"gray, black",gray,,Grab the red cube and put it in the box
+180,4,"eraser, red cube, green cube, blue cube",eraser,"black, brown",black,black,Put the eraser into the black box
+181,4,"eraser, yellow cube, green cube, red cube",yellow cube,"gray, black",black,,Put the yellow cube into the box
+182,3,"red cube, green cube, yellow cube",green cube,"gray, black",black,black,Grab the green cube and put it in the black box
+183,4,"purple cube, yellow cube, red cube, blue cube",red cube,"gray, black",black,black,Put the red cube into the black box
+184,3,"orange cube, purple cube, yellow cube",purple cube,"brown, black",brown,brown,Pick up the purple cube and place it in the brown box
+185,3,"orange cube, purple cube, yellow cube",orange cube,"gray, brown",gray,gray,Put the orange cube into the gray box
+186,4,"yellow cube, purple cube, orange cube, green cube",purple cube,"gray, brown",brown,brown,Grab the purple cube and put it in the brown box
+187,2,"eraser, orange cube",eraser,"brown, black",brown,brown,Grab the eraser and put it in the brown box
+188,2,"eraser, red cube",eraser,"brown, gray",gray,gray,Pick up the eraser and place it in the gray box
+189,4,"purple cube, red cube, marker, eraser",purple cube,"gray, black",black,black,Pick up the purple cube and place it in the black box
+190,4,"yellow cube, marker, orange cube, eraser",marker,"brown, black",brown,brown,Pick up the marker and place it in the brown box
+191,3,"marker, red cube, yellow cube",red cube,"brown, black",brown,brown,Pick up the red cube and place it in the brown box
+192,4,"green cube, orange cube, purple cube, blue cube",green cube,"black, gray",black,black,Pick up the green cube and place it in the black box
+193,4,"blue cube, purple cube, yellow cube, green cube",purple cube,"brown, gray",gray,gray,Pick up the purple cube and place it in the gray box
+194,3,"orange cube, marker, purple cube",orange cube,"black, brown",black,black,Pick up the orange cube and place it in the black box
+195,4,"red cube, orange cube, marker, eraser",orange cube,"gray, black",gray,gray,Pick up the orange cube and place it in the gray box
+196,4,"blue cube, red cube, green cube, purple cube",purple cube,"brown, gray",brown,brown,Pick up the purple cube and place it in the brown box
+197,2,"yellow cube, orange cube",yellow cube,"black, gray",gray,,Put the yellow cube into the box
+198,3,"red cube, yellow cube, marker",red cube,"black, brown",brown,brown,Grab the red cube and put it in the brown box
+199,4,"yellow cube, red cube, green cube, blue cube",red cube,"black, gray",black,,Put the red cube into the box
+200,4,"yellow cube, blue cube, red cube, eraser",eraser,"brown, black",brown,brown,Put the eraser into the brown box
+201,3,"marker, purple cube, green cube",purple cube,"black, brown",brown,brown,Grab the purple cube and put it in the brown box
+202,3,"marker, blue cube, yellow cube",yellow cube,"brown, gray",gray,gray,Grab the yellow cube and put it in the gray box
+203,4,"green cube, blue cube, yellow cube, marker",marker,"brown, gray",gray,gray,Put the marker into the gray box
+204,3,"blue cube, marker, yellow cube",blue cube,"black, gray",gray,gray,Pick up the blue cube and place it in the gray box
+205,3,"green cube, blue cube, purple cube",purple cube,"black, brown",black,black,Pick up the purple cube and place it in the black box
+206,4,"green cube, orange cube, purple cube, eraser",eraser,"brown, black",brown,,Pick up the eraser and place it in the box
+207,2,"purple cube, green cube",green cube,"brown, gray",gray,gray,Put the green cube into the gray box
+208,3,"eraser, red cube, blue cube",red cube,"gray, brown",gray,,Put the red cube into the box
+209,4,"orange cube, marker, yellow cube, blue cube",yellow cube,"gray, brown",gray,,Grab the yellow cube and put it in the box
+210,3,"orange cube, green cube, blue cube",orange cube,"brown, gray",gray,gray,Grab the orange cube and put it in the gray box
+211,4,"purple cube, orange cube, yellow cube, marker",marker,"black, brown",brown,,Grab the marker and put it in the box
+212,3,"orange cube, eraser, green cube",green cube,"black, brown",brown,,Pick up the green cube and place it in the box
+213,1,orange cube,orange cube,"brown, gray",brown,,Pick up the block and place it in the box
+214,3,"orange cube, marker, purple cube",purple cube,"gray, brown",brown,brown,Pick up the purple cube and place it in the brown box
+215,1,green cube,green cube,"black, brown",black,,Pick up the green cube and place it in the box
+216,3,"blue cube, orange cube, purple cube",orange cube,"gray, brown",brown,brown,Grab the orange cube and put it in the brown box
+217,2,"orange cube, purple cube",orange cube,"gray, black",gray,gray,Pick up the orange cube and place it in the gray box
+218,1,green cube,green cube,"brown, gray",brown,,Pick up the block and place it in the box
+219,3,"blue cube, red cube, green cube",green cube,"brown, gray",brown,brown,Pick up the green cube and place it in the brown box
+220,3,"yellow cube, orange cube, marker",marker,"brown, black",black,black,Put the marker into the black box
+221,3,"yellow cube, orange cube, marker",marker,"black, gray",black,black,Grab the marker and put it in the black box
+222,3,"marker, green cube, red cube",green cube,"brown, gray",brown,brown,Put the green cube into the brown box
+223,4,"purple cube, eraser, blue cube, marker",marker,"brown, gray",brown,brown,Put the marker into the brown box
+224,4,"yellow cube, marker, red cube, orange cube",red cube,"gray, brown",brown,,Pick up the red cube and place it in the box
+225,1,yellow cube,yellow cube,"gray, black",black,black,Pick up the yellow cube and place it in the black box
+226,3,"red cube, green cube, yellow cube",green cube,"brown, gray",gray,,Pick up the green cube and place it in the box
+227,3,"orange cube, green cube, marker",orange cube,"black, gray",gray,,Pick up the orange cube and place it in the box
+228,2,"red cube, yellow cube",yellow cube,"brown, black",brown,brown,Put the yellow cube into the brown box
+229,1,yellow cube,yellow cube,"black, gray",black,,Pick up the block and place it in the box
+230,4,"marker, yellow cube, eraser, orange cube",yellow cube,"gray, brown",gray,,Pick up the yellow cube and place it in the box
+231,2,"blue cube, green cube",green cube,"gray, brown",brown,,Put the green cube into the box
+232,4,"eraser, red cube, yellow cube, blue cube",yellow cube,"gray, black",black,black,Put the yellow cube into the black box
+233,4,"marker, blue cube, orange cube, green cube",marker,"brown, gray",brown,,Put the marker into the box
+234,4,"red cube, purple cube, yellow cube, blue cube",red cube,"brown, black",brown,,Pick up the red cube and place it in the box
+235,4,"blue cube, yellow cube, eraser, red cube",blue cube,"brown, black",black,black,Put the blue cube into the black box
+236,3,"red cube, purple cube, marker",purple cube,"gray, black",gray,gray,Put the purple cube into the gray box
+237,4,"yellow cube, blue cube, orange cube, green cube",blue cube,"black, brown",black,,Pick up the blue cube and place it in the box
+238,2,"yellow cube, red cube",yellow cube,"brown, gray",gray,,Put the yellow cube into the box
+239,4,"red cube, green cube, purple cube, orange cube",red cube,"black, gray",gray,gray,Grab the red cube and put it in the gray box
+240,4,"marker, green cube, orange cube, yellow cube",green cube,"brown, black",brown,brown,Grab the green cube and put it in the brown box
+241,3,"marker, red cube, purple cube",marker,"gray, black",gray,gray,Pick up the marker and place it in the gray box
+242,3,"purple cube, blue cube, marker",blue cube,"gray, brown",gray,gray,Grab the blue cube and put it in the gray box
+243,4,"green cube, yellow cube, purple cube, eraser",purple cube,"black, brown",brown,brown,Pick up the purple cube and place it in the brown box
+244,1,marker,marker,"gray, black",black,,Pick up the block and place it in the box
+245,3,"marker, yellow cube, purple cube",yellow cube,"brown, black",brown,brown,Grab the yellow cube and put it in the brown box
+246,4,"purple cube, eraser, blue cube, marker",blue cube,"gray, black",gray,gray,Pick up the blue cube and place it in the gray box
+247,1,red cube,red cube,"black, brown",black,black,Put the red cube into the black box
+248,3,"marker, purple cube, green cube",purple cube,"gray, brown",gray,,Grab the purple cube and put it in the box
+249,4,"orange cube, marker, red cube, green cube",green cube,"gray, brown",brown,,Put the green cube into the box
+250,3,"red cube, yellow cube, blue cube",yellow cube,"brown, gray",brown,,Grab the yellow cube and put it in the box
