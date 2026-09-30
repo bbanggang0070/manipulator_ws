@@ -57,6 +57,23 @@ CONDS=(
   "15|P7|hex_prism|black|Pick up the pencil and place it in the box"
   "16|P7|red_cube|black|Pick up the red block and place it in the box"
   "17|P7|marker|black|Pick up the marker and place it in the box"
+  # ── 목적지 단독 (2026-09-30). 물체가 하나뿐이라 성공률이 곧 목적지 정확도다 ──
+  #   기존 조건 5·6·7은 물체 선택과 목적지 선택의 **곱**이라 역산이 필요했다.
+  #   18↔19가 대응쌍이고, 우연은 상자 2개이므로 50%다.
+  "18|P8|yellow_cube|black|Pick up the yellow block and place it in the black box"
+  "19|P8|yellow_cube|brown|Pick up the yellow block and place it in the brown box"
+  # ── 교차 셀 (2026-09-30). **지시문은 그대로 두고 판정 상자만 반대로** 놓는다 ──
+  #   18·19만으로는 닫히지 않는다. 성공률의 합이 83.4%였는데, 이 값이
+  #   "배치 자체를 실패한 비율"인지 "반대 상자로 간 비율"인지 구별되지 않는다.
+  #     a = P(검정|검정 지시), b = P(갈색|갈색 지시), q = 어느 상자엔가 넣은 비율
+  #     q·a = 0.267, q·b = 0.567  →  a + b = 0.834 / q
+  #     a + b > 1 이면 언어를 읽는 것이고, = 1 이면 고정 편향(우연)이다.
+  #   20·21이 각 지시문의 **반대 상자 도달률**을 주므로 행 합이 곧 q이고,
+  #   가정 없이 2×2 혼동행렬이 닫힌다.
+  #     18 검정지시→검정판정   20 검정지시→갈색판정   (합 = q)
+  #     21 갈색지시→검정판정   19 갈색지시→갈색판정   (합 = q)
+  "20|P8|yellow_cube|brown|Pick up the yellow block and place it in the black box"
+  "21|P8|yellow_cube|black|Pick up the yellow block and place it in the brown box"
 )
 
 mkdir -p "$DEST"
@@ -95,7 +112,20 @@ for c in "${CONDS[@]}"; do
   IFS='|' read -r N PAN TGT DST LANG <<< "$c"
   [ -n "$ONLY" ] && ! grep -qw "$N" <<< "$ONLY" && continue
   GLOB="hl_*lang${RUN:+_$RUN}_c${N}_s${SEED}"
+  # ── 교차 셀 감지 ──────────────────────────────────────────────────
+  #   지시문이 부르는 상자색과 **판정 상자(DST)가 다른** 조건이 있다(20·21).
+  #   "틀린 상자로 간 비율"을 재려고 일부러 그렇게 만든 것이라, 로봇이 지시를
+  #   제대로 따르면 outcome=fail · steps=900(timeout)으로 기록된다.
+  #   조기 종료는 **판정 상자**에 들어갔을 때만 발동하기 때문이다.
+  #   이 사실이 파일명·로그 어디에도 안 드러나서 두 번 오독됐다(2026-09-30). 표시한다.
+  SAID=""
+  for _col in black brown gray white cyan pink; do
+    grep -qi "\b$_col box\b\|\b$_col bin\b" <<< "$LANG" && SAID="$_col"
+  done
+  CROSS=0
+  [ -n "$SAID" ] && [ -n "$DST" ] && [ "$SAID" != "$DST" ] && CROSS=1
   printf "  조건 %-2s %-22s " "$N" "${TGT:-legacy}${DST:+ → $DST}"
+  [ "$CROSS" = 1 ] && printf "\n     ⚠️ 교차 셀 — 지시문은 '%s', 판정은 '%s'. 지시를 잘 따르면 fail/timeout이 정상.\n     %-25s " "$SAID" "$DST" ""
   ex=$(ls -d "$DEST"/$GLOB 2>/dev/null | head -1); [ -n "$ex" ] && [ -f "$ex/scenes.csv" ] && { echo "건너뜀 (이미 있음)"; continue; }
   t0=$(date +%s)
 
@@ -119,9 +149,40 @@ for c in "${CONDS[@]}"; do
     chmod -R u+w "$found" 2>/dev/null
     printf '{"cond":%s,"panel":"%s","target":"%s","dest":"%s","lang":"%s","seed":%s,"episodes":%s,"model":"%s","finished":"%s"}\n' \
       "$N" "$PAN" "$TGT" "$DST" "$LANG" "$SEED" "$NUM" "$MODEL" "$(date -Is)" > "$found/run.json"
+    if [ "$CROSS" = 1 ]; then
+      # success/fail 이라는 말이 정반대로 읽히는 조건이다. 폴더에 못을 박고 이름을 바꾼다.
+      cat > "$found/README.txt" <<EOF
+⚠️ 교차 셀 조건 $N — success/fail 을 글자 그대로 읽으면 안 됩니다.
+
+  지시문        : "$LANG"          (로봇에게 시킨 것 = $SAID 상자)
+  판정 상자     : $DST              (여기 들어가야 success)
+
+  이 조건은 "$SAID 라고 했는데 $DST 로 간 횟수"를 세려고 만든 것입니다.
+  따라서 로봇이 지시를 **제대로 따르면**(= $SAID 로 가면) 이렇게 기록됩니다:
+
+    outcome = fail · steps = 900 (timeout)
+
+  조기 종료는 판정 상자($DST)에 들어갔을 때만 발동하므로, $SAID 에 정확히
+  넣어도 에피소드는 끝까지 돕니다. 타임아웃은 결함이 아니라 그 구조의 결과입니다.
+
+  영상 이름도 같은 이유로 바꿔 두었습니다:
+    epNN_reached-$DST.mp4      $DST 로 감  (= 지시를 어김)
+    epNN_not-$DST.mp4          $DST 로 안 감 (= 대개 지시를 따름)
+EOF
+      for f in "$found"/ep*_success.mp4; do
+        [ -e "$f" ] && mv "$f" "${f%_success.mp4}_reached-$DST.mp4"
+      done
+      for f in "$found"/ep*_fail.mp4; do
+        [ -e "$f" ] && mv "$f" "${f%_fail.mp4}_not-$DST.mp4"
+      done
+    fi
     ok=$(awk -F, 'NR>1 && $2=="success"' "$found/scenes.csv" | wc -l)
     tot=$(($(wc -l < "$found/scenes.csv") - 1))
-    echo "✅ ${ok}/${tot}  ($(( ($(date +%s)-t0)/60 ))분)"
+    if [ "$CROSS" = 1 ]; then
+      echo "✅ ${ok}/${tot} 이 '$DST'로 감 (지시는 '$SAID' — 낮을수록 좋다)  ($(( ($(date +%s)-t0)/60 ))분)"
+    else
+      echo "✅ ${ok}/${tot}  ($(( ($(date +%s)-t0)/60 ))분)"
+    fi
   else
     echo "❌ 실패 — /tmp/eval_lang_c${N}.log 확인"
   fi

@@ -1,0 +1,81 @@
+ep,group,group_kind,group_pos,keep_layout,n_objects,objects,target,slot,slot_color,dest_named,instruction
+1,1,single,1/1,NEW,2,"marker, purple cube",purple cube,4,pink,pink,Put the purple cube into the pink bin
+2,2,single,1/1,NEW,4,"orange cube, eraser, marker, red cube",marker,1,black,black,Put the marker into the black bin
+3,3,single,1/1,NEW,4,"marker, eraser, red cube, yellow cube",eraser,1,black,black,Grab the eraser and place it in the black bin
+4,4,single,1/1,NEW,3,"marker, red cube, blue cube",blue cube,4,pink,pink,Put the blue cube into the pink bin
+5,5,single,1/1,NEW,2,"orange cube, yellow cube",orange cube,1,black,,Grab the orange cube and place it in the bin
+6,6,single,1/1,NEW,3,"yellow cube, green cube, eraser",green cube,4,pink,pink,Put the green cube into the pink bin
+7,7,single,1/1,NEW,4,"orange cube, red cube, marker, purple cube",red cube,4,pink,pink,Pick up the red cube and put it in the pink bin
+8,8,single,1/1,NEW,4,"marker, orange cube, green cube, yellow cube",yellow cube,1,black,black,Put the yellow cube into the black bin
+9,9,single,1/1,NEW,4,"purple cube, marker, red cube, blue cube",red cube,4,pink,,Pick up the red cube and put it in the bin
+10,10,pair,1/2,NEW,3,"orange cube, blue cube, red cube",blue cube,4,pink,pink,Grab the blue cube and place it in the pink bin
+11,10,pair,2/2,KEEP,3,"orange cube, blue cube, red cube",blue cube,1,black,black,Put the blue cube into the black bin
+12,11,pair,1/2,NEW,3,"green cube, purple cube, orange cube",green cube,1,black,black,Grab the green cube and place it in the black bin
+13,11,pair,2/2,KEEP,3,"green cube, purple cube, orange cube",green cube,4,pink,pink,Grab the green cube and place it in the pink bin
+14,12,pair,1/2,NEW,4,"marker, blue cube, eraser, purple cube",eraser,1,black,black,Grab the eraser and place it in the black bin
+15,12,pair,2/2,KEEP,4,"marker, blue cube, eraser, purple cube",eraser,4,pink,pink,Pick up the eraser and put it in the pink bin
+16,13,single,1/1,NEW,4,"marker, red cube, purple cube, eraser",purple cube,1,black,black,Put the purple cube into the black bin
+17,14,single,1/1,NEW,3,"eraser, purple cube, yellow cube",yellow cube,4,pink,pink,Put the yellow cube into the pink bin
+18,15,single,1/1,NEW,1,marker,marker,1,black,,Grab the marker and place it in the bin
+19,16,single,1/1,NEW,2,"purple cube, orange cube",orange cube,1,black,black,Put the orange cube into the black bin
+20,17,single,1/1,NEW,3,"purple cube, red cube, orange cube",red cube,4,pink,pink,Grab the red cube and place it in the pink bin
+21,18,single,1/1,NEW,4,"yellow cube, orange cube, eraser, blue cube",yellow cube,4,pink,pink,Pick up the yellow cube and put it in the pink bin
+22,19,single,1/1,NEW,1,purple cube,purple cube,1,black,black,Put the purple cube into the black bin
+23,20,single,1/1,NEW,2,"yellow cube, marker",marker,4,pink,,Put the marker into the bin
+24,21,single,1/1,NEW,2,"orange cube, marker",orange cube,1,black,black,Put the orange cube into the black bin
+25,22,single,1/1,NEW,3,"orange cube, yellow cube, purple cube",yellow cube,1,black,black,Put the yellow cube into the black bin
+26,23,single,1/1,NEW,4,"purple cube, red cube, eraser, green cube",eraser,4,pink,pink,Grab the eraser and place it in the pink bin
+27,24,pair,1/2,NEW,4,"purple cube, marker, green cube, eraser",marker,4,pink,pink,Pick up the marker and put it in the pink bin
+28,24,pair,2/2,KEEP,4,"purple cube, marker, green cube, eraser",marker,1,black,black,Pick up the marker and put it in the black bin
+29,25,single,1/1,NEW,3,"orange cube, blue cube, red cube",red cube,4,pink,pink,Pick up the red cube and put it in the pink bin
+30,26,single,1/1,NEW,2,"red cube, blue cube",blue cube,1,black,,Grab the blue cube and place it in the bin
+31,27,single,1/1,NEW,2,"orange cube, yellow cube",orange cube,1,black,black,Put the orange cube into the black bin
+32,28,single,1/1,NEW,3,"eraser, purple cube, blue cube",purple cube,4,pink,,Pick up the purple cube and put it in the bin
+33,29,single,1/1,NEW,4,"green cube, eraser, blue cube, purple cube",green cube,1,black,black,Grab the green cube and place it in the black bin
+34,30,single,1/1,NEW,4,"green cube, blue cube, red cube, purple cube",purple cube,4,pink,pink,Grab the purple cube and place it in the pink bin
+35,31,single,1/1,NEW,4,"blue cube, orange cube, red cube, marker",blue cube,1,black,black,Pick up the blue cube and put it in the black bin
+36,32,pair,1/2,NEW,3,"blue cube, yellow cube, green cube",green cube,1,black,black,Grab the green cube and place it in the black bin
+37,32,pair,2/2,KEEP,3,"blue cube, yellow cube, green cube",green cube,4,pink,pink,Grab the green cube and place it in the pink bin
+38,33,single,1/1,NEW,4,"marker, blue cube, red cube, yellow cube",red cube,4,pink,,Put the red cube into the bin
+39,34,single,1/1,NEW,4,"green cube, purple cube, marker, yellow cube",yellow cube,1,black,black,Grab the yellow cube and place it in the black bin
+40,35,single,1/1,NEW,1,eraser,eraser,4,pink,,Pick up the eraser and put it in the bin
+41,36,single,1/1,NEW,1,orange cube,orange cube,1,black,black,Grab the orange cube and place it in the black bin
+42,37,pair,1/2,NEW,3,"orange cube, purple cube, yellow cube",purple cube,4,pink,pink,Pick up the purple cube and put it in the pink bin
+43,37,pair,2/2,KEEP,3,"orange cube, purple cube, yellow cube",purple cube,1,black,black,Grab the purple cube and place it in the black bin
+44,38,single,1/1,NEW,3,"eraser, purple cube, blue cube",eraser,4,pink,pink,Grab the eraser and place it in the pink bin
+45,39,single,1/1,NEW,4,"blue cube, eraser, red cube, yellow cube",blue cube,4,pink,pink,Grab the blue cube and place it in the pink bin
+46,40,single,1/1,NEW,4,"orange cube, eraser, red cube, marker",marker,1,black,black,Pick up the marker and put it in the black bin
+47,41,single,1/1,NEW,1,yellow cube,yellow cube,1,black,black,Grab the yellow cube and place it in the black bin
+48,42,single,1/1,NEW,3,"red cube, blue cube, orange cube",red cube,4,pink,pink,Grab the red cube and place it in the pink bin
+49,43,single,1/1,NEW,4,"eraser, blue cube, orange cube, purple cube",orange cube,4,pink,pink,Grab the orange cube and place it in the pink bin
+50,44,pair,1/2,NEW,1,marker,marker,4,pink,pink,Pick up the marker and put it in the pink bin
+51,44,pair,2/2,KEEP,1,marker,marker,1,black,black,Grab the marker and place it in the black bin
+52,45,single,1/1,NEW,3,"yellow cube, eraser, blue cube",eraser,1,black,black,Put the eraser into the black bin
+53,46,single,1/1,NEW,4,"green cube, orange cube, yellow cube, purple cube",yellow cube,4,pink,pink,Pick up the yellow cube and put it in the pink bin
+54,47,single,1/1,NEW,3,"blue cube, eraser, red cube",blue cube,1,black,,Grab the blue cube and place it in the bin
+55,48,pair,1/2,NEW,3,"green cube, marker, purple cube",green cube,1,black,black,Grab the green cube and place it in the black bin
+56,48,pair,2/2,KEEP,3,"green cube, marker, purple cube",green cube,4,pink,pink,Put the green cube into the pink bin
+57,49,pair,1/2,NEW,4,"marker, orange cube, purple cube, red cube",red cube,4,pink,pink,Pick up the red cube and put it in the pink bin
+58,49,pair,2/2,KEEP,4,"marker, orange cube, purple cube, red cube",red cube,1,black,black,Pick up the red cube and put it in the black bin
+59,50,single,1/1,NEW,4,"orange cube, blue cube, eraser, purple cube",orange cube,1,black,black,Put the orange cube into the black bin
+60,51,pair,1/2,NEW,4,"eraser, yellow cube, green cube, purple cube",eraser,1,black,black,Pick up the eraser and put it in the black bin
+61,51,pair,2/2,KEEP,4,"eraser, yellow cube, green cube, purple cube",eraser,4,pink,pink,Pick up the eraser and put it in the pink bin
+62,52,single,1/1,NEW,4,"yellow cube, blue cube, marker, red cube",yellow cube,4,pink,,Grab the yellow cube and place it in the bin
+63,53,single,1/1,NEW,4,"marker, blue cube, orange cube, green cube",orange cube,1,black,black,Put the orange cube into the black bin
+64,54,single,1/1,NEW,2,"purple cube, blue cube",purple cube,4,pink,pink,Put the purple cube into the pink bin
+65,55,single,1/1,NEW,1,blue cube,blue cube,4,pink,pink,Pick up the blue cube and put it in the pink bin
+66,56,single,1/1,NEW,2,"red cube, purple cube",purple cube,1,black,black,Put the purple cube into the black bin
+67,57,single,1/1,NEW,2,"blue cube, yellow cube",yellow cube,4,pink,pink,Pick up the yellow cube and put it in the pink bin
+68,58,single,1/1,NEW,2,"red cube, orange cube",orange cube,1,black,black,Grab the orange cube and place it in the black bin
+69,59,single,1/1,NEW,3,"red cube, purple cube, blue cube",blue cube,4,pink,pink,Grab the blue cube and place it in the pink bin
+70,60,single,1/1,NEW,2,"green cube, purple cube",green cube,1,black,black,Pick up the green cube and put it in the black bin
+71,61,pair,1/2,NEW,3,"orange cube, red cube, blue cube",red cube,4,pink,pink,Pick up the red cube and put it in the pink bin
+72,61,pair,2/2,KEEP,3,"orange cube, red cube, blue cube",red cube,1,black,black,Grab the red cube and place it in the black bin
+73,62,pair,1/2,NEW,2,"marker, green cube",marker,4,pink,pink,Grab the marker and place it in the pink bin
+74,62,pair,2/2,KEEP,2,"marker, green cube",marker,1,black,black,Grab the marker and place it in the black bin
+75,63,single,1/1,NEW,3,"red cube, blue cube, orange cube",orange cube,1,black,black,Put the orange cube into the black bin
+76,64,single,1/1,NEW,4,"marker, green cube, red cube, purple cube",green cube,4,pink,pink,Grab the green cube and place it in the pink bin
+77,65,single,1/1,NEW,3,"eraser, blue cube, orange cube",blue cube,4,pink,pink,Grab the blue cube and place it in the pink bin
+78,66,single,1/1,NEW,2,"eraser, marker",eraser,1,black,,Pick up the eraser and put it in the bin
+79,67,single,1/1,NEW,2,"yellow cube, green cube",yellow cube,1,black,black,Put the yellow cube into the black bin
+80,68,single,1/1,NEW,4,"marker, eraser, purple cube, green cube",purple cube,4,pink,,Put the purple cube into the bin

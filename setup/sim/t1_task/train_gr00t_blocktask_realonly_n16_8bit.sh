@@ -57,6 +57,40 @@ if docker ps --format '{{.Names}}' | grep -q '^gr00t-train8$'; then
 fi
 
 echo "  스텝 $STEPS · 실기 단독(sim 미사용)"
+
+# ── 입력 해상도 (실험 버튼) ──────────────────────────────────────────────
+#   기본 256. EDGE=448 처럼 주면 그 해상도로 돈다.
+#   ⚠️ 이 값은 CLI에도 FinetuneConfig에도 없고, 체크포인트 config가 256을 실어 오며,
+#      processor의 from_pretrained 화이트리스트에서 **조용히 버려진다.**
+#      edge_patch.py 가 그 네 겹을 뚫고, --verify가 실제 출력 크기를 찍어 확인한다.
+#   ⚠️ 병목은 VRAM이 아니라 **호스트 RAM**이다. worker 8로 640을 돌리면 OOM killer에
+#      dataloader worker가 죽는다(실측). 그래서 해상도를 올리면 worker를 내린다.
+#   ℹ️ 체크포인트의 processor_config.json이 이 값을 싣고 나가므로 **서빙은 자동으로 맞는다.**
+EDGE="${EDGE:-}"
+EDGE_ARGS=(); WORKERS=8; PRE=""
+if [ -n "$EDGE" ] && [ "$EDGE" != "256" ]; then
+  # 이 스크립트는 5090에 **평평하게** 복사돼 돌 때가 많아(~/train_...sh) 레포 상대경로를
+  # 믿을 수 없다. 몇 군데를 훑고, 못 찾으면 무엇을 복사해야 하는지 말하고 죽는다.
+  _HERE="$(cd "$(dirname "$0")" && pwd)"
+  PATCHER=""
+  for _c in "${EDGE_PATCH:-}" "$_HERE/edge_patch.py" "$_HERE/../../gr00t/edge_patch.py" \
+            "$HOME/edge_patch.py" "$HOME/manipulator_ws/setup/gr00t/edge_patch.py"; do
+    [ -n "$_c" ] && [ -f "$_c" ] && { PATCHER="$(cd "$(dirname "$_c")" && pwd)/$(basename "$_c")"; break; }
+  done
+  [ -n "$PATCHER" ] || {
+    echo "❌ edge_patch.py 를 못 찾았다. 아래 중 하나로 두거나 EDGE_PATCH= 로 지정하세요:"
+    echo "     $_HERE/edge_patch.py   (5090에 평평하게 복사한 경우 — 보통 이것)"
+    echo "     \$HOME/edge_patch.py"
+    echo "   로컬에서:  scp setup/gr00t/edge_patch.py 5090:~/"
+    exit 1; }
+  EDGE_ARGS=(-e "GR00T_SHORTEST_EDGE=$EDGE" -v "$PATCHER:/tmp/edge_patch.py:ro")
+  PRE="python3 /tmp/edge_patch.py --verify && "
+  WORKERS=2
+  echo "  ⚠️ 입력 해상도 $EDGE (기본 256)"
+  echo "     실측 step 배수: 448 = 1.27x (peak RAM 23.3G) · 640 = 2.18x (30.7G)"
+  echo "     dataloader worker 8 → $WORKERS 로 내린다 (호스트 RAM 병목)"
+fi
+
 docker run -d --name gr00t-train8 --rm --gpus all --network host --ipc=host \
   -e PYTHONUNBUFFERED=1 -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   -e HF_TOKEN="$(cat $HOME/.cache/huggingface/token 2>/dev/null)" \
@@ -64,8 +98,9 @@ docker run -d --name gr00t-train8 --rm --gpus all --network host --ipc=host \
   -v "$HOME/gr00tn16_ws/checkpoints:/workspace/models" \
   -v "$HOME/gr00tn16_ws/hf_cache_container:/root/.cache/huggingface" \
   -v "$LAUNCH:/tmp/launch_cotrain.py:ro" \
+  ${EDGE_ARGS[@]+"${EDGE_ARGS[@]}"} \
   real-robot-train8 \
-  bash -c "cd /Isaac-GR00T && python3 /tmp/launch_cotrain.py \
+  bash -c "$PRE cd /Isaac-GR00T && python3 /tmp/launch_cotrain.py \
     --base-model-path nvidia/GR00T-N1.6-3B \
     --dataset-path /data/heongyu/$REAL_DS \
     --modality-config-path examples/SO100/so100_config.py \
@@ -75,7 +110,7 @@ docker run -d --name gr00t-train8 --rm --gpus all --network host --ipc=host \
     --warmup-ratio 0.05 --weight-decay 1e-5 --learning-rate 1e-4 \
     --global-batch-size 2 --gradient-accumulation-steps 32 \
     --color-jitter-params brightness 0.3 contrast 0.4 saturation 0.5 hue 0.08 \
-    --dataloader-num-workers 8"
+    --dataloader-num-workers $WORKERS"
 
 echo
 echo "real-only 학습 시작 (gr00t-train8). 실기=$REAL_DS 단독"

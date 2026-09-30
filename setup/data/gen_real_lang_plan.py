@@ -1,18 +1,47 @@
-"""실기 언어 조건화 수집 계획표 — **사람이 물체를 놓을 수 있게** 에피소드별 지시를 만든다.
+"""실기 언어 조건화 수집 계획표 — **4칸 선반 · 색상 단독 · 대응쌍**.
 
-sim 계획표(gen_lang_collect_plan.py)와 같은 목적이지만 두 가지가 다르다.
+2026-09-30 재설계. 이전 버전(상자 3색 중 2개)에서 바뀐 이유는 sim 1단계에서
+목적지 축만 실패했고, 그 원인을 둘로 좁혔기 때문이다.
 
-  ① 배치를 코드가 못 한다. 사람이 손으로 놓으므로 **무엇을 놓을지 표로 알려준다.**
-     그냥 "아무거나 놓으세요"라고 하면 무의식적으로 같은 자리·같은 조합에 몰린다.
-     실기 50ep에서 박스가 사실상 고정이었던 전례가 있다(픽셀 중심 편차 x 7px).
-  ② 물체 수가 1~4로 가변이다. sim은 항상 4개였다.
+  ① **저대비.** sim 상자색이 black(0.03,0.03,0.03) / brown(0.35,0.22,0.12) /
+     gray(0.45,0.45,0.45)였다. 256²로 줄이면 사실상 한 덩어리다.
+  ② **구조적 신호 결핍.** 에피소드 절반이 상자 1개였고(목적지 단어가 장식),
+     상자가 2개여도 목적지는 **transport 구간(~30%)만** 지배한다. 물체 축은
+     reach 전체(~60%)를 지배한다. 같은 에피소드 수가 같은 기울기를 주지 않는다.
 
-**물체가 1개인 에피소드는 언어 신호가 0이다.** 고를 것이 하나뿐이면 지시문을 안 읽어도
-맞는다. 그래서 1개 에피소드 비율을 낮게 두고(기본 10%), 3~4개를 두껍게 깐다.
-sim 수집에서 확인된 것과 같은 이유다 — 지시문이 정답을 가르는 **유일한 단서**여야 한다.
+  실측: 목적지 정확도 = 28.8/54.0 = 0.53 (우연 0.50). 물체 축은 52.5%(우연 25%).
+
+이 계획표가 ①②를 어떻게 고치나:
+
+  · 칸 4개가 **매 에피소드 전부 존재**하고 목적지를 85% 명시한다 → 신호 희석 제거
+  · 색을 **서로 먼 4색**으로 잡는다(black·white·cyan·pink) → 저대비 제거
+  · **대응쌍/4연속**을 넣는다 → 관측이 동일하고 행동만 다른 구간을 데이터에 직접 심는다
+  · 우연이 50% → **25%**로 내려가 같은 에피소드 수로 훨씬 잘 검출된다
+
+물리 구성 (중요):
+  책꽂이를 **등을 바닥에 대고 눕힌다.** 세워 두면 좁은 칸에 수평 삽입이 되어
+  P(삽입)이라는 항이 새로 생기고, 그게 작아서 목적지 신호를 다시 가린다.
+  눕히면 위가 열린 강체 통 4개라 배치 난이도가 지금과 같다.
+  칸 안쪽 너비 ≥ 80mm (마커가 가로로 누워도 여유가 있어야 한다).
+  색지는 **자석/벨크로**로 붙인다 — 평가 때 바꿔 끼워야 한다(아래).
+  수집 전에 4칸 전부 텔레오프로 넣어 보고 리치를 확인할 것. 끝 칸이 작업공간
+  경계에 있으면 그 칸만 성공률이 낮아 목적지 측정을 오염시킨다.
+
+숫자는 선반에 **작게** 붙이되 지시문에는 넣지 않는다. 시연자가 칸을 헷갈리지
+않게 하고 발표 자료에서 가리키기 위한 것이다. 색 패치가 면적을 먹어야 한다.
+(256²에서 작은 글리프는 패치 14px 기준 1~2패치라 읽히지 않는다. 해상도를 448로
+ 올리는 버튼은 setup/gr00t/edge_patch.py 에 있지만 1단계에서는 쓰지 않는다.)
+
+평가 때 할 것 — 학습 데이터를 안 쓰는 공짜 실험:
+  색↔칸이 **고정**이라 모델은 라벨을 안 보고 "단어 → 횡위치" 룩업만 외워도 만점이다.
+  태스크상 그걸로 충분하지만, 어느 쪽인지는 **평가에서 색지 두 장을 바꿔 끼워** 가른다.
+  정확도가 유지되면 라벨을 읽는 것이고, 원래 자리로 가면 위치를 외운 것이다.
+  보고서에서 주장의 범위를 이 결과에 맞춰 쓴다.
 
 사용:
-  python3 gen_real_lang_plan.py --episodes 120 --out ~/manipulator_ws/manipulator_md/real/real_lang_plan.csv
+  python3 gen_real_lang_plan.py --episodes 250
+  python3 gen_real_lang_plan.py --episodes 80 --slots 1,4 \\
+      --out ~/manipulator_ws/manipulator_md/real/real_lang_plan_s1.csv
 """
 import argparse
 import csv
@@ -20,145 +49,246 @@ import os
 import random
 from collections import Counter
 
-# 실물 프롭 8종. 이름은 지시문에 그대로 들어간다.
-#   ⚠️ sim 카탈로그와 **색이 하나 다르다** — sim은 청록(cyan), 실기는 주황(orange)이다.
-#      sim 학습본에 orange 큐브는 0회 등장하므로, co-training 전까지 이 색은
-#      "실기에서만 본 색"이다. 반대로 cyan은 실기에 없다.
-OBJECTS = {
-    "red cube":    "red",
-    "blue cube":   "blue",
-    "yellow cube": "yellow",
-    "green cube":  "green",
-    "purple cube": "purple",
-    "orange cube": "orange",
-    "marker":      "marker",
-    "eraser":      "eraser",
-}
-NAMES = list(OBJECTS)
+# ── 물체 8종. 이름이 지시문에 그대로 들어간다 ────────────────────────────
+#   sim 카탈로그와 색이 하나 다르다 — sim은 cyan, 실기는 orange다.
+#   실기 단독 학습이라 sim 어휘를 물려받지 않으므로 문제가 되지 않는다.
+OBJECTS = ["red cube", "blue cube", "yellow cube", "green cube",
+           "purple cube", "orange cube", "marker", "eraser"]
 
-# 물체 수 분포 — 1개는 언어 신호가 없으므로 얇게 깐다.
-COUNT_WEIGHTS = {1: 0.10, 2: 0.20, 3: 0.35, 4: 0.35}
+# ── 목적지 4칸. 색↔칸은 **고정**이다(선반이 고정이므로) ──────────────────
+#   색 선택 기준 세 가지:
+#     · 저해상도·조명 변화에서 서로 멀 것 → 휘도 양극단(black/white) + 포화 색상 2개
+#     · 큐브 6색과 **겹치지 않을 것** → "red cube를 red 칸에"가 만드는 색↔명사 결합
+#       부담을 250ep에 얹지 않는다. cleanup 최종형에서 필요해지겠지만 1단계 비용은 아니다.
+#     · 흔한 영어 색 이름일 것
+#   brown·gray는 쓰지 않는다 — sim에서 black과 구별되지 않은 바로 그 색들이다.
+SLOTS = [(1, "black"), (2, "white"), (3, "cyan"), (4, "pink")]
 
-# 목적지 상자 3색 중 **2개**를 매 에피소드 놓는다(sim과 같은 구성).
-#   sim에서 목적지 축은 **실패**했다 — 28.3%로 우연(50%)에도 못 미쳤고,
-#   같은 배치에서 흑/갈을 각각 지시했을 때 둘 다 성공한 것이 30개 중 3개뿐이었다.
-#   cleanup("빨간 건 왼쪽, 파란 건 오른쪽")은 이 축 없이 성립하지 않으므로
-#   실기 수집에서 이 구간을 두껍게 채운다.
-#   색 이름은 sim 학습본이 이미 배운 것과 맞춘다 — 새 단어를 만들면 실기에서만 본
-#   어휘가 또 늘어난다(주황 큐브가 이미 그렇다).
-BOXES = ["black", "brown", "gray"]
+# 목적지를 부르는 명사. 선반 칸이므로 box가 아니라 bin으로 통일한다.
+DEST_NOUN = "bin"
 
-# 지시문 문형. sim 계획표와 같은 형태로 맞춘다 — 학습에서 본 적 없는 문형을 쓰면
-# "언어를 못 읽는다"가 아니라 "그 문형을 모른다"를 재게 된다.
-#   목적지를 **명시하는 문장이 약 70%**다(sim 실측 분포와 맞춤). 나머지는 "the box"로
-#   두어 상자가 하나뿐이던 기존 배포와도 호환된다.
+# ── 물체 수 분포 ─────────────────────────────────────────────────────────
+#   이전 버전에서는 "1물체 = 언어 신호 0"이라 얇게 깔았다. 이제는 **아니다** —
+#   칸이 4개라 물체가 하나여도 목적지 신호는 온전하다(오히려 곱이 풀려 측정이 깨끗하다).
+#   다만 **물체 축** 신호는 여전히 0이므로 계속 얇게 유지한다.
+COUNT_WEIGHTS = {1: 0.12, 2: 0.20, 3: 0.34, 4: 0.34}
+
+# ── 지시문 문형 ──────────────────────────────────────────────────────────
+#   목적지 미명시(the bin)를 일부 남기는 이유: **색 단어의 유무가 의미를 갖는다**는
+#   것도 배워야 하고, 최종형("그냥 치워")과 이어진다. 다만 칸이 4개라 정답이
+#   정의되지 않으므로 비율을 낮게 두고, **쌍/4연속에는 절대 넣지 않는다**(아래).
 TEMPLATES_DEST = [
-    "Pick up the {obj} and place it in the {dst} box",
-    "Put the {obj} into the {dst} box",
-    "Grab the {obj} and put it in the {dst} box",
+    "Pick up the {obj} and put it in the {dst} " + DEST_NOUN,
+    "Put the {obj} into the {dst} " + DEST_NOUN,
+    "Grab the {obj} and place it in the {dst} " + DEST_NOUN,
 ]
-TEMPLATES = [
-    "Pick up the {obj} and place it in the box",
-    "Put the {obj} into the box",
-    "Grab the {obj} and put it in the box",
+TEMPLATES_PLAIN = [
+    "Pick up the {obj} and put it in the " + DEST_NOUN,
+    "Put the {obj} into the " + DEST_NOUN,
+    "Grab the {obj} and place it in the " + DEST_NOUN,
 ]
-DEST_FRAC = 0.70          # 목적지 색을 명시하는 비율
-# 물체가 1개일 때만 쓰는 문장. sim의 레거시 문장과 같다(기존 배포 호환).
-LEGACY = "Pick up the block and place it in the box"
+
+FIELDS = ["ep", "group", "group_kind", "group_pos", "keep_layout",
+          "n_objects", "objects", "target", "slot", "slot_color",
+          "dest_named", "instruction"]
+
+
+def pick_least(counter, candidates, rng):
+    """가장 적게 쓴 후보를 고른다(동률이면 무작위). 매번 무작위로 뽑으면 고르게 안 나온다."""
+    lo = min(counter[c] for c in candidates)
+    return rng.choice([c for c in candidates if counter[c] == lo])
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--episodes", type=int, default=120)
+    ap.add_argument("--episodes", type=int, default=250)
     ap.add_argument("--seed", type=int, default=20260930)
     ap.add_argument("--out", default=os.path.expanduser(
         "~/manipulator_ws/manipulator_md/real/real_lang_plan.csv"))
-    ap.add_argument("--legacy-frac", type=float, default=0.06,
-                    help="1물체 에피소드에서 레거시 문장을 쓸 비율")
+    ap.add_argument("--slots", default="1,2,3,4",
+                    help="쓸 칸 번호. 1단계는 '1,4'(양 끝)로 좁혀 우연 50%%·행동차 최대로 본다")
+    ap.add_argument("--pair-frac", type=float, default=0.30,
+                    help="대응쌍(같은 배치, 목적지만 다름)이 차지할 에피소드 비율")
+    ap.add_argument("--quad-frac", type=float, default=0.16,
+                    help="4연속(같은 배치, 4칸 전부)이 차지할 비율. 칸이 4개일 때만")
+    ap.add_argument("--dest-frac", type=float, default=0.85,
+                    help="목적지 색을 명시하는 비율. 나머지는 'the bin'(단독에서만)")
     a = ap.parse_args()
     rng = random.Random(a.seed)
 
-    counts = list(COUNT_WEIGHTS)
-    weights = [COUNT_WEIGHTS[c] for c in counts]
+    want = [int(x) for x in a.slots.split(",") if x.strip()]
+    slots = [(n, c) for n, c in SLOTS if n in want]
+    assert len(slots) >= 2, "칸이 2개 이상이어야 목적지 축이 성립한다"
+    slot_nums = [n for n, _ in slots]
 
-    # 목적지도 균등하게 — 무작위로 뽑으면 3색이 고르게 안 나온다.
-    dper = a.episodes // len(BOXES) + 1
-    dests = (BOXES * dper)[:a.episodes]
-    rng.shuffle(dests)
-    dest_rows = set(rng.sample(range(a.episodes), int(a.episodes * DEST_FRAC)))
+    # ── 1) 그룹 구조를 먼저 정한다 ──────────────────────────────────────
+    #   에피소드를 낱개로 뽑으면 쌍이 안 생긴다. 그룹 단위로 예산을 나눈 뒤 펼친다.
+    n_quad = int(a.episodes * a.quad_frac) // 4 if len(slots) >= 4 else 0
+    n_pair = int(a.episodes * a.pair_frac) // 2
+    n_single = a.episodes - n_quad * 4 - n_pair * 2
+    assert n_single >= 0, "pair-frac + quad-frac 이 1을 넘었다"
 
-    # 타깃을 균등하게 깔기 위해 먼저 타깃 열을 만들고 섞는다.
-    # 무작위로 매 행 뽑으면 8종이 고르게 안 나온다(실측: 얇은 표본에서 최대 2배 차).
-    per = a.episodes // len(NAMES) + 1
-    targets = (NAMES * per)[:a.episodes]
-    rng.shuffle(targets)
+    kinds = ["quad"] * n_quad + ["pair"] * n_pair + ["single"] * n_single
+    rng.shuffle(kinds)
 
-    # 레거시 문장은 미리 자리를 잡아 둔다 — 그때그때 뽑으면 몰린다.
-    n_legacy = max(1, int(a.episodes * a.legacy_frac))
-    legacy_rows = set(rng.sample(range(a.episodes), n_legacy))
+    # 목적지 미명시는 **단독 에피소드에서만** 나온다.
+    #   쌍/4연속에서 목적지를 안 부르면 같은 지시문에 서로 다른 목적지를 시연하는 것이 되어
+    #   "목적지 단어를 무시하라"를 정면으로 가르친다. 대응쌍의 취지를 정확히 뒤집는다.
+    n_unnamed = min(int(a.episodes * (1 - a.dest_frac)), n_single)
+    unnamed = set(rng.sample(range(n_single), n_unnamed)) if n_single else set()
 
-    rows = []
-    for i in range(a.episodes):
-        tgt = targets[i]
-        # 상자 2개를 놓는다. 목적지로 지정된 것이 반드시 그중 하나여야 한다.
-        dst = dests[i]
-        other_box = rng.choice([b for b in BOXES if b != dst])
-        boxes = [dst, other_box]
-        rng.shuffle(boxes)
+    tgt_count, slot_count = Counter(), Counter()
+    rows, single_i, ep = [], 0, 0
 
-        if i in legacy_rows:
-            n, objs, instr = 1, [tgt], LEGACY
-            named_dst = ""          # 레거시 문장은 목적지를 지정하지 않는다
+    for gi, kind in enumerate(kinds):
+        # 그룹 하나는 배치(물체 구성·타깃)를 공유한다. 사람은 물체를 한 번만 놓는다.
+        target = pick_least(tgt_count, OBJECTS, rng)
+        n_obj = rng.choices(list(COUNT_WEIGHTS), list(COUNT_WEIGHTS.values()))[0]
+        others = [o for o in OBJECTS if o != target]
+        objs = [target] + rng.sample(others, n_obj - 1)
+        rng.shuffle(objs)
+
+        if kind == "quad":
+            picks = list(slots)
+            rng.shuffle(picks)
+        elif kind == "pair":
+            first = pick_least(slot_count, slot_nums, rng)
+            second = pick_least(slot_count, [n for n in slot_nums if n != first], rng)
+            picks = [(n, c) for n, c in slots if n in (first, second)]
+            rng.shuffle(picks)
         else:
-            n = rng.choices(counts, weights)[0]
-            if n == 1:
-                objs = [tgt]
-            else:
-                others = [o for o in NAMES if o != tgt]
-                objs = [tgt] + rng.sample(others, n - 1)
-                rng.shuffle(objs)
-            if i in dest_rows:
-                instr = rng.choice(TEMPLATES_DEST).format(obj=tgt, dst=dst)
-                named_dst = dst
-            else:
-                instr = rng.choice(TEMPLATES).format(obj=tgt)
-                named_dst = ""
-        rows.append({"ep": i + 1, "n_objects": n, "objects": ", ".join(objs),
-                     "target": tgt, "boxes": ", ".join(boxes),
-                     "dest": dst, "dest_named": named_dst, "instruction": instr})
+            n = pick_least(slot_count, slot_nums, rng)
+            picks = [(sn, sc) for sn, sc in slots if sn == n]
+
+        for pos, (snum, scol) in enumerate(picks, start=1):
+            ep += 1
+            tgt_count[target] += 1
+            slot_count[snum] += 1
+
+            named = True
+            if kind == "single":
+                named = single_i not in unnamed
+                single_i += 1
+
+            instr = (rng.choice(TEMPLATES_DEST).format(obj=target, dst=scol) if named
+                     else rng.choice(TEMPLATES_PLAIN).format(obj=target))
+
+            rows.append({
+                "ep": ep,
+                "group": gi + 1,
+                "group_kind": kind,
+                "group_pos": f"{pos}/{len(picks)}",
+                # 시연자에게 주는 유일한 조작 지시다. 2회차부터는 물체를 건드리면 안 된다.
+                "keep_layout": "NEW" if pos == 1 else "KEEP",
+                "n_objects": n_obj,
+                "objects": ", ".join(objs),
+                "target": target,
+                "slot": snum,
+                "slot_color": scol,
+                "dest_named": scol if named else "",
+                "instruction": instr,
+            })
 
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     with open(a.out, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["ep", "n_objects", "objects", "target", "boxes", "dest", "dest_named", "instruction"])
+        w = csv.DictWriter(f, fieldnames=FIELDS)
         w.writeheader()
         w.writerows(rows)
 
-    # ── 균형 점검 — 수집 전에 여기서 걸러야 한다 ──
-    tc = Counter(r["target"] for r in rows)
-    nc = Counter(r["n_objects"] for r in rows)
-    ac = Counter(o for r in rows for o in r["objects"].split(", "))
-    exp = a.episodes / len(NAMES)
-    print(f"\n  {a.out}  —  {len(rows)}행\n")
-    print(f"  물체 수 분포:  " + "  ".join(f"{k}개 {nc[k]}({nc[k]/len(rows)*100:.0f}%)"
-                                        for k in sorted(nc)))
-    print(f"  1물체 에피소드 {nc[1]}개 ({nc[1]/len(rows)*100:.0f}%) — 이 구간은 언어 신호가 없다")
-    print(f"\n  타깃 분포 (기대 {exp:.0f} ±30%)")
-    bad = []
-    for o in NAMES:
-        mark = "" if exp * 0.7 <= tc[o] <= exp * 1.3 else "  ⚠"
-        if mark:
-            bad.append(o)
-        print(f"    {o:<13} 타깃 {tc[o]:>3}   등장 {ac[o]:>3}{mark}")
-    print(f"\n  {'❌ 타깃 불균형: ' + ', '.join(bad) if bad else '✅ 타깃 균형 통과'}")
-    dc = Counter(r["dest"] for r in rows)
-    named = sum(1 for r in rows if r["dest_named"])
-    print(f"\n  목적지 분포 (기대 {a.episodes/len(BOXES):.0f})")
-    for b in BOXES:
-        print(f"    {b:<13} {dc[b]:>3}")
-    print(f"  목적지 명시 문장 {named}개 ({named/len(rows)*100:.0f}%) — 나머지는 \"the box\"")
-    print(f"  레거시 문장 {sum(1 for r in rows if r['instruction'] == LEGACY)}개")
-    print("\n  수집 시:  ./record_real_lang.sh")
+    report(rows, slots, a)
     return 0
+
+
+def groups(rows):
+    cur, buf = None, []
+    for r in rows:
+        if r["group"] != cur:
+            if buf:
+                yield cur, buf
+            cur, buf = r["group"], [r]
+        else:
+            buf.append(r)
+    if buf:
+        yield cur, buf
+
+
+def report(rows, slots, a):
+    """수집 **전에** 걸러야 하는 것들. 9시간 쓰고 나서 알면 늦다."""
+    N = len(rows)
+    tc = Counter(r["target"] for r in rows)
+    sc = Counter(r["slot"] for r in rows)
+    nc = Counter(r["n_objects"] for r in rows)
+    kc = Counter(r["group_kind"] for r in rows)
+    ac = Counter(o for r in rows for o in r["objects"].split(", "))
+    named = sum(1 for r in rows if r["dest_named"])
+    ok = True
+
+    print(f"\n  {a.out}\n  {N}행 · 칸 {len(slots)}개 " +
+          " ".join(f"{n}={c}" for n, c in slots) + "\n")
+
+    print("  그룹 구성")
+    for k in ("quad", "pair", "single"):
+        if kc[k]:
+            print(f"    {k:<7} {kc[k]:>3}ep ({kc[k] / N * 100:.0f}%)")
+    print("    ↑ quad·pair는 **같은 배치**를 재사용한다 — 관측 동일, 행동만 다름.")
+    print("      물체를 다시 놓지 않으므로 에피소드당 ~40초 절약된다.")
+
+    exp = N / len(OBJECTS)
+    print(f"\n  타깃 분포 (기대 {exp:.0f} ±30%)")
+    bad = [o for o in OBJECTS if not exp * 0.7 <= tc[o] <= exp * 1.3]
+    for o in OBJECTS:
+        print(f"    {o:<13} 타깃 {tc[o]:>3}   등장 {ac[o]:>3}{'  ⚠' if o in bad else ''}")
+    ok &= not bad
+    print(f"  {'✅ 타깃 균형' if not bad else '❌ 타깃 불균형: ' + ', '.join(bad)}")
+
+    exps = N / len(slots)
+    print(f"\n  칸 분포 (기대 {exps:.0f} ±30%)")
+    badv = [n for n, _ in slots if not exps * 0.7 <= sc[n] <= exps * 1.3]
+    for n, c in slots:
+        print(f"    {n}번 {c:<7} {sc[n]:>3}{'  ⚠' if n in badv else ''}")
+    ok &= not badv
+    print(f"  {'✅ 칸 균형' if not badv else '❌ 칸 불균형: ' + str(badv)}")
+
+    print("\n  물체 수: " + "  ".join(
+        f"{k}개 {nc[k]}({nc[k] / N * 100:.0f}%)" for k in sorted(nc)))
+    print(f"  목적지 명시 {named}/{N} ({named / N * 100:.0f}%) — 계획 {a.dest_frac * 100:.0f}%")
+    print(f"  서로 다른 지시문 {len(set(r['instruction'] for r in rows))}종")
+
+    # 쌍 무결성 — 여기가 깨지면 대응쌍이 역효과를 낸다
+    bad_pairs = []
+    for g, items in groups(rows):
+        if len(items) == 1:
+            continue
+        if len({i["objects"] for i in items}) != 1 or len({i["target"] for i in items}) != 1:
+            bad_pairs.append((g, "배치가 다름"))
+        if len({i["slot"] for i in items}) != len(items):
+            bad_pairs.append((g, "칸이 겹침"))
+        if any(not i["dest_named"] for i in items):
+            bad_pairs.append((g, "목적지 미명시가 섞임"))
+    ok &= not bad_pairs
+    print(f"  {'✅' if not bad_pairs else '❌'} 쌍 무결성 "
+          f"(같은 배치 · 서로 다른 칸 · 목적지 전부 명시)  위반 {len(bad_pairs)}건")
+    for g, why in bad_pairs[:5]:
+        print(f"       그룹 {g}: {why}")
+
+    reuse = sum(1 for r in rows if r["keep_layout"] == "KEEP")
+    hours = ((N - reuse) * 150 + reuse * 110) / 3600
+    print(f"\n  예상 수집 시간 약 {hours:.1f}시간 "
+          f"(신규 {N - reuse}ep×150s + 배치재사용 {reuse}ep×110s)")
+    print(f"\n  {'✅ 통과 — 수집 시작 가능' if ok else '❌ 위 항목을 고칠 것'}")
+
+    print("""
+  ── 시연 규칙 (수집 내내 지킬 것) ─────────────────────────────────────
+   · keep_layout=KEEP 행은 **물체를 건드리지 않는다.** 지시문만 바뀐다.
+     이 데이터셋에서 언어 신호가 가장 진한 구간이다.
+   · 파지 직후 **목표 칸 위로 먼저 횡이동**하고 그다음 하강한다.
+     공통 경로로 올라갔다가 마지막에 갈라지지 말 것 — 목적지가 지배하는
+     프레임이 2~3배로 늘어난다(sim에서 목적지 축이 죽은 주된 이유가 이것이다).
+   · 물체는 매번 다른 자리에. 무의식적으로 같은 자리에 놓기 쉽다
+     (실기 50ep에서 박스가 사실상 고정이었던 전례: 픽셀 중심 편차 x 7px).
+   · 지시와 다른 물체를 집었거나 다른 칸에 넣었으면 **그 에피소드를 다시 찍는다.**
+     잘못 저장된 1개가 "언어를 무시해도 된다"는 반례가 된다.
+""")
 
 
 if __name__ == "__main__":
