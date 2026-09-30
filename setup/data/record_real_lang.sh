@@ -73,7 +73,7 @@ python3 - "$PLAN" "$START" "$END" <<'PY' > /tmp/real_lang_rows.txt
 import csv, sys
 plan, s, e = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
 need = ["ep", "group_kind", "group_pos", "keep_layout", "n_objects",
-        "objects", "target", "slot", "slot_color", "instruction"]
+        "objects", "target", "slot", "slot_color", "dest_named", "instruction"]
 rows = list(csv.DictReader(open(plan)))
 missing = [c for c in need if rows and c not in rows[0]]
 if missing:
@@ -81,11 +81,16 @@ if missing:
              " (4칸 선반 구성)." % missing)
 for r in rows:
     if s <= int(r["ep"]) <= e:
-        print("\t".join(r[c] for c in need))
+        # ⚠️ 빈 필드를 그대로 흘리면 안 된다. bash의 `read`는 IFS가 탭이어도
+        #    **탭은 IFS 공백**이라 연속된 구분자를 하나로 접는다. dest_named가 비면
+        #    뒤 필드가 한 칸씩 당겨져 **instruction이 통째로 사라지고**
+        #    `--dataset.single_task=""` 로 저장된다(목적지 미명시 ~15%가 전부 해당).
+        #    비는 열은 "-"로 채워 자리를 지킨다.
+        print("\t".join((r[c] or "-") for c in need))
 PY
 
 N=0
-while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL INSTR; do
+while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; do
   N=$((N+1))
   echo
   if [ "$KEEP" = "KEEP" ]; then
@@ -102,7 +107,14 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL INSTR; do
     printf "  놓을 물체 (%s개) :  \033[1m%s\033[0m\n" "$NOBJ" "$OBJS"
   fi
   printf "  집을 것          :  \033[1;33m%s\033[0m\n" "$TGT"
-  printf "  넣을 칸          :  \033[1;33m%s번 (%s)\033[0m\n" "$SLOT" "$SCOL"
+  if [ "$DNAMED" != "-" ]; then
+    printf "  넣을 칸          :  \033[1;33m%s번 (%s)\033[0m\n" "$SLOT" "$SCOL"
+  else
+    # 지시문이 "the bin"이라 정답이 정의되지 않는 에피소드(계획상 15%).
+    # 칸은 분포 균형을 위해 지정해 두지만, **문장은 그 칸을 부르지 않는다.**
+    # 시연자가 "표시와 지시문이 다르다"고 혼란스러워하지 않도록 명시한다.
+    printf "  넣을 칸          :  \033[1;33m%s번 (%s)\033[0m  \033[2m← 지시문엔 색이 없다(임의 지정)\033[0m\n" "$SLOT" "$SCOL"
+  fi
   echo
   printf "  지시문           :  \033[1;36m\"%s\"\033[0m\n" "$INSTR"
   echo "════════════════════════════════════════════════════════════════"
