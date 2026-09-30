@@ -74,6 +74,19 @@ CONDS=(
   #     21 갈색지시→검정판정   19 갈색지시→갈색판정   (합 = q)
   "20|P8|yellow_cube|brown|Pick up the yellow block and place it in the black box"
   "21|P8|yellow_cube|black|Pick up the yellow block and place it in the brown box"
+  # ── 조건 5·6 분해 (2026-09-30). **방해물이 있는 현실 조건**에서 목적지를 떼어낸다 ──
+  #   조건 5·6은 물체 4개 중 고르고 상자 2개 중 골라 배치까지 성공해야 하는 **곱**이라
+  #   28.3%라는 값이 목적지 능력을 말해 주지 않는다.
+  #   P8(물체 1개)에서 목적지 단독 68.3%를 얻었지만, 그 값이 **물체가 4개일 때도
+  #   유지되는지는 별개 문제**다. 방해물이 늘면 목적지 판단도 흔들릴 수 있다.
+  #   28.3 / 68.3 같은 산술은 하지 않는다 — 항이 조건 간에 옮겨간다고 가정하는 것이
+  #   바로 역산이 틀렸던 이유다(§14).
+  #   22·23이 각 지시문의 **반대 상자 도달률**을 주므로 행 합이 곧 "물체+배치" 항이고,
+  #   목적지 정확도 = 맞은 수 / 행 합 으로 가정 없이 분해된다.
+  #     5  검정지시→검정판정   22 검정지시→갈색판정   (합 = 물체+배치)
+  #     23 갈색지시→검정판정   6  갈색지시→갈색판정   (합 = 물체+배치)
+  "22|P2|yellow_cube|brown|Pick up the yellow block and place it in the black box"
+  "23|P2|yellow_cube|black|Pick up the yellow block and place it in the brown box"
 )
 
 mkdir -p "$DEST"
