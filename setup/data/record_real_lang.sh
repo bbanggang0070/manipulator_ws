@@ -16,6 +16,14 @@
 #   · 지시문과 **다른 물체를 집었으면 해당 에피소드를 다시 찍는다**(lerobot의 재녹화 키).
 #     잘못 저장된 한 ep가 "언어를 무시해도 된다"는 반례가 된다.
 #   · 지우개는 짧은 변으로, 마커는 길이 중앙을 잡는다. 같은 물체를 늘 같은 각도로 잡지 말 것.
+#
+# ⚠️ --dataset.push_to_hub=false 는 **반드시** 필요하다(기본값이 true다).
+#    lerobot_record.py:599 의 finally 블록이 이렇게 돼 있다:
+#        if dataset: dataset.finalize()          ← 가드 있음
+#        if cfg.dataset.push_to_hub: dataset.push_to_hub(...)   ← 가드 없음
+#    데이터셋 생성이 실패해 dataset이 None이면, 여기서 AttributeError가 나면서
+#    **원래 예외를 통째로 덮어쓴다.** 진짜 원인을 못 보게 된다.
+#    (2026-10-02 실제로 겪음 — "NoneType has no attribute push_to_hub"만 보였다)
 #   · **keep_layout=KEEP 행은 물체를 그대로 둔다.** 같은 배치에 지시문만 바꿔 다시 찍는
 #     대응쌍이고, 여기가 언어 신호가 가장 진한 구간이다. 다시 놓으면 그 가치가 사라진다.
 #   · **파지 직후 목표 칸 위로 먼저 횡이동**하고 그다음 하강한다. 공통 경로로 올라갔다가
@@ -50,6 +58,28 @@ TOTAL=$(( $(wc -l < "$PLAN") - 1 ))
 [ "$END" = "0" ] && END=$TOTAL
 DONE=0
 [ -d "$ROOT/meta" ] && DONE=$(python3 -c "import json;print(json.load(open('$ROOT/meta/info.json'))['total_episodes'])" 2>/dev/null || echo 0)
+
+# ── 실패한 생성이 남긴 빈 데이터셋 정리 ────────────────────────────────
+#   LeRobotDataset.create 가 도중에 실패하면 meta/info.json 만 있는 **0ep 폴더**가
+#   남는다. 그 상태로 다시 돌리면 create 가 "folder already exists"로 죽어
+#   영원히 재시도가 안 된다(sim 수집에서 같은 일을 겪었다).
+#   데이터가 0개일 때만, 그리고 **물어본 뒤에만** 지운다.
+if [ -d "$ROOT" ] && [ "$DONE" -eq 0 ]; then
+  NFILE=$(find "$ROOT" -type f ! -name "info.json" ! -name "calibration_snapshot.json" 2>/dev/null | wc -l)
+  echo
+  echo "⚠️  데이터셋 폴더가 이미 있는데 에피소드가 0개입니다."
+  echo "    $ROOT"
+  echo "    (info.json 외 파일 ${NFILE}개 — 이전 실행이 생성 도중 실패했을 때 남는 모양입니다)"
+  if [ "$NFILE" -gt 0 ]; then
+    echo "❌ 데이터 파일이 있습니다. 자동으로 지우지 않습니다 — 직접 확인하세요."
+    exit 1
+  fi
+  read -r -p "    지우고 새로 시작할까요? (y/N): " YN </dev/tty
+  case "$YN" in
+    y|Y) rm -rf "$ROOT" && echo "    지웠습니다." ;;
+    *)   echo "    그대로 둡니다. --resume 없이는 create 가 실패합니다."; exit 1 ;;
+  esac
+fi
 
 # ── 캘리브레이션 지문 대조 ──────────────────────────────────────────────
 #   수집 도중 캘리브레이션이 바뀌면 관절 공간이 달라져 데이터셋이 **서로 안 맞는
@@ -148,6 +178,7 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; d
       --dataset.episode_time_s="$EP_TIME" \
       --dataset.reset_time_s=5 \
       --dataset.private=true \
+      --dataset.push_to_hub=false \
       $RESUME )
 
   NEW=$(python3 -c "import json;print(json.load(open('$ROOT/meta/info.json'))['total_episodes'])" 2>/dev/null || echo "$DONE")
