@@ -11,10 +11,17 @@
      중간에 터지면 `reset_calibration()` 이 이미 서보 레지스터를 건드린 뒤라
      팔이 어정쩡한 상태로 남는다.
 
-  ② **리더와 팔로워의 자세가 서로 다름** ← 텔레오프가 어긋나는 주원인
+  ② **리더와 팔로워의 정규화 위치가 어긋남** ← 텔레오프가 어긋나는 주원인
      homing 은 **누른 그 순간의 자세를 중앙으로 삼는다.** 리더를 A자세에서,
      팔로워를 B자세에서 캘리브레이션하면 두 팔의 "중앙"이 달라져서
-     텔레오프 내내 그 차이만큼 어긋난다. 각 관절을 나란히 놓고 비교한다.
+     텔레오프 내내 그 차이만큼 어긋난다.
+
+     ⚠️ 비교는 반드시 **정규화 위치(도)** 로 한다. 원시 엔코더 값은 팔마다
+        서보 혼 조립 각도가 달라 기계적 영점이 다르므로, **같은 자세여도 값이
+        다르다.** 원시값끼리 비교하면 아무 의미가 없다(2026-10-02에 그렇게
+        표시했다가 정정). 원시값은 ①(엔코더 끝 판정)에만 쓴다.
+
+     그리고 이 비교는 **두 팔을 물리적으로 같은 자세로 들고 있을 때만** 뜻이 있다.
 
 사용:
   cd ~/manipulator_ws/envs/lerobot
@@ -44,11 +51,23 @@ def open_arm(kind, port, dev_id):
 
 
 def read_arm(kind, port, dev_id):
-    dev = open_arm(kind, port, dev_id)
+    """원시값(끝 판정용)과 정규화값(두 팔 비교용)을 함께 읽는다."""
+    if kind == "follower":
+        from lerobot.robots.so_follower import SOFollower as C, SOFollowerConfig as Cfg
+    else:
+        from lerobot.teleoperators.so_leader import SOLeader as C, SOLeaderConfig as Cfg
+    cfg = Cfg(port=port)
+    cfg.id = dev_id
+    cfg.calibration_dir = None
+    dev = C(cfg)
+    dev.connect(calibrate=False)
     try:
-        return dict(dev.bus.sync_read("Present_Position", normalize=False))
+        norm = dict(dev.bus.sync_read("Present_Position"))
+        dev.bus.reset_calibration()
+        raw = dict(dev.bus.sync_read("Present_Position", normalize=False))
+        return {"raw": raw, "norm": norm}
     finally:
-        dev.bus.disconnect()
+        dev.disconnect()
 
 
 def watch():
@@ -150,34 +169,36 @@ def main():
     if not arms:
         return 1
 
-    names = list(next(iter(arms.values())))
-    print(f"\n  원시 엔코더 위치 (0~4095 · 중앙 {MID})\n")
-    hdr = f"  {'관절':<16}" + "".join(f"{k:>12}" for k in arms) + f"{'차이':>9}   판정"
-    print(hdr)
-    print("  " + "─" * (len(hdr) - 2))
-
-    blocked, mismatch = [], []
+    names = list(next(iter(arms.values()))["raw"])
+    print(f"\n  ① 원시 엔코더 (0~4095 · 중앙 {MID}) — **캘리브레이션 가능 여부** 판정용")
+    print(f"  {'관절':<16}{'팔로워':>9}{'리더':>9}   판정")
+    print("  " + "─" * 46)
+    blocked = []
     for n in names:
-        vals = {k: a.get(n) for k, a in arms.items()}
-        row = f"  {n:<16}" + "".join(f"{v:>12}" for v in vals.values())
-        diff = ""
-        if len(vals) == 2 and None not in vals.values():
-            d = vals["leader"] - vals["follower"]
-            diff = f"{d:>9}"
-            if abs(d) > 400:
-                mismatch.append((n, d))
         marks = []
-        for k, v in vals.items():
+        for k, a in arms.items():
+            v = a["raw"].get(n)
             if v is None:
                 continue
             if abs(v - MID) > EDGE_HARD:
-                blocked.append((k, n, v))
-                marks.append(f"❌{k} 끝에 걸림")
+                blocked.append((k, n, v)); marks.append(f"❌{k} 끝")
             elif abs(v - MID) > EDGE_WARN:
                 marks.append(f"⚠️ {k} 거의 끝")
-        if abs(vals.get("leader", MID) - vals.get("follower", MID)) > 400 if len(vals) == 2 else False:
-            marks.append("⚠️ 두 팔 자세 차이 큼")
-        print(row + diff + "   " + (" · ".join(marks) if marks else "✅"))
+        print(f"  {n:<16}{arms['follower']['raw'][n]:>9}{arms['leader']['raw'][n]:>9}   "
+              + (" · ".join(marks) if marks else "✅"))
+
+    print(f"\n  ② 정규화 위치(도) — **두 팔이 같은 공간에 있는가**")
+    print("     ⚠️ 두 팔을 물리적으로 **같은 자세**로 들고 있을 때만 의미가 있습니다")
+    print(f"  {'관절':<16}{'팔로워':>9}{'리더':>9}{'차이':>9}   판정")
+    print("  " + "─" * 55)
+    mismatch = []
+    for n in names:
+        f, l = arms["follower"]["norm"][n], arms["leader"]["norm"][n]
+        d = l - f
+        ok = abs(d) < 15
+        if not ok:
+            mismatch.append((n, d))
+        print(f"  {n:<16}{f:>9.1f}{l:>9.1f}{d:>9.1f}   {'✅' if ok else '⚠️  어긋남'}")
 
     print()
     if blocked:
@@ -185,13 +206,12 @@ def main():
         for k, n, v in blocked:
             print(f"       {k}의 {n} 가 {v} — 가동범위 가운데로 옮기세요")
     if mismatch:
-        print("  ⚠️  리더와 팔로워의 자세가 많이 다릅니다")
-        for n, d in mismatch:
-            print(f"       {n}: 차이 {d}")
-        print("       homing 은 **누른 순간의 자세를 중앙으로 삼습니다.**")
-        print("       두 팔을 **같은 자세**로 맞춘 뒤 캘리브레이션해야 텔레오프가 맞습니다.")
+        print(f"  ⚠️  정규화 위치가 {len(mismatch)}개 관절에서 어긋납니다")
+        print("       두 팔을 같은 자세로 들고 있었다면 → 캘리브레이션을 다시 하세요")
+        print("       자세가 달랐다면 → 같은 자세로 맞추고 다시 확인하세요")
     if not blocked and not mismatch:
-        print("  ✅ 캘리브레이션을 시작해도 좋습니다")
+        print("  ✅ 캘리브레이션 상태 양호")
+    print("\n  최종 확인은 실제 텔레오프로:  ./check_setup.sh teleop")
     return 1 if blocked else 0
 
 
