@@ -136,22 +136,38 @@ def main(root):
                   f"→ 건너뜀 약 {max(0, span - len(eps))}행")
 
         # ── ③ 대응쌍이 저장본에서 살아 있는가 ──
-        #   계획표 그룹별로 "저장된 지시문 집합"을 모아, 그룹 전원이 들어왔는지 본다.
-        #   한쪽만 저장된 그룹은 **깨진 쌍**이다 — 언어 신호가 가장 진한 구간을 잃은 것.
-        saved = Counter(tasks)
+        #   ⚠️ 지시문 **문자열**로 짝을 찾으면 안 된다. 80행에 지시문이 57종뿐이라
+        #      같은 문장이 여러 행에 나온다. ep2를 저장했을 뿐인데 같은 문장을 가진
+        #      행 50이 "절반 저장됨"으로 잡혀 수집 내내 거짓 경보가 난다(실제로 겪음).
+        #   수집 러너가 남기는 collect_progress.txt 에 **실제 행 번호**가 있으므로
+        #   그것으로 판정한다. 없으면(옛 수집본) 판정을 건너뛴다 — 틀린 경보보다 낫다.
+        prog = os.path.join(root, "collect_progress.txt")
+        done_rows = set()
+        if os.path.exists(prog):
+            for line in open(prog):
+                part = line.split(",")[0].strip()
+                if part.isdigit():
+                    done_rows.add(part)
         groups = defaultdict(list)
         for r in plan:
             groups[r["group"]].append(r)
         intact = broken = 0
         broken_ex = []
+        if not done_rows:
+            print("  ⏸ collect_progress.txt 없음 — 대응쌍 판정 건너뜀")
+            groups = {}
+        last_row = max((int(x) for x in done_rows), default=0)
         for g, items in groups.items():
             if len(items) < 2:
                 continue
-            got = sum(1 for r in items if saved.get(r["instruction"], 0) > 0)
+            rows_ = [r["ep"] for r in items]
+            got = sum(1 for e in rows_ if e in done_rows)
             if got == 0:
-                continue          # 아직 진행 안 한 그룹
+                continue          # 아직 시작 안 한 그룹
             if got == len(items):
                 intact += 1
+            elif max(int(e) for e in rows_) > last_row:
+                continue          # **아직 진행 중인 그룹** — 뒷 행에 아직 도달 못 했다
             else:
                 broken += 1
                 if len(broken_ex) < 3:
