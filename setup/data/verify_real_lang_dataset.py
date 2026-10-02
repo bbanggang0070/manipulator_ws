@@ -218,4 +218,4 @@ def main(root):
 
 if __name__ == "__main__":
     sys.exit(main(os.path.expanduser(sys.argv[1] if len(sys.argv) > 1 else
-                                     "~/.cache/huggingface/lerobot/heongyu/so101_real_lang")))
+                                     "~/blocktask_ws/Sim-to-Real-SO-101-Workshop/datasets/_train/cleanup_real")))

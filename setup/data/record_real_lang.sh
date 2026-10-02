@@ -38,9 +38,13 @@ set -uo pipefail
 cd "$(dirname "$0")"
 
 PLAN="${PLAN:-$HOME/manipulator_ws/manipulator_md/real/real_lang_plan.csv}"
-DSNAME="${DSNAME:-so101_real_lang}"
+DSNAME="${DSNAME:-cleanup_real}"
 REPO="heongyu/$DSNAME"
-ROOT="${ROOT:-$HOME/.cache/huggingface/lerobot/$REPO}"
+# 저장 위치. lerobot 기본값(HF 캐시)이 아니라 워크숍 datasets/_train 아래에 둔다.
+#   ⚠️ ROOT를 바꾸면 **lerobot에도 --dataset.root로 같이 넘겨야** 한다.
+#      안 넘기면 러너는 여기를 보고 lerobot은 HF 캐시에 쓰면서 둘이 따로 논다
+#      (이어쓰기 판단·지문·검증이 전부 엉뚱한 폴더를 보게 된다).
+ROOT="${ROOT:-$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop/datasets/_train/$DSNAME}"
 START="${START:-1}"
 END="${END:-0}"
 EP_TIME="${EP_TIME:-60}"
@@ -58,6 +62,8 @@ TOTAL=$(( $(wc -l < "$PLAN") - 1 ))
 [ "$END" = "0" ] && END=$TOTAL
 DONE=0
 [ -d "$ROOT/meta" ] && DONE=$(python3 -c "import json;print(json.load(open('$ROOT/meta/info.json'))['total_episodes'])" 2>/dev/null || echo 0)
+
+mkdir -p "$(dirname "$ROOT")"
 
 # ── 실패한 생성이 남긴 빈 데이터셋 정리 ────────────────────────────────
 #   LeRobotDataset.create 가 도중에 실패하면 meta/info.json 만 있는 **0ep 폴더**가
@@ -173,6 +179,7 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; d
       --teleop.type=so101_leader --teleop.port=/dev/ttyLEADER --teleop.id=leader \
       --display_data=true \
       --dataset.repo_id="$REPO" \
+      --dataset.root="$ROOT" \
       --dataset.num_episodes=1 \
       --dataset.single_task="$INSTR" \
       --dataset.episode_time_s="$EP_TIME" \
