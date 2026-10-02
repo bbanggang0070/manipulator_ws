@@ -45,7 +45,7 @@ def open_arm(kind, port, dev_id):
     cfg.id = dev_id
     cfg.calibration_dir = None
     dev = C(cfg)
-    dev.bus.connect()
+    dev.connect(calibrate=False)      # calibration 을 들고 있어야 나중에 복원할 수 있다
     dev.bus.reset_calibration()
     return dev
 
@@ -67,6 +67,17 @@ def read_arm(kind, port, dev_id):
         raw = dict(dev.bus.sync_read("Present_Position", normalize=False))
         return {"raw": raw, "norm": norm}
     finally:
+        # ⚠️ reset_calibration() 은 **서보 레지스터의 캘리브레이션을 지운다.**
+        #    그대로 두면 다음 번 연결에서 파일과 불일치가 나서
+        #      "Mismatch between calibration values in the motor and the calibration file"
+        #    이 뜨고 캘리브레이션을 다시 하겠냐고 묻는다(실제로 겪음).
+        #    읽기만 하는 도구가 장비 상태를 바꾸면 안 된다 — 반드시 되돌린다.
+        try:
+            if dev.calibration:
+                dev.bus.write_calibration(dev.calibration)
+        except Exception as e:
+            print(f"  ⚠️  {kind} 캘리브레이션 복원 실패: {e}")
+            print(f"     다음 연결에서 'Mismatch...' 가 뜨면 **ENTER**(파일 사용)를 누르세요")
         dev.disconnect()
 
 
@@ -132,6 +143,11 @@ def watch():
         print("\n  종료.")
     finally:
         for d in devs.values():
+            try:
+                if d.calibration:
+                    d.bus.write_calibration(d.calibration)   # 레지스터 원상복구(위 주석 참조)
+            except Exception:
+                pass
             d.bus.disconnect()
     return 0
 
