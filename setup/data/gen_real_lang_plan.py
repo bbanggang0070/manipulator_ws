@@ -58,7 +58,7 @@ import os
 import random
 from collections import Counter
 
-# ── 물체 11종. 이름이 지시문에 그대로 들어간다 ───────────────────────────
+# ── 물체 10종. 이름이 지시문에 그대로 들어간다 ───────────────────────────
 #   큐브 6색 + 사물 5종. 사물 쪽은 형상이 다양해 **파지 난이도 편차가 크다** —
 #   sim 분해에서 병목이 언어가 아니라 조작(물체+배치 45.0%)이었으므로,
 #   어려운 물체를 넣을수록 전체 성공률은 더 내려간다. 평가 때 축을 분리해 본다.
@@ -67,17 +67,18 @@ from collections import Counter
 #   · glue stick 은 **구른다.** 눕혀 놓되 굴러가지 않는 자세로 둘 것.
 OBJECTS = ["red cube", "blue cube", "yellow cube", "green cube",
            "purple cube", "orange cube",
-           "marker", "eraser", "board eraser", "glue stick", "screwdriver"]
+           "marker", "eraser", "glue stick", "screwdriver"]
 
 # ── 같은 에피소드에 **함께 놓지 않을** 쌍 ────────────────────────────────
-#   "the eraser"가 둘 중 어느 것인지 사람도 헷갈린다. 시연자가 잘못 집으면
-#   그 에피소드가 "언어를 무시해도 된다"는 반례가 되어 데이터를 오염시킨다.
-#   세밀한 구별은 가치 있는 능력이지만, 250ep에 얹을 부담은 아니다.
-EXCLUSIVE = [("eraser", "board eraser")]
+#   지금은 비어 있다 — board eraser를 빼면서 유일한 충돌 쌍이 사라졌다.
+#   이름이 서로 포함 관계인 물체를 추가하면(예: "eraser"와 "board eraser")
+#   여기 넣어야 한다. "the eraser"가 어느 쪽인지 사람도 헷갈리고, 시연자가
+#   잘못 집으면 그 에피소드가 "언어를 무시해도 된다"는 반례가 되기 때문이다.
+EXCLUSIVE = []
 
 # ── 목적지 4칸. 색↔칸은 **고정**이다(선반이 고정이므로) ──────────────────
 #   번호는 **물리적 왼쪽→오른쪽** 순서다. 색지를 이 순서로 붙일 것.
-#   1단계는 1·4번만 쓰므로 **양 끝이 white·black** — 휘도 양극단이 공간적으로도
+#   1단계는 1·4번만 쓰므로 **양 끝이 black·white** — 휘도 양극단이 공간적으로도
 #   가장 멀리 놓인다. 대비와 행동차가 동시에 최대가 되는 배치다.
 #
 #   색 선택 기준 셋:
@@ -87,7 +88,7 @@ EXCLUSIVE = [("eraser", "board eraser")]
 #   ⚠️ 물리 색지는 하늘색이어도 **지시문 단어는 `cyan`**을 쓴다.
 #      "blue bin"이라고 하면 **blue cube와 같은 단어**가 되어 충돌한다.
 #   brown·gray는 쓰지 않는다 — sim에서 black과 구별되지 않은 바로 그 색들이다.
-SLOTS = [(1, "white"), (2, "cyan"), (3, "pink"), (4, "black")]
+SLOTS = [(1, "black"), (2, "cyan"), (3, "pink"), (4, "white")]
 
 # 목적지를 부르는 명사. 선반 칸이므로 box가 아니라 bin으로 통일한다.
 DEST_NOUN = "bin"

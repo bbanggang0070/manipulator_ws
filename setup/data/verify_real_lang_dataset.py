@@ -45,9 +45,10 @@ import pandas as pd
 PLAN = os.environ.get("REAL_LANG_PLAN", os.path.expanduser(
     "~/manipulator_ws/manipulator_md/real/real_lang_plan.csv"))
 OBJ_NOUNS = ("red cube", "blue cube", "yellow cube", "green cube",
-             "purple cube", "orange cube", "marker", "eraser")
+             "purple cube", "orange cube", "marker", "eraser",
+             "glue stick", "screwdriver")
 # 4칸 선반. gen_real_lang_plan.py 의 SLOTS 와 같아야 한다.
-SLOTS = {"black": 1, "white": 2, "cyan": 3, "pink": 4}
+SLOTS = {"black": 1, "cyan": 2, "pink": 3, "white": 4}
 DEST_NOUN = "bin"
 
 
