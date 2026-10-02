@@ -16,12 +16,19 @@ sim 검증(verify_lang_dataset.py)과 같은 목적이지만, 실기에서만 �
      재녹화 순서가 밀리면 **짝이 깨진다.** 짝이 깨진 쌍은 그냥 평범한 에피소드 2개라
      이 데이터셋의 가장 진한 언어 신호가 사라진다. 저장 순서로 짝을 복원해 확인한다.
 
-  ④ 타깃·칸 균형, 지시문 다양성, 에피소드 길이
+  ④ **캘리브레이션이 수집 시작 때와 같은가** — 바뀌면 관절 공간이 달라져
+     데이터셋이 서로 안 맞는 두 덩어리가 된다. 기록에 남지 않아 조용히 지나간다.
+
+  ⑤ 타깃·칸 균형, 지시문 다양성, 에피소드 길이
 
 사용(lerobot venv 필요 — pandas):
   cd ~/manipulator_ws/envs/lerobot
   uv run python ../../setup/data/verify_real_lang_dataset.py \\
       ~/.cache/huggingface/lerobot/heongyu/so101_real_lang
+
+  # 1단계(80행 계획표)를 검증할 때는 계획표를 맞춰 준다
+  REAL_LANG_PLAN=~/manipulator_ws/manipulator_md/real/real_lang_plan_s1.csv \\
+  uv run python ../../setup/data/verify_real_lang_dataset.py
 """
 import csv
 import glob
@@ -33,7 +40,10 @@ from collections import Counter, defaultdict
 
 import pandas as pd
 
-PLAN = os.path.expanduser("~/manipulator_ws/manipulator_md/real/real_lang_plan.csv")
+# 대조할 계획표. **1단계는 80행짜리를 쓰므로** 환경변수로 바꿔야 한다 —
+# 250행 계획표로 대조하면 대응쌍 그룹 번호가 어긋나 멀쩡한 쌍이 깨진 것으로 나온다.
+PLAN = os.environ.get("REAL_LANG_PLAN", os.path.expanduser(
+    "~/manipulator_ws/manipulator_md/real/real_lang_plan.csv"))
 OBJ_NOUNS = ("red cube", "blue cube", "yellow cube", "green cube",
              "purple cube", "orange cube", "marker", "eraser")
 # 4칸 선반. gen_real_lang_plan.py 의 SLOTS 와 같아야 한다.
@@ -65,6 +75,22 @@ def main(root):
     n_ep, n_fr, fps = info["total_episodes"], info.get("total_frames", 0), info["fps"]
     print(f"\n{'=' * 66}\n{os.path.basename(root)} — {n_ep}ep · {n_fr:,}frames · "
           f"{info['codebase_version']}\n{'=' * 66}")
+
+    # ── ⓪ 캘리브레이션 지문 ──────────────────────────────────────────
+    #   수집 도중/후에 캘리브레이션이 바뀌면 관절 공간이 달라져 데이터셋이
+    #   서로 안 맞는 두 덩어리가 된다. 학습 전에 반드시 확인한다.
+    import subprocess
+    fp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "calib_fingerprint.py")
+    if os.path.exists(fp):
+        r = subprocess.run([sys.executable, fp, "--check", root],
+                           capture_output=True, text=True)
+        for line in r.stdout.rstrip().split("\n"):
+            print("  " + line.strip() if line.strip() else "")
+        if r.returncode != 0:
+            print("  ❌ 캘리브레이션 불일치 — 학습 전에 정리해야 한다")
+            return 1
+    else:
+        print(f"  ⏸ calib_fingerprint.py 없음 — 캘리브레이션 대조 건너뜀")
 
     ef = sorted(glob.glob(f"{root}/meta/episodes/**/*.parquet", recursive=True))
     if not ef:

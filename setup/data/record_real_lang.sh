@@ -51,6 +51,15 @@ TOTAL=$(( $(wc -l < "$PLAN") - 1 ))
 DONE=0
 [ -d "$ROOT/meta" ] && DONE=$(python3 -c "import json;print(json.load(open('$ROOT/meta/info.json'))['total_episodes'])" 2>/dev/null || echo 0)
 
+# ── 캘리브레이션 지문 대조 ──────────────────────────────────────────────
+#   수집 도중 캘리브레이션이 바뀌면 관절 공간이 달라져 데이터셋이 **서로 안 맞는
+#   두 덩어리**가 된다. 그런데 그 변화는 아무 데도 기록되지 않아 조용히 지나간다.
+#   단계를 나눠 모으므로(80 → +80 → +90) 단계 사이가 특히 위험하다.
+if ! python3 "$(dirname "$0")/calib_fingerprint.py" --check "$ROOT"; then
+  echo "❌ 캘리브레이션이 바뀌었습니다. 위 안내를 보고 정리한 뒤 다시 실행하세요."
+  exit 1
+fi
+
 cat <<INFO
 
   계획표   : $PLAN  (${TOTAL}행)
@@ -145,6 +154,8 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; d
   if [ "$NEW" -gt "$DONE" ]; then
     DONE=$NEW
     echo "  ✅ 저장됨 (누적 ${DONE}ep)"
+    # 데이터셋 폴더는 첫 저장 때 생긴다. 그 시점에 지문을 남긴다(이미 있으면 대조만).
+    python3 "$(dirname "$0")/calib_fingerprint.py" --write "$ROOT" >/dev/null 2>&1 || true
   else
     echo "  ⚠ 저장이 안 됐습니다 — 다음 행으로 넘어갑니다"
   fi
