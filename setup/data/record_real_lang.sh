@@ -132,6 +132,9 @@ if ! python3 "$(dirname "$0")/calib_fingerprint.py" --check "$ROOT"; then
   exit 1
 fi
 
+echo
+python3 "$(dirname "$0")/calib_fingerprint.py" --banner || exit 1
+
 cat <<INFO
 
   계획표   : $PLAN  (${TOTAL}행)

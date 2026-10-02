@@ -47,6 +47,37 @@ def snap_path(root):
     return os.path.join(os.path.expanduser(root), SNAP_NAME)
 
 
+# lerobot 클래스 이름이 캘리브레이션 폴더를 정한다(타입 이름이 아니다).
+#   SO101Follower.name == 'so_follower'  → robots/so_follower/<id>.json
+#   SO101Leader.name   == 'so_leader'    → teleoperators/so_leader/<id>.json
+# 그래서 --robot.type=so101_follower 로 돌려도 so_follower/ 를 읽고 쓴다.
+LIVE = [("팔로워", "robots/so_follower/follower.json"),
+        ("리더  ", "teleoperators/so_leader/leader.json")]
+
+
+def cmd_banner():
+    """수집·텔레오프가 **실제로 쓸** 캘리브레이션을 한눈에 보여 준다.
+
+    스크립트가 어떤 캘리브레이션으로 도는지 화면에 안 나오면, 재캘리브레이션을
+    했는지 안 했는지조차 확인할 수 없다. 시작할 때마다 찍는다.
+    """
+    fp = fingerprint()
+    missing = False
+    print("  캘리브레이션 (이 실행에 적용됨)")
+    for label, rel in LIVE:
+        full = os.path.join(CALIB_DIR, rel)
+        if not os.path.exists(full):
+            print(f"    {label}  ❌ 없음: {rel}")
+            missing = True
+            continue
+        mt = datetime.fromtimestamp(os.path.getmtime(full)).strftime("%Y-%m-%d %H:%M")
+        print(f"    {label}  {fp.get(rel, '?')}  ({mt})  {rel}")
+    if missing:
+        print("    → lerobot-calibrate 로 먼저 캘리브레이션하세요")
+        return 1
+    return 0
+
+
 def cmd_show():
     fp = fingerprint()
     if not fp:
@@ -119,8 +150,12 @@ def main():
     g.add_argument("--write", metavar="ROOT")
     g.add_argument("--check", metavar="ROOT")
     g.add_argument("--show", action="store_true")
+    g.add_argument("--banner", action="store_true",
+                   help="실제로 쓰이는 두 파일만 한 줄씩 — 스크립트 시작 배너용")
     ap.add_argument("--force", action="store_true", help="--write 시 기존 지문을 덮어쓴다")
     a = ap.parse_args()
+    if a.banner:
+        return cmd_banner()
     if a.show:
         return cmd_show()
     if a.write:

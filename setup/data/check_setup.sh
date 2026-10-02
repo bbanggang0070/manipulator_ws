@@ -39,6 +39,10 @@ case "$MODE" in
 
   teleop)
     need_dev /dev/ttyLEADER /dev/ttyFOLLOWER /dev/cam_top /dev/cam_wrist
+    # 어떤 캘리브레이션으로 도는지 눈에 보이게 한다. 안 보이면 재캘리브레이션을
+    # 했는지조차 확인할 수 없고, 리치 판단이 옛 캘리브레이션 기준이 될 수 있다.
+    echo
+    python3 "$(dirname "$0")/calib_fingerprint.py" --banner || exit 1
     cat <<'INFO'
 
 ▶ 텔레오프 모드 — 리더암으로 팔로워암을 몹니다.
