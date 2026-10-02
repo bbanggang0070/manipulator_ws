@@ -31,8 +31,10 @@
 #     sim에서 목적지 축이 물체 축보다 약했던 주된 이유가 이 구간 길이 차이다.
 #
 # 사용:
-#   ./record_real_lang.sh              # 계획표 처음부터
-#   START=41 ./record_real_lang.sh     # 41번 행부터 (이어서)
+#   ./record_real_lang.sh              # 처음 실행이면 1행부터,
+#                                      # 중단 뒤 재실행이면 **자동으로 이어서**
+#   START=41 ./record_real_lang.sh     # 41번 행부터 (수동 지정)
+#   START=1  ./record_real_lang.sh     # 진행 기록을 무시하고 처음부터
 #   END=60 ./record_real_lang.sh       # 60번 행까지만
 set -uo pipefail
 cd "$(dirname "$0")"
@@ -45,7 +47,7 @@ REPO="heongyu/$DSNAME"
 #      안 넘기면 러너는 여기를 보고 lerobot은 HF 캐시에 쓰면서 둘이 따로 논다
 #      (이어쓰기 판단·지문·검증이 전부 엉뚱한 폴더를 보게 된다).
 ROOT="${ROOT:-$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop/datasets/_train/$DSNAME}"
-START="${START:-1}"
+START="${START:-}"        # 비우면 진행 기록에서 자동 결정(아래)
 END="${END:-0}"
 EP_TIME="${EP_TIME:-60}"
 LEROBOT="$(cd ../../envs/lerobot && pwd)"
@@ -64,6 +66,22 @@ DONE=0
 [ -d "$ROOT/meta" ] && DONE=$(python3 -c "import json;print(json.load(open('$ROOT/meta/info.json'))['total_episodes'])" 2>/dev/null || echo 0)
 
 mkdir -p "$(dirname "$ROOT")"
+
+# ── 재개 지점 결정 ──────────────────────────────────────────────────────
+#   에피소드 수(DONE)로는 계획표 행을 못 맞춘다. 건너뛰기(s)나 재녹화가 섞이면
+#   DONE+1 이 행 번호와 어긋나기 때문이다. 그래서 **저장에 성공한 행 번호를
+#   직접 기록**하고(PROGRESS), 그 다음 행부터 재개한다.
+PROGRESS="$ROOT/collect_progress.txt"
+if [ -z "$START" ]; then
+  if [ -s "$PROGRESS" ]; then
+    LAST=$(tail -1 "$PROGRESS" | cut -d, -f1)
+    START=$((LAST + 1))
+    echo "▶ 진행 기록 발견 — 계획표 ${LAST}행까지 저장됨. **${START}행부터 재개**합니다."
+    echo "   (처음부터 다시 하려면 START=1 로 지정하세요)"
+  else
+    START=1
+  fi
+fi
 
 # ── 실패한 생성이 남긴 빈 데이터셋 정리 ────────────────────────────────
 #   LeRobotDataset.create 가 도중에 실패하면 meta/info.json 만 있는 **0ep 폴더**가
@@ -194,6 +212,8 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; d
     echo "  ✅ 저장됨 (누적 ${DONE}ep)"
     # 데이터셋 폴더는 첫 저장 때 생긴다. 그 시점에 지문을 남긴다(이미 있으면 대조만).
     python3 "$(dirname "$0")/calib_fingerprint.py" --write "$ROOT" >/dev/null 2>&1 || true
+    # 재개용 진행 기록 — "계획표 몇 행이 몇 번째 에피소드로 저장됐는가"
+    echo "$EP,$DONE,$(date -Is)" >> "$PROGRESS"
   else
     echo "  ⚠ 저장이 안 됐습니다 — 다음 행으로 넘어갑니다"
   fi
