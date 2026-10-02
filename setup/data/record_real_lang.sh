@@ -52,7 +52,25 @@ END="${END:-0}"
 EP_TIME="${EP_TIME:-60}"
 LEROBOT="$(cd ../../envs/lerobot && pwd)"
 
-[ -f "$PLAN" ] || { echo "❌ 계획표 없음: $PLAN"; echo "   python3 gen_real_lang_plan.py 로 먼저 생성하세요"; exit 1; }
+if [ ! -f "$PLAN" ]; then
+  echo "❌ 계획표 파일이 없습니다: $PLAN"
+  # 경로 오타가 가장 흔하다. 있는 것을 보여 주면 바로 알아챈다.
+  _PD="$HOME/manipulator_ws/manipulator_md/real"
+  if ls "$_PD"/*.csv >/dev/null 2>&1; then
+    echo
+    echo "   이미 만들어 둔 계획표:"
+    for f in "$_PD"/*.csv; do
+      printf "     %s  (%d행)\n" "$f" "$(($(wc -l < "$f") - 1))"
+    done
+    echo
+    echo "   예:  PLAN=$_PD/real_lang_plan_s1.csv ./record_real_lang.sh"
+  else
+    echo "   계획표가 하나도 없습니다 — 먼저 생성하세요:"
+    echo "     python3 gen_real_lang_plan.py --episodes 80 --slots 1,4 \\"
+    echo "         --out $_PD/real_lang_plan_s1.csv"
+  fi
+  exit 1
+fi
 for d in /dev/ttyLEADER /dev/ttyFOLLOWER /dev/cam_top /dev/cam_wrist; do
   [ -e "$d" ] || { echo "❌ $d 없음 — 하드웨어 연결을 확인하세요"; exit 1; }
 done
