@@ -58,20 +58,36 @@ import os
 import random
 from collections import Counter
 
-# ── 물체 8종. 이름이 지시문에 그대로 들어간다 ────────────────────────────
-#   sim 카탈로그와 색이 하나 다르다 — sim은 cyan, 실기는 orange다.
-#   실기 단독 학습이라 sim 어휘를 물려받지 않으므로 문제가 되지 않는다.
+# ── 물체 11종. 이름이 지시문에 그대로 들어간다 ───────────────────────────
+#   큐브 6색 + 사물 5종. 사물 쪽은 형상이 다양해 **파지 난이도 편차가 크다** —
+#   sim 분해에서 병목이 언어가 아니라 조작(물체+배치 45.0%)이었으므로,
+#   어려운 물체를 넣을수록 전체 성공률은 더 내려간다. 평가 때 축을 분리해 본다.
+#   · screwdriver, glue stick, marker 는 **가늘고 길다** — 256²에서 서로 닮는다.
+#     색이 확실히 다른 것으로 고르고, 수집 전 view_cams.py의 모델 시점에서 확인할 것.
+#   · glue stick 은 **구른다.** 눕혀 놓되 굴러가지 않는 자세로 둘 것.
 OBJECTS = ["red cube", "blue cube", "yellow cube", "green cube",
-           "purple cube", "orange cube", "marker", "eraser"]
+           "purple cube", "orange cube",
+           "marker", "eraser", "board eraser", "glue stick", "screwdriver"]
+
+# ── 같은 에피소드에 **함께 놓지 않을** 쌍 ────────────────────────────────
+#   "the eraser"가 둘 중 어느 것인지 사람도 헷갈린다. 시연자가 잘못 집으면
+#   그 에피소드가 "언어를 무시해도 된다"는 반례가 되어 데이터를 오염시킨다.
+#   세밀한 구별은 가치 있는 능력이지만, 250ep에 얹을 부담은 아니다.
+EXCLUSIVE = [("eraser", "board eraser")]
 
 # ── 목적지 4칸. 색↔칸은 **고정**이다(선반이 고정이므로) ──────────────────
-#   색 선택 기준 세 가지:
-#     · 저해상도·조명 변화에서 서로 멀 것 → 휘도 양극단(black/white) + 포화 색상 2개
-#     · 큐브 6색과 **겹치지 않을 것** → "red cube를 red 칸에"가 만드는 색↔명사 결합
-#       부담을 250ep에 얹지 않는다. cleanup 최종형에서 필요해지겠지만 1단계 비용은 아니다.
+#   번호는 **물리적 왼쪽→오른쪽** 순서다. 색지를 이 순서로 붙일 것.
+#   1단계는 1·4번만 쓰므로 **양 끝이 white·black** — 휘도 양극단이 공간적으로도
+#   가장 멀리 놓인다. 대비와 행동차가 동시에 최대가 되는 배치다.
+#
+#   색 선택 기준 셋:
+#     · 저해상도·조명 변화에서 서로 멀 것 → 휘도 양극단(white/black) + 포화 색상 2개
+#     · 큐브 6색과 **겹치지 않을 것** → 색↔명사 결합 부담을 250ep에 얹지 않는다
 #     · 흔한 영어 색 이름일 것
+#   ⚠️ 물리 색지는 하늘색이어도 **지시문 단어는 `cyan`**을 쓴다.
+#      "blue bin"이라고 하면 **blue cube와 같은 단어**가 되어 충돌한다.
 #   brown·gray는 쓰지 않는다 — sim에서 black과 구별되지 않은 바로 그 색들이다.
-SLOTS = [(1, "black"), (2, "white"), (3, "cyan"), (4, "pink")]
+SLOTS = [(1, "white"), (2, "cyan"), (3, "pink"), (4, "black")]
 
 # 목적지를 부르는 명사. 선반 칸이므로 box가 아니라 bin으로 통일한다.
 DEST_NOUN = "bin"
@@ -153,8 +169,23 @@ def main():
         # 그룹 하나는 배치(물체 구성·타깃)를 공유한다. 사람은 물체를 한 번만 놓는다.
         target = pick_least(tgt_count, OBJECTS, rng)
         n_obj = rng.choices(list(COUNT_WEIGHTS), list(COUNT_WEIGHTS.values()))[0]
-        others = [o for o in OBJECTS if o != target]
-        objs = [target] + rng.sample(others, n_obj - 1)
+        # 상호 배제 — 헷갈리는 짝이 **한 화면에 같이 서지 않도록** 한다.
+        #   타깃 기준으로만 막으면 부족하다. 타깃이 'red cube'여도 방해물로
+        #   eraser와 board eraser가 **둘 다** 뽑힐 수 있다(자체 검사로 13건 적발).
+        #   그래서 하나를 고를 때마다 그 짝을 풀에서 즉시 뺀다.
+        def partners_of(x):
+            return {b for pr in EXCLUSIVE for a, b in (pr, pr[::-1]) if a == x}
+
+        pool = [o for o in OBJECTS if o != target and o not in partners_of(target)]
+        objs = [target]
+        for _ in range(n_obj - 1):
+            if not pool:
+                break
+            pick = rng.choice(pool)
+            objs.append(pick)
+            drop = partners_of(pick) | {pick}
+            pool = [o for o in pool if o not in drop]
+        n_obj = len(objs)
         rng.shuffle(objs)
 
         if kind == "quad":
@@ -279,6 +310,18 @@ def report(rows, slots, a):
           f"(같은 배치 · 서로 다른 칸 · 목적지 전부 명시)  위반 {len(bad_pairs)}건")
     for g, why in bad_pairs[:5]:
         print(f"       그룹 {g}: {why}")
+
+    # 상호 배제가 지켜졌는가 — 깨지면 지시문이 모호해진다
+    viol = []
+    for r in rows:
+        on = set(x.strip() for x in r["objects"].split(","))
+        for a, b in EXCLUSIVE:
+            if a in on and b in on:
+                viol.append((r["ep"], a, b))
+    ok &= not viol
+    print(f"  {'✅' if not viol else '❌'} 상호 배제 (같은 화면에 두지 않을 쌍)  위반 {len(viol)}건")
+    for ep, a, b in viol[:3]:
+        print(f"       ep{ep}: '{a}' 와 '{b}' 가 함께 있다")
 
     reuse = sum(1 for r in rows if r["keep_layout"] == "KEEP")
     hours = ((N - reuse) * 150 + reuse * 110) / 3600
