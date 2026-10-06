@@ -125,15 +125,28 @@ def main(root):
         for t in stray[:3]:
             print(f'       "{t}"')
 
-        # 저장 순서 ↔ 계획표 순서. 건너뛰기는 허용, 역행은 재녹화 신호
-        idx = [plan_instr.index(t) for t in tasks if t in plan_instr]
-        back = sum(1 for a, b in zip(idx, idx[1:]) if b < a)
-        print(f"  {'✅' if back == 0 else '⚠️ '} 계획표 순서 역행          {back}건 "
-              f"{'' if back == 0 else '← 문장 중복으로 추정이 거칠 수 있다. 재녹화면 정상'}")
-        if idx:
-            span = max(idx) + 1
+        # 저장 순서 ↔ 계획표 순서.
+        #   ⚠️ 지시문 **문자열**로 순서를 추정하면 안 된다. 같은 문장이 여러 행에
+        #      나와서 멀쩡한 수집이 "역행 22건"으로 잡힌다(80ep에서 실제로 겪음).
+        #      러너가 남기는 collect_progress.txt 의 **실제 행 번호**를 쓴다.
+        prog_rows = []
+        prog_f = os.path.join(root, "collect_progress.txt")
+        if os.path.exists(prog_f):
+            prog_rows = [int(l.split(",")[0]) for l in open(prog_f)
+                         if l.split(",")[0].strip().isdigit()]
+        if prog_rows:
+            back = sum(1 for a, b in zip(prog_rows, prog_rows[1:]) if b < a)
+            dup = sorted({r for r in prog_rows if prog_rows.count(r) > 1})
+            span = max(prog_rows)
+            missing = sorted(set(range(1, span + 1)) - set(prog_rows))
+            ok &= back == 0 and not dup
+            print(f"  {'✅' if back == 0 else '❌'} 계획표 순서 역행          {back}건")
+            print(f"  {'✅' if not dup else '❌'} 행 중복                  "
+                  f"{len(dup)}건{(' ' + str(dup[:5])) if dup else ''}")
             print(f"     계획표 {span}행까지 진행해 {len(eps)}ep 저장 "
-                  f"→ 건너뜀 약 {max(0, span - len(eps))}행")
+                  f"→ 건너뛴 행 {len(missing)}개{(' ' + str(missing[:8])) if missing else ''}")
+        else:
+            print("  ⏸ collect_progress.txt 없음 — 순서 검사 건너뜀")
 
         # ── ③ 대응쌍이 저장본에서 살아 있는가 ──
         #   ⚠️ 지시문 **문자열**로 짝을 찾으면 안 된다. 80행에 지시문이 57종뿐이라
@@ -203,15 +216,24 @@ def main(root):
         print(f"  ⏸ 표본 {n_named}ep — 균형 판정은 80ep 이상에서")
 
     named = sum(v for k, v in dst.items() if k != "(미지정)")
-    print(f"\n  칸 분포")
+    # ⚠️ 기대값은 **계획표가 실제로 쓰는 칸** 기준이어야 한다. 1단계는 칸 1·4만
+    #    쓰는데 4칸 전부로 나누면 멀쩡한 33/35 가 "불균형"으로 잡힌다(실제로 겪음).
+    used = {c for c in SLOTS}
+    if plan:
+        used = {r["slot_color"] for r in plan if r.get("dest_named")}
+    print(f"\n  칸 분포  (계획표가 쓰는 칸: {', '.join(sorted(used)) or '?'})")
     for c, n in sorted(SLOTS.items(), key=lambda kv: kv[1]):
-        print(f"    {n}번 {c:<7} {dst.get(c, 0):>3}")
-    if named:
-        e2 = named / len(SLOTS)
-        badv = [c for c in SLOTS if named >= 60 and not e2 * 0.7 <= dst.get(c, 0) <= e2 * 1.3]
+        tag = "" if c in used else "   (이 단계에서 미사용)"
+        print(f"    {n}번 {c:<7} {dst.get(c, 0):>3}{tag}")
+    if named and used:
+        e2 = named / len(used)
+        badv = [c for c in used if named >= 60 and not e2 * 0.7 <= dst.get(c, 0) <= e2 * 1.3]
         if named >= 60:
             ok &= not badv
-            print(f"  {'✅' if not badv else '❌'} 칸 균형                   기대 {e2:.0f} ±30%")
+            print(f"  {'✅' if not badv else '❌'} 칸 균형                   기대 {e2:.0f} ±30%"
+                  f" ({len(used)}칸 기준)")
+            for c in badv:
+                print(f"       {c}: {dst.get(c, 0)}")
         else:
             print(f"  ⏸ 목적지 명시 {named}ep — 칸 균형 판정은 60ep 이상에서")
     print(f"  목적지 명시 {named}/{len(tasks)} ({named / len(tasks) * 100:.0f}%) — 계획 약 85%")
