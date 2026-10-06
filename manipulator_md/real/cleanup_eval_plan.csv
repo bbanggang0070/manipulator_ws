@@ -1,0 +1,61 @@
+trial,group,kind,pos,keep_layout,objects,target,slot,slot_color,instruction
+1,1,dest,1/2,NEW,"yellow cube, marker, red cube",yellow cube,4,white,Grab the yellow cube and place it in the white bin
+2,1,dest,2/2,KEEP,"yellow cube, marker, red cube",yellow cube,1,black,Pick up the yellow cube and put it in the black bin
+3,2,obj,1/2,NEW,"screwdriver, red cube, green cube",screwdriver,1,black,Pick up the screwdriver and put it in the black bin
+4,2,obj,2/2,KEEP,"screwdriver, red cube, green cube",red cube,1,black,Put the red cube into the black bin
+5,3,dest,1/2,NEW,"blue cube, green cube, screwdriver, purple cube",blue cube,1,black,Pick up the blue cube and put it in the black bin
+6,3,dest,2/2,KEEP,"blue cube, green cube, screwdriver, purple cube",blue cube,4,white,Grab the blue cube and place it in the white bin
+7,4,obj,1/2,NEW,"green cube, red cube",green cube,4,white,Pick up the green cube and put it in the white bin
+8,4,obj,2/2,KEEP,"green cube, red cube",red cube,4,white,Pick up the red cube and put it in the white bin
+9,5,dest,1/2,NEW,"glue stick, yellow cube",glue stick,1,black,Put the glue stick into the black bin
+10,5,dest,2/2,KEEP,"glue stick, yellow cube",glue stick,4,white,Pick up the glue stick and put it in the white bin
+11,6,obj,1/2,NEW,"screwdriver, purple cube",screwdriver,1,black,Pick up the screwdriver and put it in the black bin
+12,6,obj,2/2,KEEP,"screwdriver, purple cube",purple cube,1,black,Grab the purple cube and place it in the black bin
+13,7,dest,1/2,NEW,"orange cube, blue cube, glue stick",orange cube,4,white,Grab the orange cube and place it in the white bin
+14,7,dest,2/2,KEEP,"orange cube, blue cube, glue stick",orange cube,1,black,Pick up the orange cube and put it in the black bin
+15,8,obj,1/2,NEW,"glue stick, marker, orange cube, green cube",glue stick,4,white,Put the glue stick into the white bin
+16,8,obj,2/2,KEEP,"glue stick, marker, orange cube, green cube",marker,4,white,Put the marker into the white bin
+17,9,dest,1/2,NEW,"yellow cube, green cube, blue cube",yellow cube,1,black,Grab the yellow cube and place it in the black bin
+18,9,dest,2/2,KEEP,"yellow cube, green cube, blue cube",yellow cube,4,white,Put the yellow cube into the white bin
+19,10,obj,1/2,NEW,"eraser, purple cube, blue cube",eraser,1,black,Grab the eraser and place it in the black bin
+20,10,obj,2/2,KEEP,"eraser, purple cube, blue cube",purple cube,1,black,Put the purple cube into the black bin
+21,11,dest,1/2,NEW,"orange cube, yellow cube, eraser",orange cube,1,black,Pick up the orange cube and put it in the black bin
+22,11,dest,2/2,KEEP,"orange cube, yellow cube, eraser",orange cube,4,white,Grab the orange cube and place it in the white bin
+23,12,obj,1/2,NEW,"glue stick, orange cube",glue stick,4,white,Grab the glue stick and place it in the white bin
+24,12,obj,2/2,KEEP,"glue stick, orange cube",orange cube,4,white,Put the orange cube into the white bin
+25,13,dest,1/2,NEW,"screwdriver, eraser, blue cube, marker",screwdriver,4,white,Put the screwdriver into the white bin
+26,13,dest,2/2,KEEP,"screwdriver, eraser, blue cube, marker",screwdriver,1,black,Put the screwdriver into the black bin
+27,14,obj,1/2,NEW,"red cube, purple cube",red cube,4,white,Put the red cube into the white bin
+28,14,obj,2/2,KEEP,"red cube, purple cube",purple cube,4,white,Grab the purple cube and place it in the white bin
+29,15,dest,1/2,NEW,"orange cube, red cube, eraser, yellow cube",orange cube,4,white,Grab the orange cube and place it in the white bin
+30,15,dest,2/2,KEEP,"orange cube, red cube, eraser, yellow cube",orange cube,1,black,Pick up the orange cube and put it in the black bin
+31,16,obj,1/2,NEW,"red cube, green cube, purple cube, blue cube",red cube,1,black,Put the red cube into the black bin
+32,16,obj,2/2,KEEP,"red cube, green cube, purple cube, blue cube",green cube,1,black,Put the green cube into the black bin
+33,17,dest,1/2,NEW,"blue cube, yellow cube, eraser, green cube",blue cube,1,black,Pick up the blue cube and put it in the black bin
+34,17,dest,2/2,KEEP,"blue cube, yellow cube, eraser, green cube",blue cube,4,white,Put the blue cube into the white bin
+35,18,obj,1/2,NEW,"marker, orange cube, screwdriver",marker,1,black,Pick up the marker and put it in the black bin
+36,18,obj,2/2,KEEP,"marker, orange cube, screwdriver",orange cube,1,black,Pick up the orange cube and put it in the black bin
+37,19,dest,1/2,NEW,"yellow cube, green cube, glue stick",yellow cube,4,white,Put the yellow cube into the white bin
+38,19,dest,2/2,KEEP,"yellow cube, green cube, glue stick",yellow cube,1,black,Grab the yellow cube and place it in the black bin
+39,20,obj,1/2,NEW,"purple cube, screwdriver, red cube",purple cube,1,black,Put the purple cube into the black bin
+40,20,obj,2/2,KEEP,"purple cube, screwdriver, red cube",screwdriver,1,black,Grab the screwdriver and place it in the black bin
+41,21,dest,1/2,NEW,"screwdriver, orange cube, yellow cube",screwdriver,4,white,Put the screwdriver into the white bin
+42,21,dest,2/2,KEEP,"screwdriver, orange cube, yellow cube",screwdriver,1,black,Grab the screwdriver and place it in the black bin
+43,22,obj,1/2,NEW,"marker, screwdriver, glue stick, red cube",marker,4,white,Grab the marker and place it in the white bin
+44,22,obj,2/2,KEEP,"marker, screwdriver, glue stick, red cube",screwdriver,4,white,Put the screwdriver into the white bin
+45,23,dest,1/2,NEW,"green cube, blue cube",green cube,4,white,Put the green cube into the white bin
+46,23,dest,2/2,KEEP,"green cube, blue cube",green cube,1,black,Pick up the green cube and put it in the black bin
+47,24,obj,1/2,NEW,"orange cube, red cube",orange cube,1,black,Pick up the orange cube and put it in the black bin
+48,24,obj,2/2,KEEP,"orange cube, red cube",red cube,1,black,Grab the red cube and place it in the black bin
+49,25,dest,1/2,NEW,"glue stick, blue cube, orange cube",glue stick,4,white,Pick up the glue stick and put it in the white bin
+50,25,dest,2/2,KEEP,"glue stick, blue cube, orange cube",glue stick,1,black,Pick up the glue stick and put it in the black bin
+51,26,obj,1/2,NEW,"yellow cube, purple cube, orange cube, glue stick",yellow cube,4,white,Put the yellow cube into the white bin
+52,26,obj,2/2,KEEP,"yellow cube, purple cube, orange cube, glue stick",purple cube,4,white,Pick up the purple cube and put it in the white bin
+53,27,dest,1/2,NEW,"eraser, screwdriver",eraser,1,black,Put the eraser into the black bin
+54,27,dest,2/2,KEEP,"eraser, screwdriver",eraser,4,white,Put the eraser into the white bin
+55,28,obj,1/2,NEW,"yellow cube, blue cube",yellow cube,4,white,Grab the yellow cube and place it in the white bin
+56,28,obj,2/2,KEEP,"yellow cube, blue cube",blue cube,4,white,Put the blue cube into the white bin
+57,29,dest,1/2,NEW,"yellow cube, glue stick, red cube, blue cube",yellow cube,1,black,Pick up the yellow cube and put it in the black bin
+58,29,dest,2/2,KEEP,"yellow cube, glue stick, red cube, blue cube",yellow cube,4,white,Grab the yellow cube and place it in the white bin
+59,30,obj,1/2,NEW,"glue stick, purple cube",glue stick,1,black,Grab the glue stick and place it in the black bin
+60,30,obj,2/2,KEEP,"glue stick, purple cube",purple cube,1,black,Put the purple cube into the black bin
