@@ -235,8 +235,15 @@ def main(root):
             for c in badv:
                 print(f"       {c}: {dst.get(c, 0)}")
         else:
-            print(f"  ⏸ 목적지 명시 {named}ep — 칸 균형 판정은 60ep 이상에서")
-    print(f"  목적지 명시 {named}/{len(tasks)} ({named / len(tasks) * 100:.0f}%) — 계획 약 85%")
+            print(f"  ⏸ 표본 {named}ep — 칸 균형 판정은 60ep 이상에서")
+    # 기대 비율은 **계획표에서 직접 센다.** 85%로 박아 두었다가 설계가 100% 명시로
+    # 바뀐 뒤에도 "계획 약 85%"라고 찍어 멀쩡한 데이터가 어긋나 보였다.
+    exp = (sum(1 for r in plan if r.get("dest_named")) / len(plan) * 100) if plan else None
+    print(f"  목적지 색 명시 {named}/{len(tasks)} ({named / len(tasks) * 100:.0f}%)"
+          + (f" — 계획 {exp:.0f}%" if exp is not None else ""))
+    if exp is not None and abs(named / len(tasks) * 100 - exp) > 10:
+        ok = False
+        print(f"  ❌ 계획({exp:.0f}%)과 10%p 넘게 다르다 — 계획표를 잘못 쓰고 있는지 확인")
     print(f"  ℹ️  서로 다른 지시문 {len(set(tasks))}종")
     if tgt.get("?", 0):
         ok = False
