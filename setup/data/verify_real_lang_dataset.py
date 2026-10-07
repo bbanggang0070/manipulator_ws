@@ -268,48 +268,26 @@ def main(root):
     else:
         d = pd.concat([pd.read_parquet(f, columns=["episode_index", "frame_index",
                                                    "observation.state"]) for f in df])
-        # 파지 **시도** 횟수를 센다. 이 지표는 두 번 틀렸으니 정의를 박아 둔다:
-        #   ① 중점 임계로 개폐 전이를 세면 평균 3.9회가 나오는데, 이건 정상이다.
-        #      rest 에서 그리퍼가 닫혀 있다가 **접근하려고 열고** → 집고 → 놓고 →
-        #      복귀하며 닫는다. 즉 4회 전이가 올바른 시연이다. 99% 가 "재파지"로
-        #      찍혔던 건 지표가 정상 동작을 센 것이었다.
-        #   ② 첫 1초를 빼지 않으면, 에피소드가 그리퍼 열린 채 시작했다가 닫히는
-        #      것(시작 자세 문제)이 파지 시도로 잘못 잡힌다 — 56% 로 부풀었다.
-        # 올바른 정의: **첫 1초를 제외**하고, '크게 벌림 → 닫힘' 전이의 수.
-        # 마지막 닫힘이 rest 복귀면 빼고 센다. 2회 이상이면 한 번에 못 집은 것이다.
-        def grasp_attempts(g, dwell=3):
-            g = g[fps:]
-            lo, hi = g.min(), g.max()
-            if hi - lo < 5:
-                return None
-            o_th, c_th = lo + 0.6 * (hi - lo), lo + 0.35 * (hi - lo)
-            st, cand, run, seq = None, None, 0, []
-            for v in g:
-                t = "O" if v > o_th else ("C" if v < c_th else None)
-                if t is None or t == st:
-                    cand, run = None, 0
-                    continue
-                if t == cand:
-                    run += 1
-                else:
-                    cand, run = t, 1
-                if run >= dwell:
-                    seq.append(t); st = t; cand, run = None, 0
-            att = [i for i in range(1, len(seq)) if seq[i] == "C" and seq[i - 1] == "O"]
-            if att and att[-1] == len(seq) - 1 and len(att) > 1:
-                att = att[:-1]
-            return len(att)
+        # 파지 시도·놓은 위치는 **episode_events.py** 가 맡는다.
+        #   이 측정을 네 번 틀렸고(그 내력은 그 파일 머리말에 있다), 지금은
+        #   손으로 읽고 영상으로 확인한 정답 14개로 고정돼 있다:
+        #       python3 episode_events.py --selftest
+        #   지표를 건드리면 그 자가검사부터 통과시킬 것.
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from episode_events import analyze
 
-        starts, attempts, bad_grip = [], [], []
+        starts, attempts, bad_grip, rel = [], [], [], {}
         for e, sub in d.groupby("episode_index"):
             a = np.stack(sub.sort_values("frame_index")["observation.state"].values).astype(float)
             starts.append(a[0])
-            n = grasp_attempts(a[:, 5])
-            if n is None:
+            ev = analyze(a, fps=fps)
+            if ev["release_pan"] is not None:
+                rel[int(e)] = ev["release_pan"]
+            if ev["attempts"] is None:
                 continue
-            attempts.append(n)
-            if n > 1:
-                bad_grip.append((int(e), n))
+            attempts.append(ev["attempts"])
+            if ev["attempts"] > 1:
+                bad_grip.append((int(e), ev["attempts"]))
         starts = np.array(starts)
 
         if attempts:
@@ -325,6 +303,34 @@ def main(root):
                 print(f"  ❌ 재파지가 15% 를 넘는다 — drop_episode.sh 로 지우고 다시 찍을 것")
             else:
                 print(f"  ✅ 재파지 15% 이하")
+
+        # ── 칸 분리도 ────────────────────────────────────────────────
+        #   **목적지 축에서 가장 중요한 수치다.** 지시한 칸마다 놓은 위치가
+        #   실제로 갈라져 있어야 모델이 배울 신호가 존재한다. 겹쳐 있으면
+        #   아무리 많이 모아도 목적지를 배울 수 없다.
+        # 에피소드 인덱스 → 계획표 행. collect_progress.txt 의 **실제 행 번호**를 쓴다
+        # (지시문 문자열로 맞추면 같은 문장이 여러 행에 나와 틀린다 — 이미 겪었다).
+        if rel and plan and prog_rows and len(prog_rows) >= len(rel):
+            by = defaultdict(list)
+            for e, v in rel.items():
+                if e < len(prog_rows) and 1 <= prog_rows[e] <= len(plan):
+                    by[plan[prog_rows[e] - 1]["slot_color"]].append(v)
+            cols = [c for c in ("black", "cyan", "pink", "white") if len(by.get(c, [])) >= 5]
+            if len(cols) >= 2:
+                print("\n  놓은 위치 (shoulder_pan) — 칸이 실제로 갈라지는가")
+                mu, sd = {}, {}
+                for c in cols:
+                    v = np.array(by[c]); mu[c], sd[c] = v.mean(), v.std()
+                    print(f"    {c:<7} n={len(v):>3}  {v.mean():+7.1f}° ±{v.std():4.1f}"
+                          f"   범위 {v.min():+.0f}~{v.max():+.0f}")
+                zs = [(a, b, abs(mu[a] - mu[b]) / max(np.sqrt((sd[a]**2 + sd[b]**2) / 2), 1e-6))
+                      for a, b in zip(cols, cols[1:])]
+                a, b, z = min(zs, key=lambda t: t[2])
+                if z < 2.0:
+                    ok = False
+                    print(f"  ❌ {a}↔{b} 가 {z:.1f}σ 밖에 안 갈라진다 — 목적지를 배울 수 없다")
+                else:
+                    print(f"  ✅ 가장 가까운 인접 쌍 {a}↔{b} = {z:.1f}σ")
 
         J = ["pan", "lift", "elbow", "w_flex", "w_roll", "grip"]
         sd = starts.std(axis=0)
