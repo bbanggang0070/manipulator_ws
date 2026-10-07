@@ -133,6 +133,18 @@ def pick_least(counter, candidates, rng):
     return rng.choice([c for c in candidates if counter[c] == lo])
 
 
+def pick_least2(key1, key2, candidates, rng):
+    """1차 기준으로 고르고 동률이면 2차 기준, 그래도 동률이면 무작위.
+
+    물체와 칸을 **따로** 균등하게 맞추면 그 **조합**은 고르지 않다.
+    v2 계획표 실측: 물체당 24~27ep · 칸당 62~63ep 으로 주변 분포는 완벽한데
+    (물체×칸) 40종은 2~12회로 6배나 벌어졌다. 주변 분포가 중요하긴 해도
+    조합을 맞추는 데 드는 추가 비용이 **0**이므로 맞춰 둔다.
+    """
+    best = min((key1(c), key2(c)) for c in candidates)
+    return rng.choice([c for c in candidates if (key1(c), key2(c)) == best])
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--episodes", type=int, default=250)
@@ -148,6 +160,10 @@ def main():
     ap.add_argument("--dest-frac", type=float, default=1.0,
                     help="목적지 색을 명시하는 비율. 기본 1.0 = **전부 명시**. "
                          "4칸에서 'the bin' 은 정답이 없어 언어 신호를 거꾸로 가르친다")
+    ap.add_argument("--base", help="이어 짤 기존 계획표 (--keep-head 와 함께)")
+    ap.add_argument("--keep-head", type=int, default=0,
+                    help="기존 계획표의 앞 N행을 그대로 두고 나머지만 다시 짠다. "
+                         "수집 중에 고칠 때 쓴다 — 이미 찍은 행을 건드리면 진행 기록이 깨진다")
     a = ap.parse_args()
     rng = random.Random(a.seed)
 
@@ -156,11 +172,44 @@ def main():
     assert len(slots) >= 2, "칸이 2개 이상이어야 목적지 축이 성립한다"
     slot_nums = [n for n, _ in slots]
 
-    # ── 1) 그룹 구조를 먼저 정한다 ──────────────────────────────────────
+    tgt_count, slot_count, combo_count = Counter(), Counter(), Counter()
+    rows, single_i, ep = [], 0, 0
+
+    # ── 0) 이어 짜기 ────────────────────────────────────────────────────
+    #   수집 중에 계획표를 고쳐야 할 때가 있다(실제로 겪음). 이미 찍은 행을
+    #   건드리면 진행 기록·순서 검사가 깨지므로 **앞 N행은 그대로 두고**
+    #   카운터만 그 행들로 채운 뒤 **남은 예산만큼** 다시 짠다.
+    #   ⚠️ 그룹 예산은 반드시 **남은 에피소드 수**로 계산해야 한다. 전체 예산으로
+    #      만든 뒤 잘라내면 그룹 수가 어긋나 총 행 수가 모자란다(실제로 겪음).
+    head, gi_off = [], 0
+    if a.base and a.keep_head:
+        base = list(csv.DictReader(open(os.path.expanduser(a.base))))
+        n = a.keep_head
+        # 그룹 중간에서 자르면 대응쌍이 반토막 난다 — 그룹 끝까지 민다.
+        while n < len(base) and base[n]["keep_layout"] == "KEEP":
+            n += 1
+        head = base[:n]
+        # ⚠️ CSV 에서 읽으면 전부 문자열이다. 새로 만드는 행은 slot/group/n_objects 가
+        #    정수라, 그대로 합치면 Counter 가 "1" 과 1 을 **다른 키로** 센다
+        #    (칸 분포가 새 행만 세어 멀쩡한 계획표가 불균형으로 찍혔다).
+        for r in head:
+            for k in ("group", "n_objects", "slot"):
+                r[k] = int(r[k])
+        for r in head:
+            tgt_count[r["target"]] += 1
+            slot_count[int(r["slot"])] += 1
+            combo_count[(r["target"], r["slot_color"])] += 1
+        ep, gi_off = n, int(head[-1]["group"])
+        print(f"  ▶ 앞 {n}행 유지 (그룹 {gi_off}까지) · {n + 1}행부터 다시 짠다")
+
+    budget = a.episodes - ep
+    assert budget > 0, f"--keep-head({ep})가 --episodes({a.episodes}) 이상이다"
+
+    # ── 1) 그룹 구조를 정한다 ───────────────────────────────────────────
     #   에피소드를 낱개로 뽑으면 쌍이 안 생긴다. 그룹 단위로 예산을 나눈 뒤 펼친다.
-    n_quad = int(a.episodes * a.quad_frac) // 4 if len(slots) >= 4 else 0
-    n_pair = int(a.episodes * a.pair_frac) // 2
-    n_single = a.episodes - n_quad * 4 - n_pair * 2
+    n_quad = int(budget * a.quad_frac) // 4 if len(slots) >= 4 else 0
+    n_pair = int(budget * a.pair_frac) // 2
+    n_single = budget - n_quad * 4 - n_pair * 2
     assert n_single >= 0, "pair-frac + quad-frac 이 1을 넘었다"
 
     kinds = ["quad"] * n_quad + ["pair"] * n_pair + ["single"] * n_single
@@ -169,15 +218,15 @@ def main():
     # 목적지 미명시는 **단독 에피소드에서만** 나온다.
     #   쌍/4연속에서 목적지를 안 부르면 같은 지시문에 서로 다른 목적지를 시연하는 것이 되어
     #   "목적지 단어를 무시하라"를 정면으로 가르친다. 대응쌍의 취지를 정확히 뒤집는다.
-    n_unnamed = min(int(a.episodes * (1 - a.dest_frac)), n_single)
+    n_unnamed = min(int(budget * (1 - a.dest_frac)), n_single)
     unnamed = set(rng.sample(range(n_single), n_unnamed)) if n_single else set()
 
-    tgt_count, slot_count = Counter(), Counter()
-    rows, single_i, ep = [], 0, 0
-
-    for gi, kind in enumerate(kinds):
+    for gi, kind in enumerate(kinds, start=gi_off):
         # 그룹 하나는 배치(물체 구성·타깃)를 공유한다. 사람은 물체를 한 번만 놓는다.
-        target = pick_least(tgt_count, OBJECTS, rng)
+        # 타깃은 총량 기준으로 고르되, 동률이면 **덜 채워진 조합을 더 많이 가진** 쪽.
+        target = pick_least2(lambda o: tgt_count[o],
+                             lambda o: min(combo_count[(o, c)] for _, c in slots),
+                             OBJECTS, rng)
         n_obj = rng.choices(list(COUNT_WEIGHTS), list(COUNT_WEIGHTS.values()))[0]
         # 상호 배제 — 헷갈리는 짝이 **한 화면에 같이 서지 않도록** 한다.
         #   타깃 기준으로만 막으면 부족하다. 타깃이 'red cube'여도 방해물로
@@ -201,19 +250,25 @@ def main():
         if kind == "quad":
             picks = list(slots)
             rng.shuffle(picks)
-        elif kind == "pair":
-            first = pick_least(slot_count, slot_nums, rng)
-            second = pick_least(slot_count, [n for n in slot_nums if n != first], rng)
-            picks = [(n, c) for n, c in slots if n in (first, second)]
-            rng.shuffle(picks)
         else:
-            n = pick_least(slot_count, slot_nums, rng)
-            picks = [(sn, sc) for sn, sc in slots if sn == n]
+            # 이 타깃과의 **조합**이 가장 적게 쓰인 칸을 고르고, 동률이면 칸 총량으로.
+            cmap = {n: c for n, c in slots}
+            k1 = lambda n: combo_count[(target, cmap[n])]
+            k2 = lambda n: slot_count[n]
+            if kind == "pair":
+                first = pick_least2(k1, k2, slot_nums, rng)
+                second = pick_least2(k1, k2, [n for n in slot_nums if n != first], rng)
+                picks = [(n, c) for n, c in slots if n in (first, second)]
+                rng.shuffle(picks)
+            else:
+                n = pick_least2(k1, k2, slot_nums, rng)
+                picks = [(sn, sc) for sn, sc in slots if sn == n]
 
         for pos, (snum, scol) in enumerate(picks, start=1):
             ep += 1
             tgt_count[target] += 1
             slot_count[snum] += 1
+            combo_count[(target, scol)] += 1
 
             named = True
             if kind == "single":
@@ -243,9 +298,9 @@ def main():
     with open(a.out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
         w.writeheader()
-        w.writerows(rows)
+        w.writerows(head + rows)
 
-    report(rows, slots, a)
+    report(head + rows, slots, a)
     return 0
 
 
