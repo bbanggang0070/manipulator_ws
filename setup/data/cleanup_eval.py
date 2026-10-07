@@ -156,14 +156,27 @@ def cmd_log(a):
         if not a.no_run:
             input("  물체를 놓았으면 Enter (로봇이 출발합니다) ")
             cond = f"trial{int(r['trial']):02d}"
-            env = dict(os.environ, LANG_INSTRUCTION=r["instruction"])
+            # MAX_SEC: 실패 시행이 그냥 서 있으면 60시행이 끝나지 않는다.
+            # 시간이 다 되면 러너가 스스로 빠져나와 다음 시행으로 넘어간다.
+            env = dict(os.environ, LANG_INSTRUCTION=r["instruction"],
+                       MAX_SEC=str(a.max_sec))
+            # 아래 둘은 **이 모델에 맞는 값**이다. 사용자가 환경변수로 준 값이 이긴다.
+            #   HOME_SCRIPT — goto_home_real.py 는 so101_blocktask_real 50ep 기준이라
+            #     cleanup_real 의 시작 자세와 wrist_flex 가 18.3° 다르다. 그대로 쓰면
+            #     정책이 학습 시작 분포 밖에서 출발한다.
+            #   ENSEMBLE_W — run_eval_real.sh 기본값 0.6 은 그 스크립트 자신의 실측표에서
+            #     **최악(1/5)**으로 적혀 있고 0.8 이 최적으로 적혀 있다. 0.8 로 둔다.
+            #     (그 표는 co-train blocktask 모델 실측이므로 이 모델에서 재확인 필요)
+            env.setdefault("HOME_SCRIPT", "goto_home_cleanup.py")
+            env.setdefault("ENSEMBLE_W", "0.8")
             runner = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                   "..", "gr00t", "run_eval_real.sh")
             if not os.path.exists(runner):
                 print(f"  ⚠️  러너 없음: {runner} — 직접 돌린 뒤 결과만 입력하세요")
             else:
                 print(f"\n  ▶ 실행: LANG_INSTRUCTION=\"{r['instruction']}\"")
-                print(f"     (끝나면 Ctrl+C 로 멈추세요)\n")
+                _lim = f"{a.max_sec:.0f}s 후 자동 종료" if a.max_sec else "Ctrl+C 로 멈추세요"
+                print(f"     ({_lim} · 먼저 끝내려면 Ctrl+C)\n")
                 subprocess.call(["bash", runner, a.eval_name, cond],
                                 cwd=os.path.dirname(runner), env=env)
                 print()
@@ -325,6 +338,8 @@ def main():
     l.add_argument("--out", default=RESULT); l.add_argument("--redo", action="store_true")
     l.add_argument("--no-run", action="store_true",
                    help="로봇을 띄우지 않고 기록만 한다(다른 터미널에서 돌릴 때)")
+    l.add_argument("--max-sec", type=float, default=30,
+                   help="시행 1회 제한 시간(초). 지나면 다음 시행으로 넘어간다. 0=무제한")
     l.add_argument("--eval-name", default="cleanup",
                    help="run_eval_real.sh 의 평가 이름 — 영상 저장 폴더가 된다")
     l.set_defaults(fn=cmd_log)

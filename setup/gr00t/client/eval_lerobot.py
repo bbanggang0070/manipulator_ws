@@ -95,6 +95,13 @@ _GRIP_MED = int(os.environ.get("GRIP_MED", "0"))             # 0 = 끔(원래 �
 #   앞 청크의 남은 예측과 새 청크의 첫 예측을 CROSSFADE 스텝에 걸쳐 선형 보간한다.
 #   그리퍼는 섞지 않는다 — 섞으면 문턱 근처 진동이 되살아난다(실측 2026-08-12).
 _CROSSFADE = int(os.environ.get("CROSSFADE", "0"))           # 0 = 끔(원래 동작)
+# 시행 1회의 벽시계 한계(초). 0이면 무제한 = 기존 동작(Ctrl+C로만 끝난다).
+#   EvalConfig.timeout 필드가 있었지만 **어느 루프도 읽지 않았다** — 장식이었다.
+#   평가에서는 실패 시행이 그냥 서 있는데, 사람이 멈춰 줄 때까지 기다리면
+#   60시행이 끝나지 않는다. 시간이 다 되면 조용히 돌아가 다음 시행으로 넘긴다.
+#   ⚠️ 끝날 때 **disconnect 하지 않는다.** 토크를 풀면 팔이 떨어지며 씬을 흐트러
+#      놓고, 그러면 "어느 칸에 들어갔나"를 볼 수 없다. Ctrl+C 때와 같게 둔다.
+_MAX_SEC = float(os.environ.get("MAX_SEC", "0"))
 _grip_hist = {}
 
 
@@ -398,7 +405,7 @@ class EvalConfig:
     action_horizon: int = 8  # number of actions to execute from the action chunk
     lang_instruction: str = "Grab pens and place into pen holder."
     play_sounds: bool = False  # whether to play sounds
-    timeout: int = 60  # timeout in seconds
+    timeout: int = 60  # (미사용 — 실제 한계는 MAX_SEC 환경변수다)
     show_images: bool = False  # whether to show images
 
 
@@ -468,7 +475,12 @@ def eval(cfg: EvalConfig):
 
         t = 0
         _tl = time.perf_counter()
+        _t0 = time.perf_counter()
         while True:
+            if _MAX_SEC and time.perf_counter() - _t0 >= _MAX_SEC:
+                print(f"\n[timeout] {_MAX_SEC:.0f}s 경과 — 시행 종료 (step={t})")
+                _sh["stop"] = True
+                return
             obs = robot.get_observation()
             _rr_obs(obs, camera_keys, robot_state_keys)  # 매 스텝 → rerun 카메라 부드러움
             with _lk:
@@ -546,7 +558,11 @@ def eval(cfg: EvalConfig):
     # 다음 반복에서 항상 None이 되어 크로스페이드가 한 번도 동작하지 않는다(2026-08-13 확인).
     _prev_tail = None
 
+    _t0 = time.perf_counter()
     while True:
+        if _MAX_SEC and time.perf_counter() - _t0 >= _MAX_SEC:
+            print(f"\n[timeout] {_MAX_SEC:.0f}s 경과 — 시행 종료")
+            return
         # 다음 청크용 관측 (카메라 2대 읽기 — 여기가 느리면 청크 경계 정지의 원인)
         _to = time.perf_counter()
         obs_next = robot.get_observation()

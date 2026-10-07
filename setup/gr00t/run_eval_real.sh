@@ -103,6 +103,9 @@ cat <<INFO
   영상   ${VIDEO_FPS}fps (기존 4fps → 파지 순간 확인용으로 상향)
 
   종료: Ctrl+C (mp4는 정상 마감된다)
+        MAX_SEC=30 이면 30초 뒤 **스스로** 끝난다 (기본 0 = 무제한)
+  홈   cleanup 모델은 HOME_SCRIPT=goto_home_cleanup.py 를 쓸 것
+       (goto_home_real.py 는 so101_blocktask_real 기준 — wrist_flex 18.3° 차이)
 
 INFO
 
