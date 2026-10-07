@@ -1,3 +1,0 @@
-trial,group,kind,pos,keep_layout,objects,target,slot,slot_color,instruction,picked,landed,note
-1,1,dest,1/2,NEW,"yellow cube, purple cube, blue cube",yellow cube,4,white,Grab the yellow cube and place it in the white bin,(없음),(없음),
-2,1,dest,2/2,KEEP,"yellow cube, purple cube, blue cube",yellow cube,1,black,Pick up the yellow cube and put it in the black bin,yellow cube,black,

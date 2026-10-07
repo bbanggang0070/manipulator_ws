@@ -37,15 +37,18 @@ from math import comb, sqrt
 
 PLAN = os.path.expanduser("~/manipulator_ws/manipulator_md/real/cleanup_eval_plan.csv")
 RESULT = os.path.expanduser("~/manipulator_ws/manipulator_md/real/cleanup_eval_result.csv")
+# ⚠️ 계획표와 결과는 **한 쌍**이다. 칸 구성이나 문형을 바꾸면 둘 다 새로 만들 것 —
+#    v1(2칸·문형 3종) 결과 파일을 v2(4칸·문형 1종) 계획표로 읽으면 조용히 어긋난다.
 
 OBJECTS = ["red cube", "blue cube", "yellow cube", "green cube",
            "purple cube", "orange cube", "marker", "eraser",
            "glue stick", "screwdriver"]
-# 1단계는 칸 1·4만 쓴다(수집과 동일). 우연 50%.
-SLOTS = [(1, "black"), (4, "white")]
-TEMPLATES = ["Pick up the {obj} and put it in the {dst} bin",
-             "Put the {obj} into the {dst} bin",
-             "Grab the {obj} and place it in the {dst} bin"]
+# v2 수집과 동일하게 **4칸 전부**. 우연 25%.
+SLOTS = [(1, "black"), (2, "cyan"), (3, "pink"), (4, "white")]
+CHANCE = 1.0 / len(SLOTS)
+# 문형도 **학습과 같은 1종**이어야 한다. 학습에 없던 문형으로 평가하면
+# 측정한 것이 "목적지를 읽는가"가 아니라 "문형 일반화"가 섞인 값이 된다.
+TEMPLATES = ["Put the {obj} into the {dst} bin"]
 
 FIELDS = ["trial", "group", "kind", "pos", "keep_layout",
           "objects", "target", "slot", "slot_color", "instruction"]
@@ -56,7 +59,7 @@ RFIELDS = FIELDS + ["picked", "landed", "note"]
 def cmd_plan(a):
     rng = random.Random(a.seed)
     rows, trial = [], 0
-    tgt_count = Counter()
+    tgt_count, slot_count = Counter(), Counter()
     for g in range(a.groups):
         # 쌍 종류를 번갈아 — 목적지 축과 물체 축을 같은 양으로 본다
         kind = "dest" if g % 2 == 0 else "obj"
@@ -70,7 +73,11 @@ def cmd_plan(a):
         objs = [tgt] + rng.sample(others, n_obj - 1)
         rng.shuffle(objs)
         if kind == "dest":
-            # 같은 물체, 칸만 바꾼다
+            # 같은 배치·같은 물체로 **4칸 전부** 돌린다.
+            #   칸이 4개가 되면서 쌍(2칸)보다 4연속이 훨씬 효율적이다 —
+            #   물체를 한 번만 놓고 지시문만 네 번 바꾸므로 시행당 준비 시간이
+            #   1/4 이고, 한 배치에서 '네 번 다 다른 칸으로 갔는가'라는
+            #   가장 강한 신호가 직접 나온다.
             picks = [(tgt, sl) for sl in SLOTS]
             rng.shuffle(picks)
         else:
@@ -78,13 +85,16 @@ def cmd_plan(a):
             tgt2 = min([o for o in objs if o != tgt],
                        key=lambda o: (tgt_count[o], rng.random()))
             tgt_count[tgt2] += 1
-            slot = rng.choice(SLOTS)
+            # 칸도 **가장 적게 쓴 것**부터. 무작위로 고르면 4연속이 10씩 깔아 둔
+            # 위에 obj 쌍 20시행이 쏠려 12~18 로 벌어진다(실측).
+            slot = min(SLOTS, key=lambda sl: (slot_count[sl[1]], rng.random()))
             picks = [(tgt, slot), (tgt2, slot)]
         for pos, (tgt, (snum, scol)) in enumerate(picks, start=1):
             trial += 1
+            slot_count[scol] += 1
             rows.append({
                 "trial": trial, "group": g + 1, "kind": kind,
-                "pos": f"{pos}/2", "keep_layout": "NEW" if pos == 1 else "KEEP",
+                "pos": f"{pos}/{len(picks)}", "keep_layout": "NEW" if pos == 1 else "KEEP",
                 "objects": ", ".join(objs), "target": tgt,
                 "slot": snum, "slot_color": scol,
                 "instruction": rng.choice(TEMPLATES).format(obj=tgt, dst=scol),
@@ -95,9 +105,11 @@ def cmd_plan(a):
         w.writeheader(); w.writerows(rows)
 
     kc = Counter(r["kind"] for r in rows)
-    print(f"\n  {a.out}  —  {len(rows)}시행 ({a.groups}그룹 × 2)")
-    print(f"    dest 쌍 {kc['dest']}시행 — 같은 물체, 칸만 black↔white  → 목적지 축")
-    print(f"    obj  쌍 {kc['obj']}시행 — 같은 화면, 지시 물체만 변경    → 물체 축")
+    gq = len({r["group"] for r in rows if r["kind"] == "dest"})
+    gp = len({r["group"] for r in rows if r["kind"] == "obj"})
+    print(f"\n  {a.out}  —  {len(rows)}시행")
+    print(f"    dest 4연속 {gq}그룹 = {kc['dest']}시행 — 같은 물체, 칸 4개 전부  → 목적지 축")
+    print(f"    obj  쌍    {gp}그룹 = {kc['obj']}시행 — 같은 화면, 지시 물체만 변경 → 물체 축")
     print(f"\n  칸 분포: {dict(Counter(r['slot_color'] for r in rows))}")
     print(f"  예상 시간: 약 {len(rows) * 2.5 / 60:.1f}시간 (시행당 2.5분)")
 
@@ -105,18 +117,20 @@ def cmd_plan(a):
     #   목적지 축의 분모는 '어딘가에 넣은 횟수'다. 조작 성공률이 60%쯤이면
     #   시행의 60%만 분모에 들어간다. sim 에서 68.3% 정확도를 p=0.025 로
     #   잡는 데 **배치 36건**이 필요했다. 그보다 적으면 효과가 있어도 못 잡는다.
-    for rate in (0.5, 0.6, 0.7):
+    #   ⚠️ 칸이 4개가 되어 **우연이 25%로 내려갔다.** 같은 표본으로 훨씬 잘 잡힌다.
+    #      칸 2개(우연 50%) 때는 36건이 필요했지만, 우연 25%에서는 20건이면
+    #      정확도 50%를 p<0.05 로 잡는다(이항검정).
+    NEED = 20
+    for rate in (0.4, 0.6, 0.8):
         placed = int(len(rows) * rate)
-        mark = "OK" if placed >= 36 else ("아슬" if placed >= 24 else "부족")
+        mark = "OK" if placed >= NEED else ("아슬" if placed >= 14 else "부족")
         print(f"    조작 성공률 {rate*100:.0f}% 가정 -> 목적지 분모 {placed}건  [{mark}]")
-    print("    (sim 기준: 정확도 68%를 p<0.05 로 잡으려면 배치 36건 필요)")
-    if len(rows) * 0.6 < 36:
-        need = int(36 / 0.6 / 2) + 1
-        print(f"    !! --groups {need} 이상을 권합니다 — 지금 표본으로는 목적지 축이")
-        print(f"       유의하게 안 나올 가능성이 큽니다")
+    print(f"    (우연 25% 기준: 정확도 50%를 p<0.05 로 잡으려면 배치 {NEED}건)")
+    if len(rows) * 0.4 < NEED:
+        print(f"    !! 조작이 안 풀리면 표본이 모자랍니다 — --groups 를 올리세요")
     print("""
   ── 시행 규칙 ──────────────────────────────────────────────────────
-   · pos 2/2(KEEP)는 **물체를 건드리지 않는다.** 지시문만 바꿔 다시 돌린다.
+   · pos 2/N 이후(KEEP)는 **물체를 건드리지 않는다.** 지시문만 바꿔 다시 돌린다.
      관측이 같아야 차이의 출처가 언어로 특정된다.
    · 로봇이 멈추면 **집은 물체**와 **들어간 칸**을 본 대로 적는다.
      성공/실패로 뭉치지 말 것 — 뭉치면 곱에 갇혀 목적지 축을 못 읽는다.
@@ -245,6 +259,16 @@ def fisher(a_, b_, c_, d_):
     return sum(p(x) for x in range(max(0, c1 - r2), min(r1, c1) + 1) if p(x) <= p0 * (1 + 1e-12))
 
 
+def binom_p(k, n, p0):
+    """관측 k/n 이 우연 p0 보다 **높을** 확률(단측 정확검정).
+
+    scipy 없이 쓰려고 직접 센다. 칸이 4개가 되며 우연이 25%로 내려가,
+    2×2 Fisher 보다 이쪽이 바로 답을 준다.
+    """
+    from math import comb
+    return sum(comb(n, i) * p0 ** i * (1 - p0) ** (n - i) for i in range(k, n + 1))
+
+
 def wilson(k, n, z=1.96):
     if n == 0:
         return (0.0, 0.0)
@@ -278,28 +302,39 @@ def cmd_report(a):
     print(f"    {'✅ 우연 초과' if lo > chance_o else '⚠️  우연과 구별 안 됨'}")
 
     # ── 목적지 축 — **분모가 핵심** ──
+    COLS = [c for _, c in SLOTS]
     print(f"\n  목적지 축 — 맞는 칸으로 갔는가")
     print(f"    ⚠️ 분모는 '어딘가에 넣은 횟수'다. 조작 실패를 분모에 넣으면"
           f" 목적지 능력이 과소평가된다(sim 에서 두 번 그렇게 틀렸다).")
     cells = Counter((r["slot_color"], r["landed"]) for r in placed)
-    bb, bw = cells[("black", "black")], cells[("black", "white")]
-    wb, ww = cells[("white", "black")], cells[("white", "white")]
-    print(f"\n    {'':<14}{'black에':>9}{'white에':>9}{'행합':>7}{'정확도':>9}")
-    for lbl, (x, y), corr in (('"black" 지시', (bb, bw), bb), ('"white" 지시', (wb, ww), ww)):
-        t = x + y
-        print(f"    {lbl:<12}{x:>9}{y:>9}{t:>7}"
-              + (f"{corr/t*100:>8.1f}%" if t else f"{'-':>9}"))
-    tot = bb + bw + wb + ww
+    hdr = "".join(f"{c:>8}" for c in COLS)
+    print(f"\n    {'지시 \\ 착지':<14}{hdr}{'행합':>7}{'정확도':>9}")
+    corr = tot = 0
+    for ins in COLS:
+        row = [cells[(ins, land)] for land in COLS]
+        t = sum(row)
+        c = cells[(ins, ins)]
+        corr += c; tot += t
+        print(f"    {'\"' + ins + '\" 지시':<14}" + "".join(f"{v:>8}" for v in row)
+              + f"{t:>7}" + (f"{c / t * 100:>8.1f}%" if t else f"{'-':>9}"))
+    # 착지 쏠림 — 지시와 무관하게 특정 칸으로 도망가는지 본다
+    land_tot = [sum(cells[(ins, land)] for ins in COLS) for land in COLS]
+    print(f"    {'(착지 합계)':<14}" + "".join(f"{v:>8}" for v in land_tot))
+
     if tot:
-        acc = (bb + ww) / tot
-        lo, hi = wilson(bb + ww, tot)
-        p = fisher(bb, bw, wb, ww)
-        a_ = bb / (bb + bw) if bb + bw else 0
-        b_ = ww / (wb + ww) if wb + ww else 0
-        print(f"\n    통합 {bb+ww}/{tot} = {acc*100:.1f}%   우연 50%   95% CI [{lo:.1f}, {hi:.1f}]")
-        print(f"    a + b = {a_+b_:.3f}   (지시문 무시 = 1.000 · 완전히 읽음 = 2.000)")
-        print(f"    Fisher 정확검정 p = {p:.4f}")
-        print(f"    {'✅ 지시문이 목적지에 영향을 준다' if p < 0.05 else '⚠️  유의하지 않다 (표본 부족일 수 있다)'}")
+        acc = corr / tot
+        lo, hi = wilson(corr, tot)
+        p = binom_p(corr, tot, CHANCE)
+        print(f"\n    통합 {corr}/{tot} = {acc * 100:.1f}%   우연 {CHANCE * 100:.0f}%"
+              f"   95% CI [{lo:.1f}, {hi:.1f}]")
+        print(f"    이항검정 p = {p:.5f}  (우연보다 높을 확률)")
+        print(f"    {'✅ 지시문이 목적지를 정한다' if p < 0.05 else '⚠️  유의하지 않다 (표본 부족일 수 있다)'}")
+        # 쏠림: 착지 분포가 균등에서 얼마나 벗어났나
+        if sum(land_tot):
+            worst = max(land_tot) / sum(land_tot)
+            print(f"    착지 쏠림: 가장 많이 간 칸이 전체의 {worst * 100:.0f}%"
+                  f" (균등이면 {CHANCE * 100:.0f}%)"
+                  + ("  ← 특정 칸으로 도망가는 경향" if worst > 0.45 else ""))
 
     # ── 대응쌍 — 같은 배치, 지시문만 다름 ──
     print(f"\n  대응쌍 — 같은 배치에 지시문만 바꿨을 때")
@@ -308,15 +343,31 @@ def cmd_report(a):
         for r in rows:
             if r["kind"] == kind:
                 gs.setdefault(r["group"], []).append(r)
-        full = [v for v in gs.values() if len(v) == 2]
+        want = len(SLOTS) if kind == "dest" else 2
+        full = [v for v in gs.values() if len(v) == want]
         if not full:
-            print(f"    {label} 쌍: 완성된 그룹 없음")
+            print(f"    {label} 그룹: 완성된 것 없음")
             continue
         if kind == "dest":
             both = sum(1 for v in full if all(x["landed"] == x["slot_color"] for x in v))
-            diff = sum(1 for v in full if v[0]["landed"] != v[1]["landed"])
-            print(f"    {label} 쌍 {len(full)}그룹 — 둘 다 정답 {both} · "
-                  f"**간 칸이 서로 다름 {diff}** ← 지시문을 따랐다는 직접 신호")
+            # ⚠️ '네 번 다 다른 칸으로 갔는가'를 **전체 4시행**에 요구하면,
+            #    하나만 조작에 실패해도 0 이 되어 신호가 늘 0 으로 찍힌다.
+            #    조작 실패를 분모에서 빼는 목적지 축의 원칙을 여기에도 적용한다:
+            #    **놓은 시행만** 보고, 그것들이 서로 다른 칸으로 갔는지 센다.
+            ok = spread = 0
+            for v in full:
+                got = [x["landed"] for x in v if x["landed"] not in ("", "(없음)", "-")]
+                if len(got) >= 2:
+                    spread += 1
+                    if len(set(got)) == len(got):
+                        ok += 1
+            print(f"    {label} {want}연속 {len(full)}그룹 — 전부 정답 {both}")
+            if spread:
+                print(f"      2회 이상 놓은 그룹 {spread}개 중 **놓은 칸이 전부 서로 다름"
+                      f" {ok}개 ({ok / spread * 100:.0f}%)** ← 지시문을 따랐다는 직접 신호")
+                print(f"      (지시문을 무시하면 같은 칸으로 반복해 이 값이 0 에 가깝다)")
+            else:
+                print(f"      2회 이상 놓은 그룹이 없다 — 조작이 먼저다")
         else:
             both = sum(1 for v in full if all(x["picked"] == x["target"] for x in v))
             diff = sum(1 for v in full if v[0]["picked"] != v[1]["picked"])
