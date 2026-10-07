@@ -250,6 +250,88 @@ def main(root):
     if short:
         print(f"  ⚠️  5초 미만 {short}건 — 시연이 중간에 끊겼을 수 있다. 영상 확인 권장")
 
+    # ── ⑥ 시연 품질 ──────────────────────────────────────────────────
+    #   1차 수집(2026-10-06, 80ep)에서 **이 검사가 없어서** 놓친 것들이다.
+    #   계획표 대조·쌍 무결성·길이는 전부 통과했는데도 모델이 물체를 못 집었다.
+    #   원인은 시연 자체의 품질이었고, 그건 메타가 아니라 **궤적**에만 들어 있다.
+    import numpy as np
+    df = sorted(glob.glob(f"{root}/data/**/*.parquet", recursive=True))
+    if not df:
+        print("\n  ⏸ data parquet 없음 — 시연 품질 검사 건너뜀")
+    else:
+        d = pd.concat([pd.read_parquet(f, columns=["episode_index", "frame_index",
+                                                   "observation.state"]) for f in df])
+        # 파지 **시도** 횟수를 센다. 이 지표는 두 번 틀렸으니 정의를 박아 둔다:
+        #   ① 중점 임계로 개폐 전이를 세면 평균 3.9회가 나오는데, 이건 정상이다.
+        #      rest 에서 그리퍼가 닫혀 있다가 **접근하려고 열고** → 집고 → 놓고 →
+        #      복귀하며 닫는다. 즉 4회 전이가 올바른 시연이다. 99% 가 "재파지"로
+        #      찍혔던 건 지표가 정상 동작을 센 것이었다.
+        #   ② 첫 1초를 빼지 않으면, 에피소드가 그리퍼 열린 채 시작했다가 닫히는
+        #      것(시작 자세 문제)이 파지 시도로 잘못 잡힌다 — 56% 로 부풀었다.
+        # 올바른 정의: **첫 1초를 제외**하고, '크게 벌림 → 닫힘' 전이의 수.
+        # 마지막 닫힘이 rest 복귀면 빼고 센다. 2회 이상이면 한 번에 못 집은 것이다.
+        def grasp_attempts(g, dwell=3):
+            g = g[fps:]
+            lo, hi = g.min(), g.max()
+            if hi - lo < 5:
+                return None
+            o_th, c_th = lo + 0.6 * (hi - lo), lo + 0.35 * (hi - lo)
+            st, cand, run, seq = None, None, 0, []
+            for v in g:
+                t = "O" if v > o_th else ("C" if v < c_th else None)
+                if t is None or t == st:
+                    cand, run = None, 0
+                    continue
+                if t == cand:
+                    run += 1
+                else:
+                    cand, run = t, 1
+                if run >= dwell:
+                    seq.append(t); st = t; cand, run = None, 0
+            att = [i for i in range(1, len(seq)) if seq[i] == "C" and seq[i - 1] == "O"]
+            if att and att[-1] == len(seq) - 1 and len(att) > 1:
+                att = att[:-1]
+            return len(att)
+
+        starts, attempts, bad_grip = [], [], []
+        for e, sub in d.groupby("episode_index"):
+            a = np.stack(sub.sort_values("frame_index")["observation.state"].values).astype(float)
+            starts.append(a[0])
+            n = grasp_attempts(a[:, 5])
+            if n is None:
+                continue
+            attempts.append(n)
+            if n > 1:
+                bad_grip.append((int(e), n))
+        starts = np.array(starts)
+
+        if attempts:
+            rate = len(bad_grip) / len(attempts)
+            print(f"\n  파지 시도: 1회 {attempts.count(1)}건 · 2회 이상 {len(bad_grip)}건 "
+                  f"({rate:.0%}) · 미검출 {n_ep - len(attempts)}건")
+            if bad_grip:
+                print("     재파지 ep: " + ", ".join(
+                    f"{e}({n}회)" for e, n in sorted(bad_grip, key=lambda x: -x[1])[:10])
+                    + (" ..." if len(bad_grip) > 10 else ""))
+            if rate > 0.15:
+                ok = False
+                print(f"  ❌ 재파지가 15% 를 넘는다 — drop_episode.sh 로 지우고 다시 찍을 것")
+            else:
+                print(f"  ✅ 재파지 15% 이하")
+
+        J = ["pan", "lift", "elbow", "w_flex", "w_roll", "grip"]
+        sd = starts.std(axis=0)
+        print(f"\n  시작 자세 표준편차: " + " · ".join(f"{j} ±{v:.1f}°" for j, v in zip(J, sd)))
+        loose = [j for j, v in zip(J, sd) if v > 8.0]
+        if loose:
+            # rest 가 흔들리면 **배포 시 goto_home 목표를 정할 수 없다.**
+            # 1차 수집에서 wrist_flex ±14.3° 였고, 옛 홈 자세와 18.3° 어긋난 채
+            # 평가를 돌렸다.
+            print(f"  ⚠️  {', '.join(loose)} 의 편차가 8° 를 넘는다 — rest 가 느슨하다. "
+                  f"배포 홈 자세(goto_home_*.py)를 이 평균으로 갱신할 것")
+        print(f"  배포용 홈 자세(이 데이터셋 기준): " +
+              ", ".join(f"{j} {v:+.1f}" for j, v in zip(J, starts.mean(axis=0))))
+
     print(f"\n  {'✅ 통과' if ok else '❌ 실패 — 위 항목을 고칠 것'}")
     return 0 if ok else 1
 

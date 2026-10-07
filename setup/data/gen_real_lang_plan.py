@@ -100,18 +100,22 @@ DEST_NOUN = "bin"
 COUNT_WEIGHTS = {1: 0.12, 2: 0.20, 3: 0.34, 4: 0.34}
 
 # ── 지시문 문형 ──────────────────────────────────────────────────────────
+#   ⚠️ **문형은 1종이다** (2026-10-07 변경). 전에는 3종이었는데, 그러면 지시문
+#      가짓수가 3배로 불어난다. 1차 수집 실측: 80ep 에 지시문 49종 =
+#      **지시문당 1.6 에피소드**. sim(280ep/100종 = 2.8)보다도 얇았고
+#      그 데이터로 학습한 모델은 물체를 집지 못했다.
+#      문형을 하나로 고정하면 지시문이 **물체 × 칸**으로만 결정된다:
+#        4칸 × 물체 10종 = 40종 → 250ep 이면 지시문당 5.3 에피소드.
+#      문형 일반화(같은 뜻의 다른 문장)는 **포기한다.** 지금 재야 하는 것은
+#      "색 단어를 읽는가"이지 "문장을 바꿔도 되는가"가 아니다.
 #   목적지 미명시(the bin)를 일부 남기는 이유: **색 단어의 유무가 의미를 갖는다**는
 #   것도 배워야 하고, 최종형("그냥 치워")과 이어진다. 다만 칸이 4개라 정답이
 #   정의되지 않으므로 비율을 낮게 두고, **쌍/4연속에는 절대 넣지 않는다**(아래).
 TEMPLATES_DEST = [
-    "Pick up the {obj} and put it in the {dst} " + DEST_NOUN,
     "Put the {obj} into the {dst} " + DEST_NOUN,
-    "Grab the {obj} and place it in the {dst} " + DEST_NOUN,
 ]
 TEMPLATES_PLAIN = [
-    "Pick up the {obj} and put it in the " + DEST_NOUN,
     "Put the {obj} into the " + DEST_NOUN,
-    "Grab the {obj} and place it in the " + DEST_NOUN,
 ]
 
 FIELDS = ["ep", "group", "group_kind", "group_pos", "keep_layout",
@@ -137,8 +141,9 @@ def main():
                     help="대응쌍(같은 배치, 목적지만 다름)이 차지할 에피소드 비율")
     ap.add_argument("--quad-frac", type=float, default=0.16,
                     help="4연속(같은 배치, 4칸 전부)이 차지할 비율. 칸이 4개일 때만")
-    ap.add_argument("--dest-frac", type=float, default=0.85,
-                    help="목적지 색을 명시하는 비율. 나머지는 'the bin'(단독에서만)")
+    ap.add_argument("--dest-frac", type=float, default=0.90,
+                    help="목적지 색을 명시하는 비율. 나머지는 'the bin'(단독에서만). "
+                         "0.85→0.90 으로 올렸다 — 미명시는 정답이 없어 밀도만 먹는다")
     a = ap.parse_args()
     rng = random.Random(a.seed)
 
@@ -341,6 +346,12 @@ def report(rows, slots, a):
      (실기 50ep에서 박스가 사실상 고정이었던 전례: 픽셀 중심 편차 x 7px).
    · 지시와 다른 물체를 집었거나 다른 칸에 넣었으면 **그 에피소드를 다시 찍는다.**
      잘못 저장된 1개가 "언어를 무시해도 된다"는 반례가 된다.
+   · **한 번에 못 잡았으면 다시 찍는다.** 1차 수집 실측은 재파지 11%(9/80)로
+     나쁘지 않았지만, 모델은 시연을 그대로 모사하므로 이 비율이 낮을수록 좋다.
+     검증기가 '파지 시도 2회 이상'을 에피소드 번호까지 찍어 준다(15% 초과면 실패).
+   · **시작 자세를 매번 같게.** 1차 수집 실측: wrist_flex ±14.3° · gripper ±11.0°.
+     rest 가 느슨하게 정의되면 배포 때 어느 자세로 출발해야 할지 정할 수 없다
+     (goto_home 목표가 흔들린다). 리더를 거치대에 놓고 시작할 것.
 """)
 
 

@@ -210,6 +210,15 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; d
     s|S) echo "  건너뜀."; continue ;;
   esac
 
+  # ── 시작 자세 게이트 ──────────────────────────────────────────────
+  #   1차 수집에서 rest 가 wrist_flex ±14.3° 로 흔들렸고, 그 탓에 배포 홈 자세를
+  #   정하지 못해 평가를 18.3° 어긋난 자세에서 출발시켰다. 여기서 막는다.
+  #   REST_GATE=0 으로 끌 수 있다.
+  if [ "${REST_GATE:-1}" = "1" ] && [ -f "$(dirname "$0")/rest_gate.py" ]; then
+    ( cd "$LEROBOT" && uv run python "$(cd "$(dirname "$0")" && pwd)/rest_gate.py" \
+        --check "$ROOT" ) </dev/tty || true
+  fi
+
   RESUME=""
   [ "$DONE" -gt 0 ] && RESUME="--resume=true"
   ( cd "$LEROBOT" && uv run lerobot-record \
