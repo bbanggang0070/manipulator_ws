@@ -38,6 +38,10 @@
 #   END=60 ./record_real_lang.sh       # 60번 행까지만
 set -uo pipefail
 cd "$(dirname "$0")"
+# 스크립트 폴더의 **절대경로**. 서브셸에서 `cd "$LEROBOT"` 한 뒤에는 "$0" 의
+# dirname 이 더 이상 이 폴더를 가리키지 않는다 — 실제로 rest_gate.py 를
+# envs/lerobot 에서 찾다 실패했다(2026-10-07). 한 번만 구해 두고 그걸 쓴다.
+HERE="$(pwd)"
 
 PLAN="${PLAN:-$HOME/manipulator_ws/manipulator_md/real/real_lang_plan.csv}"
 DSNAME="${DSNAME:-cleanup_real}"
@@ -214,9 +218,14 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; d
   #   1차 수집에서 rest 가 wrist_flex ±14.3° 로 흔들렸고, 그 탓에 배포 홈 자세를
   #   정하지 못해 평가를 18.3° 어긋난 자세에서 출발시켰다. 여기서 막는다.
   #   REST_GATE=0 으로 끌 수 있다.
-  if [ "${REST_GATE:-1}" = "1" ] && [ -f "$(dirname "$0")/rest_gate.py" ]; then
-    ( cd "$LEROBOT" && uv run python "$(cd "$(dirname "$0")" && pwd)/rest_gate.py" \
-        --check "$ROOT" ) </dev/tty || true
+  if [ "${REST_GATE:-1}" = "1" ] && [ -f "$HERE/rest_gate.py" ]; then
+    # ⚠️ 실패를 삼키지 않는다. 전에 `|| true` 로 묻어 뒀다가 게이트가 경로 오류로
+    #    한 번도 안 돌았는데 수집은 그대로 진행됐다. 게이트가 깨졌으면 알아야 한다.
+    if ! ( cd "$LEROBOT" && uv run python "$HERE/rest_gate.py" --check "$ROOT" ) </dev/tty; then
+      echo "  ⚠️  시작 자세 게이트 실패 — 이대로 두면 rest 가 흔들립니다."
+      read -r -p "  그래도 진행할까요? (y/N): " _G </dev/tty
+      [[ "$_G" =~ ^[yY]$ ]] || { echo "  중단합니다."; break; }
+    fi
   fi
 
   RESUME=""
