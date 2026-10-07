@@ -28,6 +28,7 @@
 """
 import argparse
 import csv
+import subprocess
 import os
 import random
 import sys
@@ -147,7 +148,29 @@ def cmd_log(a):
         print(f"  지시문    :  \033[1;36m\"{r['instruction']}\"\033[0m")
         print(f"  정답      :  {r['target']} → {r['slot']}번({r['slot_color']})")
         print("=" * 64)
-        print("  로봇을 돌린 뒤 **본 대로** 입력하세요.\n")
+
+        # ── 로봇 실행 ────────────────────────────────────────────────
+        #   log 는 원래 기록만 했는데, 그러면 매 시행마다 다른 터미널에서
+        #   run_eval_real.sh 를 지시문까지 복사해 붙여야 한다. 오타 한 번이면
+        #   엉뚱한 지시문으로 돌고 그 시행은 버린다. 여기서 바로 띄운다.
+        if not a.no_run:
+            input("  물체를 놓았으면 Enter (로봇이 출발합니다) ")
+            cond = f"trial{int(r['trial']):02d}"
+            env = dict(os.environ, LANG_INSTRUCTION=r["instruction"])
+            runner = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  "..", "gr00t", "run_eval_real.sh")
+            if not os.path.exists(runner):
+                print(f"  ⚠️  러너 없음: {runner} — 직접 돌린 뒤 결과만 입력하세요")
+            else:
+                print(f"\n  ▶ 실행: LANG_INSTRUCTION=\"{r['instruction']}\"")
+                print(f"     (끝나면 Ctrl+C 로 멈추세요)\n")
+                subprocess.call(["bash", runner, a.eval_name, cond],
+                                cwd=os.path.dirname(runner), env=env)
+                print()
+        else:
+            print("  로봇을 직접 돌린 뒤 결과를 입력하세요.")
+
+        print("  로봇이 멈췄으면 **본 대로** 입력하세요.\n")
 
         # 집은 물체 — 지시와 무관하게 실제로 집은 것
         print("  집은 물체:")
@@ -300,6 +323,10 @@ def main():
     p.set_defaults(fn=cmd_plan)
     l = sub.add_parser("log"); l.add_argument("--plan", default=PLAN)
     l.add_argument("--out", default=RESULT); l.add_argument("--redo", action="store_true")
+    l.add_argument("--no-run", action="store_true",
+                   help="로봇을 띄우지 않고 기록만 한다(다른 터미널에서 돌릴 때)")
+    l.add_argument("--eval-name", default="cleanup",
+                   help="run_eval_real.sh 의 평가 이름 — 영상 저장 폴더가 된다")
     l.set_defaults(fn=cmd_log)
     r = sub.add_parser("report"); r.add_argument("--out", default=RESULT)
     r.set_defaults(fn=cmd_report)
