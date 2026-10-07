@@ -86,6 +86,32 @@ if docker ps --format '{{.Names}}' | grep -q "^${NAME}$"; then
   exit 1
 fi
 
+# ── 색 증강 ──────────────────────────────────────────────────────────────
+# ⚠️ **hue 를 크게 주면 안 되는 태스크다.** 지시문이 물체와 목적지를 **색 이름**으로
+#    지정하므로(“Put the yellow cube into the cyan bin”), 색상환을 돌리는 증강은
+#    모델이 읽어야 할 라벨 자체를 부순다.
+#
+#    GR00T 의 ColorJitter 는 **p=1.0** 이다 — 확률이 아니라 **모든 프레임**에 걸린다
+#    (gr00t/model/gr00t_n1d6/image_augmentations.py). hue 값은 torchvision 규약대로
+#    [-h, h] × 360° 이므로 0.08 = **±28.8°** 회전이다.
+#
+#    실제 수집 프레임에 걸어 본 결과(2026-10-07):
+#      hue -0.08 : cyan→초록 · pink→연보라 · yellow 큐브→주황 · blue 큐브→청록
+#      hue +0.08 : cyan→파랑 · pink→살구   · yellow 큐브→연두 · blue 큐브→보라
+#    색 이름끼리 가장 좁은 간격이 red↔orange 30° 인데 ±28.8° 는 그걸 거의 다 건넌다.
+#    즉 “yellow 를 집어라”라고 가르치면서 **주황이나 연두를 보여 주고 있었다.**
+#
+#    0.015 = ±5.4° 로 낮춘다. 가장 좁은 간격의 18% 라 이름이 바뀌지 않으면서
+#    카메라 화이트밸런스 편차는 흡수한다. 채도도 0.5(→0.5~1.5배)는 과해서 0.25 로 내린다.
+#    밝기·대비는 색상을 보존하므로 그대로 둔다(조명 변화 대응에 유용).
+#
+#    ⚠️ v1(80ep)과 sim 학습은 전부 hue 0.08 로 돌렸다. 물체 선택률이 sim 에서
+#       52.5%(우연 25%)에 머문 데에 이게 기여했을 수 있다 — 확인된 바는 아니다.
+CJ_BRI="${CJ_BRI:-0.3}"
+CJ_CON="${CJ_CON:-0.4}"
+CJ_SAT="${CJ_SAT:-0.25}"
+CJ_HUE="${CJ_HUE:-0.015}"
+
 # ── 입력 해상도 (실험 버튼) ──────────────────────────────────────────────
 #   기본 256. 자세한 배경은 setup/gr00t/edge_patch.py 참조.
 #   해상도를 올리면 호스트 RAM 이 병목이라 dataloader worker 를 내린다.
@@ -152,7 +178,7 @@ run_docker() {
       --save-steps $SAVE_STEPS --save-total-limit $SAVE_LIMIT --max-steps $STEPS \
       --warmup-ratio 0.05 --weight-decay 1e-5 --learning-rate 1e-4 \
       --global-batch-size 2 --gradient-accumulation-steps 32 \
-      --color-jitter-params brightness 0.3 contrast 0.4 saturation 0.5 hue 0.08 \
+      --color-jitter-params brightness $CJ_BRI contrast $CJ_CON saturation $CJ_SAT hue $CJ_HUE \
       --dataloader-num-workers $WORKERS"
 }
 
