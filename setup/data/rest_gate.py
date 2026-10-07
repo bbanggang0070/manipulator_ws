@@ -33,6 +33,10 @@ def read_leader():
     from lerobot.teleoperators.so_leader import SOLeader as C, SOLeaderConfig as Cfg
     cfg = Cfg(port=os.environ.get("LEADER_PORT", "/dev/ttyLEADER"))
     cfg.id = "leader"
+    # ⚠️ SOLeaderConfig 에는 calibration_dir 필드가 **없는데** 베이스 클래스
+    #    Teleoperator.__init__ 이 config.calibration_dir 을 읽는다. 안 넣으면
+    #    AttributeError 로 죽는다. None = 기본 캘리브레이션 폴더를 쓴다.
+    cfg.calibration_dir = None
     dev = C(cfg)
     dev.connect(calibrate=False)
     try:

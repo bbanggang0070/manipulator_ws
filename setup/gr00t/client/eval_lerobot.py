@@ -272,8 +272,22 @@ def _log_video(observation_dict, camera_keys):
     frame = _np.concatenate(imgs, axis=1)
     if _VID["w"] is None:
         h, w = frame.shape[:2]
-        _VID["w"] = cv2.VideoWriter(f"{_LOGDIR}/video.mp4",
-                                    cv2.VideoWriter_fourcc(*"mp4v"), _VIDEO_FPS, (w, h))
+        # 코덱은 **avc1(H.264)** 을 먼저 시도한다. mp4v(MPEG-4 Part 2)로 쓰면 파일은
+        # 멀쩡히 생기지만 **브라우저가 재생하지 못한다** — Notion/발표 자료에 그대로
+        # 못 올린다(2026-10-07에 겪음. ffmpeg로 재인코딩해야 했다).
+        # OpenCV 빌드에 H.264 인코더가 없으면 조용히 실패하므로 결과를 확인하고
+        # mp4v로 내려간다. 그 경우 아래 안내대로 변환해 쓸 것.
+        for _cc in ("avc1", "mp4v"):
+            w_ = cv2.VideoWriter(f"{_LOGDIR}/video.mp4",
+                                 cv2.VideoWriter_fourcc(*_cc), _VIDEO_FPS, (w, h))
+            if w_.isOpened():
+                if _cc == "mp4v":
+                    print("  ⚠️ H.264 인코더가 없어 mp4v 로 저장합니다 — 브라우저 재생 불가.")
+                    print("     공유 전 변환: ffmpeg -i video.mp4 -c:v libx264 "
+                          "-pix_fmt yuv420p -movflags +faststart out.mp4")
+                _VID["w"] = w_
+                break
+            w_.release()
     _VID["w"].write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
 
