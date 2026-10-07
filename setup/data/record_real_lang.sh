@@ -251,6 +251,10 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; d
     echo "  ✅ 저장됨 (누적 ${DONE}ep)"
     # 데이터셋 폴더는 첫 저장 때 생긴다. 그 시점에 지문을 남긴다(이미 있으면 대조만).
     python3 "$(dirname "$0")/calib_fingerprint.py" --write "$ROOT" >/dev/null 2>&1 || true
+    # rest 기준 자세도 데이터셋 안으로 들인다. 첫 에피소드 전에는 데이터셋 폴더를
+    # 만들 수 없어(lerobot 이 exist_ok=False 로 만든다) 옆에 적어 두었던 것이다.
+    _STAGED="$(dirname "$ROOT")/.$(basename "$ROOT")_rest_pose.json"
+    [ -f "$_STAGED" ] && mv "$_STAGED" "$ROOT/rest_pose.json" 2>/dev/null || true
     # 재개용 진행 기록 — "계획표 몇 행이 몇 번째 에피소드로 저장됐는가"
     echo "$EP,$DONE,$(date -Is)" >> "$PROGRESS"
   else

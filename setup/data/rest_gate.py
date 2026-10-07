@@ -29,6 +29,22 @@ TOL = float(os.environ.get("REST_TOL", "6.0"))     # 관절당 허용 오차(°)
 FILE = "rest_pose.json"
 
 
+def paths(root):
+    """(읽을 때 우선순위 순서, 지금 쓸 경로) 를 돌려준다.
+
+    ⚠️ **데이터셋 폴더를 만들면 안 된다.** lerobot 의 LeRobotDataset.create 는
+       `root.mkdir(exist_ok=False)` 로 만들기 때문에, 첫 에피소드 전에 우리가
+       폴더를 만들어 두면 `FileExistsError` 로 수집이 아예 시작되지 않는다
+       (2026-10-07 실제 발생). 그래서 폴더가 아직 없으면 **옆에** 적어 두고,
+       첫 저장이 끝난 뒤 record_real_lang.sh 가 안으로 옮긴다.
+    """
+    inside = os.path.join(root, FILE)
+    staged = os.path.join(os.path.dirname(os.path.abspath(root)),
+                          f".{os.path.basename(os.path.normpath(root))}_{FILE}")
+    write = inside if os.path.isdir(root) else staged
+    return [inside, staged], write
+
+
 def read_leader():
     from lerobot.teleoperators.so_leader import SOLeader as C, SOLeaderConfig as Cfg
     cfg = Cfg(port=os.environ.get("LEADER_PORT", "/dev/ttyLEADER"))
@@ -53,17 +69,17 @@ def main():
     g.add_argument("--check", action="store_true", help="기준 안에 들 때까지 대기")
     g.add_argument("--show", action="store_true")
     a = ap.parse_args()
-    path = os.path.join(a.root, FILE)
+    reads, path = paths(a.root)
+    found = next((p for p in reads if os.path.exists(p)), None)
 
     if a.show:
-        if not os.path.exists(path):
+        if not found:
             print("  기준 자세 없음"); return 1
-        t = json.load(open(path))
+        t = json.load(open(found))
         print("  기준 자세: " + " · ".join(f"{k.split('.')[0]} {v:+.1f}" for k, v in t.items()))
         return 0
 
     if a.set:
-        os.makedirs(a.root, exist_ok=True)
         t = read_leader()
         json.dump(t, open(path, "w"), indent=1)
         print("  ✅ 기준 자세 저장: " +
@@ -71,17 +87,16 @@ def main():
         return 0
 
     # --check
-    if not os.path.exists(path):
+    if not found:
         # 첫 에피소드 — 기준이 없으면 지금 자세를 기준으로 삼는다.
         print("  기준 자세가 없어 **지금 자세**를 기준으로 삼습니다.")
         print("  리더를 거치대에 놓은 상태인지 확인하세요.")
         input("  준비됐으면 Enter ")
-        os.makedirs(a.root, exist_ok=True)
         json.dump(read_leader(), open(path, "w"), indent=1)
         print("  ✅ 저장했습니다. 이후 에피소드는 이 자세와 대조합니다.")
         return 0
 
-    tgt = json.load(open(path))
+    tgt = json.load(open(found))
     for i in range(1000):
         cur = read_leader()
         d = {k: cur.get(k, 0.0) - v for k, v in tgt.items()}
