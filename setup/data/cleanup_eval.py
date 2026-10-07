@@ -55,20 +55,30 @@ RFIELDS = FIELDS + ["picked", "landed", "note"]
 def cmd_plan(a):
     rng = random.Random(a.seed)
     rows, trial = [], 0
+    tgt_count = Counter()
     for g in range(a.groups):
         # 쌍 종류를 번갈아 — 목적지 축과 물체 축을 같은 양으로 본다
         kind = "dest" if g % 2 == 0 else "obj"
         n_obj = rng.choice([2, 3, 3, 4])
-        objs = rng.sample(OBJECTS, n_obj)
+        # 타깃을 **가장 적게 쓴 물체**부터 고른다. 무작위로 뽑으면 한쪽에 몰려
+        # (실측: yellow 10회 vs marker 3회) 조작 난이도가 다른 물체가 과대표되고
+        # 물체 축 추정이 그만큼 편향된다.
+        tgt = min(OBJECTS, key=lambda o: (tgt_count[o], rng.random()))
+        tgt_count[tgt] += 1
+        others = [o for o in OBJECTS if o != tgt]
+        objs = [tgt] + rng.sample(others, n_obj - 1)
+        rng.shuffle(objs)
         if kind == "dest":
             # 같은 물체, 칸만 바꾼다
-            tgt = objs[0]
-            picks = [(tgt, s) for s in SLOTS]
+            picks = [(tgt, sl) for sl in SLOTS]
             rng.shuffle(picks)
         else:
-            # 같은 칸, 지시 물체만 바꾼다
+            # 같은 칸, 지시 물체만 바꾼다 — 두 번째 타깃도 균형을 본다
+            tgt2 = min([o for o in objs if o != tgt],
+                       key=lambda o: (tgt_count[o], rng.random()))
+            tgt_count[tgt2] += 1
             slot = rng.choice(SLOTS)
-            picks = [(objs[0], slot), (objs[1], slot)]
+            picks = [(tgt, slot), (tgt2, slot)]
         for pos, (tgt, (snum, scol)) in enumerate(picks, start=1):
             trial += 1
             rows.append({
