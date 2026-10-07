@@ -9,14 +9,16 @@
 #   그래서 여기서는 **반드시 nvidia/GR00T-N1.6-3B 에서 시작**한다.
 #   sim 학습본(gr00t_blocktask_langB*)을 base 로 주면 안 된다.
 #
-# 학습량:
+# 학습량 — **step 이 아니라 epoch 으로 지정한다**:
 #   sim 곡선에서 6.5 epoch 부근에 이미 최대 격차가 나왔고 그 뒤로 5배를 더 써도
-#   나아지지 않았다(레거시만 16.7%p 잃음). 실기도 6~12 epoch 으로 잡는다.
-#     80ep · 47,080 frames · effective batch 64
-#     6,000 step × 64 = 384,000 샘플 ÷ 47,080 = **8.2 epoch**  (약 4.5시간)
-#   save-steps 1000 이므로 1k~6k 체크포인트 6개가 남아 **곡선을 공짜로 얻는다.**
-#   sim 에서 "어느 지점이 최적인가"를 조건 2개로만 재서 단정하지 못했다.
-#   여기서는 처음부터 여러 지점을 남겨 둔다.
+#   나아지지 않았다(레거시만 16.7%p 잃음). 그래서 기준은 epoch 이다.
+#   ⚠️ step 을 박아 두면 데이터가 늘었을 때 **조용히 학습량이 줄어든다.**
+#      v1(80ep·47,080f)에서 6,000 step = 8.2 epoch 이었는데, 같은 6,000 step 을
+#      v2(250ep·168,687f)에 쓰면 **2.3 epoch** 밖에 안 된다. 여기서 계산한다.
+#        step = EPOCHS × frames ÷ 64
+#      v2 기준: 8 epoch ≈ 21,000 step ≈ 16시간 (1,333 step/h 실측)
+#   save-steps 는 체크포인트가 8개쯤 남도록 자동으로 잡는다 — sim 에서 "어느
+#   지점이 최적인가"를 조건 2개로만 재서 단정하지 못했다. 곡선을 공짜로 얻어 둔다.
 #
 # ⚠️ SMOKE=1 로 10 step 먼저 돌려 **출발점을 확인**할 것.
 #    이어학습이 조용히 성공해 버리면(체크포인트를 잘못 지정하면) 19시간을 버린다.
@@ -26,12 +28,14 @@
 #
 # 사용 (5090에서):
 #   SMOKE=1 ./train_cleanup_real.sh        # 10 step 확인
-#   ./train_cleanup_real.sh                # 본 학습 6k (약 4.5h)
-#   ./train_cleanup_real.sh 12000          # 스텝 지정
+#   ./train_cleanup_real.sh                # 본 학습 (EPOCHS=8 → 약 21k step, 16h)
+#   EPOCHS=6 ./train_cleanup_real.sh       # epoch 지정
+#   ./train_cleanup_real.sh 12000          # step 직접 지정(우선)
 #   EDGE=448 ./train_cleanup_real.sh       # 입력 해상도 448 (기본 256)
 set -e
 
-STEPS="${1:-6000}"
+EPOCHS="${EPOCHS:-8}"       # step 은 아래에서 frames 로부터 계산한다
+STEPS="${1:-}"              # 직접 주면 EPOCHS 보다 우선
 DATA_ROOT="${DATA_ROOT:-$HOME/gr00tn16_ws/sim_data}"
 DSNAME="${DSNAME:-cleanup_real}"
 OUT_NAME="${OUT_NAME:-gr00t_cleanup_real_n16_8bit}"
@@ -45,6 +49,13 @@ CKPT_DIR="$HOME/gr00tn16_ws/checkpoints"
 # ── 준비 확인 ────────────────────────────────────────────────────────────
 [ -d "$DS/meta" ] || { echo "❌ 데이터셋 없음: $DS"; echo "   prepare_cleanup_real.sh 를 먼저 돌리세요"; exit 1; }
 [ -f "$DS/meta/modality.json" ] || { echo "❌ modality.json 없음 — 변환 후처리 누락"; exit 1; }
+
+# frames 를 먼저 읽어 EPOCHS → STEPS 로 환산한다
+FRAMES=$(python3 -c "import json;print(json.load(open('$DS/meta/info.json'))['total_frames'])")
+if [ -z "$STEPS" ]; then
+  STEPS=$(python3 -c "print(round($EPOCHS*$FRAMES/64/500)*500)")
+  echo "  학습량: EPOCHS=$EPOCHS × ${FRAMES} frames ÷ 64 = ${STEPS} step (500 단위 반올림)"
+fi
 
 python3 - "$DS" "$STEPS" <<'PY' || exit 1
 import json, sys
@@ -61,8 +72,11 @@ if tasks < 20:
     sys.exit(f"❌ 지시문이 {tasks}종뿐이다 — 변환이 태스크를 접었다. 학습해도 언어 신호가 0이다.")
 ep = steps * 64 / frames
 print(f"  {steps:,} step × batch 64 = {steps*64:,} 샘플 → {ep:.1f} epoch")
-if ep > 20:
-    print(f"  ⚠️  {ep:.0f} epoch 은 sim 권장(6~12)보다 많다 — 과적합 구간일 수 있다")
+if ep > 14:
+    print(f"  ⚠️  {ep:.1f} epoch 은 sim 권장(6~12)보다 많다 — 과적합 구간일 수 있다")
+elif ep < 5:
+    sys.exit(f"❌ {ep:.1f} epoch 은 너무 적다. EPOCHS 를 올리거나 STEPS 를 직접 줄 것 "
+             f"(v1 에서 step 을 박아 둔 탓에 데이터가 3배로 늘자 학습량이 2.3 epoch 로 줄었다)")
 PY
 
 # ── 중복 실행 방지 ───────────────────────────────────────────────────────
@@ -99,7 +113,9 @@ if [ "$SMOKE" = "1" ]; then
   echo "   파운데이션에서 시작 = 약 1.05~1.13 · 학습된 체크포인트 이어받음 = 약 0.1"
   echo "   1.0 근처면 정상. 0.1 근처면 base 지정이 틀렸다."
 else
-  SAVE_STEPS="${SAVE_STEPS:-1000}"; SAVE_LIMIT="${SAVE_LIMIT:-8}"
+  # 체크포인트가 8개쯤 남도록 — 곡선을 얻기 위한 것이다
+  SAVE_STEPS="${SAVE_STEPS:-$(python3 -c "print(max(round($STEPS/8/500)*500,500))")}"
+  SAVE_LIMIT="${SAVE_LIMIT:-10}"
   # 체크포인트 1개 = 약 13GB(가중치 9.8 + optimizer 3.3)
   NEED=$(( (STEPS / SAVE_STEPS + 1) * 13 ))
   AVAIL=$(df -BG --output=avail "$CKPT_DIR" 2>/dev/null | tail -1 | tr -dc '0-9')
@@ -163,7 +179,7 @@ run_docker -d
 
 echo "실기 cleanup 학습 시작 ($NAME, ${STEPS} steps)"
 echo "  로그: docker logs -f $NAME"
-echo "  약 $((STEPS / 1333))시간 (1,333 step/h 실측)"
+echo "  약 $((STEPS / 1333))시간 (1,333 step/h 실측) · 체크포인트 $((STEPS / SAVE_STEPS))개"
 echo
 echo "  ▶ 끝나면 평가: 같은 배치에 목적지만 다른 **대응쌍 12그룹**으로 목적지 축을 잰다."
 echo "    물체 축과 목적지 축을 **따로 기록**할 것 — 곱으로 보면 또 오독한다(sim §14)."

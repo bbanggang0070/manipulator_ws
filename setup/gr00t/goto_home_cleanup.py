@@ -1,20 +1,19 @@
-"""로봇을 **cleanup_real 학습 rest 자세**로 이동 (실기 cleanup 모델 배포용 초기화).
+"""로봇을 **cleanup_real(v2) 학습 rest 자세**로 이동 (실기 cleanup 모델 배포용 초기화).
 
-⚠️ goto_home_real.py(so101_blocktask_real 50ep 기준)와 다르다. 데이터셋이 바뀌면
-   rest 자세도 바뀌는데, 그걸 갱신하지 않으면 **정책이 학습 시작 분포 밖에서
-   출발한다.** 2026-08-03에 goto_home_sim의 elbow가 4~7° 높아 추론 초반에
-   오래 맴도는 지연이 났던 것과 **같은 실패**다.
+⚠️ 데이터셋이 바뀌면 **이 파일도 반드시 갱신한다.** v1 에서 이 한 줄을 안 해서
+   goto_home_real.py(옛 so101_blocktask_real 기준)로 평가를 돌렸고, 학습 시작
+   분포와 wrist_flex 가 18.3° 어긋난 채 출발해 모델이 물체를 집지 못했다.
+   2026-08-03 에 goto_home_sim 의 elbow 가 4~7° 높아 겪은 것과 같은 실패다.
+   값은 verify_real_lang_dataset.py 가 "배포용 홈 자세" 로 찍어 준다.
 
-실측 차이 (goto_home_real.py 대비, cleanup_real 80ep 첫 프레임 평균):
-  wrist_flex  -18.3°  ← 가장 크다
-  gripper     +10.7°  (수집 시 그리퍼가 더 열린 상태에서 출발했다)
-  pan -6.3  ·  lift -6.0  ·  elbow +5.5  ·  wrist_roll +0.8
+TARGET = cleanup_real v2 **250ep** 첫 프레임 state 평균 (괄호는 표준편차):
+  pan +1.9 (2.0) · lift -96.5 (3.7) · elbow +92.5 (4.6)
+  wrist_flex +68.3 (4.8) · wrist_roll +1.5 (2.5) · gripper +2.0 (0.3)
+  ✅ 전 관절 5° 미만 — 수집 때 rest_gate.py 가 매 에피소드 리더 자세를
+     기준과 대조(허용 6°)한 덕분이다. v1 은 wrist_flex ±14.3 · gripper ±11.0 이었다.
 
-TARGET = cleanup_real 80ep 첫 프레임 state 평균 (괄호는 표준편차):
-  pan 0.1 (2.5) · lift -98.3 (2.0) · elbow 95.3 (5.5)
-  wrist_flex 58.2 (14.3) · wrist_roll -1.1 (9.0) · gripper 15.0 (11.0)
-  ⚠️ wrist_flex·wrist_roll·gripper는 편차가 크다 — rest가 그만큼 느슨하게
-     정의됐다는 뜻이다. 다음 수집에서는 시작 자세를 더 일관되게 잡을 것.
+v1(80ep) 대비 차이: wrist_flex +10.1 · gripper -13.0 · lift +1.8 · pan +1.8
+  → v1 체크포인트를 쓸 일이 있으면 이 파일을 쓰면 안 된다.
 """
 import logging
 import sys
@@ -28,8 +27,8 @@ from lerobot.robots.so_follower.config_so_follower import SOFollowerRobotConfig
 # cleanup_real 80ep 의 rest(에피소드 시작) 평균 자세 — 실측값이다.
 #   재계산: 데이터셋 parquet 의 frame_index==0 인 observation.state 평균.
 TARGET = {
-    "shoulder_pan.pos": 0.1, "shoulder_lift.pos": -98.3, "elbow_flex.pos": 95.3,
-    "wrist_flex.pos": 58.2, "wrist_roll.pos": -1.1, "gripper.pos": 15.0,
+    "shoulder_pan.pos": 1.9, "shoulder_lift.pos": -96.5, "elbow_flex.pos": 92.5,
+    "wrist_flex.pos": 68.3, "wrist_roll.pos": 1.5, "gripper.pos": 2.0,
 }
 
 r = None

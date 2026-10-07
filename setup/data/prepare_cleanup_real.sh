@@ -4,10 +4,10 @@
 # sim 준비(prepare_blocktask_lang.sh)와 같은 구조지만 세 가지가 다르다:
 #   · 원본이 datasets/_train/cleanup_real 에 있다(sim 은 datasets/ 바로 아래)
 #   · 카메라 키가 top/wrist 다 → modality 는 top→front, wrist→wrist
-#   · 1단계는 칸 2개(black·white)만 쓴다 → 그 구조가 살아남았는지도 본다
+#   · 칸 4개(black·cyan·pink·white)를 모두 쓴다 → 네 단어가 다 살아남았는지 본다
 #
 # **진짜 게이트는 check 의 TASKS 줄 수**다.
-#   80ep 에 서로 다른 지시문이 49종 들어 있다. 변환이 태스크를 한 줄로 접으면
+#   250ep 에 서로 다른 지시문이 40종 들어 있다(물체 10 × 칸 4, 문형은 1종). 변환이 태스크를 한 줄로 접으면
 #   (task_index 가 전부 0이 되면) 모든 에피소드가 같은 문장을 갖게 되고,
 #   그 데이터로 학습하면 **언어 학습 신호가 0**이다 — 학습 시간을 통째로 버린다.
 #   sim 에서 실제로 이 사고를 대비해 만든 게이트이고, 여기서도 같다.
@@ -22,7 +22,7 @@ LOCAL_ROOT="${LOCAL_ROOT:-$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop/dataset
 DS="${DSNAME:-cleanup_real}"
 REMOTE="~/gr00tn16_ws/sim_data/heongyu"
 MODALITY="../sim/t1_task/blocktask_real_modality.json"   # top→front, wrist→wrist
-EXPECT_TASKS="${EXPECT_TASKS:-49}"   # 1단계 80ep 실측. 1이면 변환이 태스크를 접은 것
+EXPECT_TASKS="${EXPECT_TASKS:-40}"   # v2 250ep 실측(물체 10 × 칸 4). 1이면 변환이 태스크를 접은 것
 MIN_TASKS="${MIN_TASKS:-30}"
 
 send() {
@@ -108,14 +108,19 @@ if len(T)>3: print(\"    - ... (+%d)\"%(len(T)-3))
   fi
 
   # 1단계는 칸 2개만 쓴다. 목적지 단어가 둘 다 살아 있어야 목적지 축을 잴 수 있다.
-  if grep -q "'black'" /tmp/cleanup_check.txt && grep -q "'white'" /tmp/cleanup_check.txt; then
-    echo "  ✅ 목적지 단어(black·white) 둘 다 살아 있다"
+  _MISS=""
+  for _c in black cyan pink white; do
+    grep -q "'$_c'" /tmp/cleanup_check.txt || _MISS="$_MISS $_c"
+  done
+  if [ -z "$_MISS" ]; then
+    echo "  ✅ 목적지 단어 4색(black·cyan·pink·white) 전부 살아 있다"
   else
-    echo "  ⚠️  목적지 단어가 한쪽뿐이다 — BINS 줄을 확인할 것 (목적지 축을 못 잰다)"
+    echo "  ❌ 목적지 단어가 빠졌다:$_MISS — BINS 줄 확인 (그 칸은 목적지 축을 못 잰다)"
+    exit 3
   fi
 
   echo
-  echo "  다음: 학습 (파운데이션에서 새로, 6k step ≈ 4.5h)"
+  echo "  다음: 학습 (파운데이션에서 새로). train_cleanup_real.sh 가 EPOCHS 로 step 을 계산한다"
   echo "    ⚠️ **파운데이션 모델에서 출발**할 것. sim 학습본에서 이어가면 안 된다 —"
   echo "       sim 1단계에서 이어학습은 우연 수준(22.5%)이었고 기존 성능까지 27%p 잃었다."
 }
