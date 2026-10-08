@@ -67,8 +67,13 @@ def cmd_plan(a):
         # 타깃을 **가장 적게 쓴 물체**부터 고른다. 무작위로 뽑으면 한쪽에 몰려
         # (실측: yellow 10회 vs marker 3회) 조작 난이도가 다른 물체가 과대표되고
         # 물체 축 추정이 그만큼 편향된다.
+        # ⚠️ 카운터를 **그룹당 1회**가 아니라 **시행 수만큼** 올려야 한다.
+        #   dest 그룹은 한 타깃으로 4시행을 돌리므로, 그룹 단위로 세면
+        #   dest 로 뽑힌 물체는 4시행, obj 로 뽑힌 물체는 1시행이 된다.
+        #   실측(60시행): orange 10회 vs red 2회 — 물체별 정확도를 비교할 수 없었다.
+        n_trials = len(SLOTS) if kind == "dest" else 1
         tgt = min(OBJECTS, key=lambda o: (tgt_count[o], rng.random()))
-        tgt_count[tgt] += 1
+        tgt_count[tgt] += n_trials
         others = [o for o in OBJECTS if o != tgt]
         objs = [tgt] + rng.sample(others, n_obj - 1)
         rng.shuffle(objs)
