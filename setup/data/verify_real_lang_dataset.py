@@ -93,6 +93,18 @@ def main(root):
     else:
         print(f"  ⏸ calib_fingerprint.py 없음 — 캘리브레이션 대조 건너뜀")
 
+    # ── 파일 개수 ────────────────────────────────────────────────────
+    #   메타·데이터·영상이 같은 수여야 한다. 하나라도 비면 학습이 조용히
+    #   어긋난 프레임을 쓴다.
+    vk = sorted(os.path.basename(p) for p in glob.glob(f"{root}/videos/*"))
+    nd = len(glob.glob(f"{root}/data/**/*.parquet", recursive=True))
+    counts = {k: len(glob.glob(f"{root}/videos/{k}/**/*.mp4", recursive=True)) for k in vk}
+    print(f"  파일 수: data {nd} · " + " · ".join(f"{k.split('.')[-1]} {v}" for k, v in counts.items())
+          + f" · info {n_ep}")
+    if {nd, *counts.values()} != {n_ep}:
+        print("  ❌ 개수가 어긋난다 — 영상이나 parquet 이 빠졌다")
+        return 1
+
     ef = sorted(glob.glob(f"{root}/meta/episodes/**/*.parquet", recursive=True))
     if not ef:
         sys.exit("❌ meta/episodes 없음 — 경로를 확인하세요")
