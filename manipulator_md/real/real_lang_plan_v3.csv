@@ -1,121 +1,371 @@
 ep,group,group_kind,group_pos,keep_layout,n_objects,objects,target,slot,slot_color,dest_named,pose_hint,instruction
-1,1,single,1/1,NEW,2,"yellow cube, eraser",eraser,2,cyan,cyan,eraser 세워서,Put the eraser into the cyan bin
-2,2,pair,1/2,NEW,3,"red cube, screwdriver, purple cube",red cube,1,black,black,,Put the red cube into the black bin
-3,2,pair,2/2,KEEP,3,"red cube, screwdriver, purple cube",red cube,4,white,white,,Put the red cube into the white bin
-4,3,single,1/1,NEW,3,"red cube, eraser, blue cube",blue cube,3,pink,pink,eraser 세워서,Put the blue cube into the pink bin
-5,4,single,1/1,NEW,2,"marker, orange cube",orange cube,3,pink,pink,,Put the orange cube into the pink bin
-6,5,single,1/1,NEW,4,"glue stick, green cube, blue cube, eraser",green cube,4,white,white,eraser 세워서,Put the green cube into the white bin
-7,6,single,1/1,NEW,3,"green cube, purple cube, marker",purple cube,1,black,black,,Put the purple cube into the black bin
-8,7,pair,1/2,NEW,2,"glue stick, blue cube",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
-9,7,pair,2/2,KEEP,2,"glue stick, blue cube",glue stick,1,black,black,,Put the glue stick into the black bin
-10,8,single,1/1,NEW,1,marker,marker,2,cyan,cyan,,Put the marker into the cyan bin
-11,9,single,1/1,NEW,3,"yellow cube, marker, glue stick",yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
-12,10,single,1/1,NEW,1,screwdriver,screwdriver,4,white,white,,Put the screwdriver into the white bin
-13,11,single,1/1,NEW,4,"glue stick, purple cube, yellow cube, green cube",purple cube,4,white,white,,Put the purple cube into the white bin
-14,12,single,1/1,NEW,2,"screwdriver, yellow cube",screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
-15,13,single,1/1,NEW,4,"marker, blue cube, orange cube, yellow cube",yellow cube,1,black,black,,Put the yellow cube into the black bin
-16,14,single,1/1,NEW,2,"eraser, glue stick",eraser,3,pink,pink,eraser 세워서,Put the eraser into the pink bin
-17,15,single,1/1,NEW,2,"eraser, marker",marker,1,black,black,eraser 세워서,Put the marker into the black bin
-18,16,single,1/1,NEW,3,"marker, glue stick, green cube",green cube,3,pink,pink,,Put the green cube into the pink bin
-19,17,single,1/1,NEW,3,"orange cube, screwdriver, purple cube",orange cube,4,white,white,,Put the orange cube into the white bin
-20,18,single,1/1,NEW,4,"blue cube, eraser, yellow cube, orange cube",blue cube,2,cyan,cyan,eraser 세워서,Put the blue cube into the cyan bin
-21,19,single,1/1,NEW,3,"orange cube, purple cube, green cube",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
-22,20,single,1/1,NEW,2,"glue stick, eraser",eraser,1,black,black,eraser 세워서,Put the eraser into the black bin
-23,21,single,1/1,NEW,3,"orange cube, blue cube, glue stick",glue stick,4,white,white,,Put the glue stick into the white bin
-24,22,single,1/1,NEW,1,green cube,green cube,2,cyan,cyan,,Put the green cube into the cyan bin
-25,23,single,1/1,NEW,4,"yellow cube, blue cube, green cube, orange cube",blue cube,4,white,white,,Put the blue cube into the white bin
-26,24,single,1/1,NEW,4,"yellow cube, red cube, eraser, screwdriver",red cube,3,pink,pink,eraser 세워서,Put the red cube into the pink bin
-27,25,single,1/1,NEW,3,"glue stick, eraser, orange cube",orange cube,1,black,black,eraser 세워서,Put the orange cube into the black bin
-28,26,single,1/1,NEW,3,"screwdriver, eraser, red cube",screwdriver,3,pink,pink,eraser 세워서,Put the screwdriver into the pink bin
-29,27,quad,1/4,NEW,4,"green cube, yellow cube, eraser, screwdriver",yellow cube,1,black,black,eraser 세워서,Put the yellow cube into the black bin
-30,27,quad,2/4,KEEP,4,"green cube, yellow cube, eraser, screwdriver",yellow cube,3,pink,pink,eraser 세워서,Put the yellow cube into the pink bin
-31,27,quad,3/4,KEEP,4,"green cube, yellow cube, eraser, screwdriver",yellow cube,4,white,white,eraser 세워서,Put the yellow cube into the white bin
-32,27,quad,4/4,KEEP,4,"green cube, yellow cube, eraser, screwdriver",yellow cube,2,cyan,cyan,eraser 세워서,Put the yellow cube into the cyan bin
-33,28,single,1/1,NEW,3,"green cube, yellow cube, marker",marker,4,white,white,,Put the marker into the white bin
-34,29,single,1/1,NEW,1,orange cube,orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
-35,30,pair,1/2,NEW,4,"screwdriver, red cube, glue stick, blue cube",glue stick,3,pink,pink,,Put the glue stick into the pink bin
-36,30,pair,2/2,KEEP,4,"screwdriver, red cube, glue stick, blue cube",glue stick,1,black,black,,Put the glue stick into the black bin
-37,31,single,1/1,NEW,3,"yellow cube, eraser, green cube",eraser,4,white,white,eraser 세워서,Put the eraser into the white bin
-38,32,quad,1/4,NEW,1,blue cube,blue cube,4,white,white,,Put the blue cube into the white bin
-39,32,quad,2/4,KEEP,1,blue cube,blue cube,1,black,black,,Put the blue cube into the black bin
-40,32,quad,3/4,KEEP,1,blue cube,blue cube,3,pink,pink,,Put the blue cube into the pink bin
-41,32,quad,4/4,KEEP,1,blue cube,blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
-42,33,pair,1/2,NEW,2,"red cube, marker",red cube,3,pink,pink,,Put the red cube into the pink bin
-43,33,pair,2/2,KEEP,2,"red cube, marker",red cube,2,cyan,cyan,,Put the red cube into the cyan bin
-44,34,single,1/1,NEW,3,"green cube, red cube, blue cube",green cube,1,black,black,,Put the green cube into the black bin
-45,35,single,1/1,NEW,3,"purple cube, screwdriver, glue stick",screwdriver,1,black,black,,Put the screwdriver into the black bin
-46,36,pair,1/2,NEW,3,"yellow cube, purple cube, orange cube",purple cube,3,pink,pink,,Put the purple cube into the pink bin
-47,36,pair,2/2,KEEP,3,"yellow cube, purple cube, orange cube",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
-48,37,single,1/1,NEW,4,"green cube, screwdriver, marker, blue cube",marker,3,pink,pink,,Put the marker into the pink bin
-49,38,pair,1/2,NEW,2,"screwdriver, eraser",screwdriver,4,white,white,eraser 세워서,Put the screwdriver into the white bin
-50,38,pair,2/2,KEEP,2,"screwdriver, eraser",screwdriver,1,black,black,eraser 세워서,Put the screwdriver into the black bin
-51,39,pair,1/2,NEW,2,"eraser, orange cube",eraser,2,cyan,cyan,eraser 세워서,Put the eraser into the cyan bin
-52,39,pair,2/2,KEEP,2,"eraser, orange cube",eraser,4,white,white,eraser 세워서,Put the eraser into the white bin
-53,40,pair,1/2,NEW,3,"orange cube, marker, screwdriver",marker,4,white,white,,Put the marker into the white bin
-54,40,pair,2/2,KEEP,3,"orange cube, marker, screwdriver",marker,2,cyan,cyan,,Put the marker into the cyan bin
-55,41,pair,1/2,NEW,4,"blue cube, screwdriver, green cube, marker",green cube,3,pink,pink,,Put the green cube into the pink bin
-56,41,pair,2/2,KEEP,4,"blue cube, screwdriver, green cube, marker",green cube,1,black,black,,Put the green cube into the black bin
-57,42,single,1/1,NEW,4,"purple cube, yellow cube, orange cube, blue cube",orange cube,1,black,black,,Put the orange cube into the black bin
-58,43,single,1/1,NEW,4,"red cube, marker, orange cube, eraser",orange cube,4,white,white,eraser 세워서,Put the orange cube into the white bin
-59,44,single,1/1,NEW,3,"glue stick, purple cube, blue cube",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
-60,45,single,1/1,NEW,3,"green cube, eraser, red cube",red cube,2,cyan,cyan,eraser 세워서,Put the red cube into the cyan bin
-61,46,pair,1/2,NEW,3,"purple cube, blue cube, glue stick",purple cube,4,white,white,,Put the purple cube into the white bin
-62,46,pair,2/2,KEEP,3,"purple cube, blue cube, glue stick",purple cube,3,pink,pink,,Put the purple cube into the pink bin
-63,47,pair,1/2,NEW,3,"purple cube, orange cube, screwdriver",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
-64,47,pair,2/2,KEEP,3,"purple cube, orange cube, screwdriver",screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
-65,48,single,1/1,NEW,4,"eraser, purple cube, glue stick, screwdriver",glue stick,4,white,white,eraser 세워서,Put the glue stick into the white bin
-66,49,single,1/1,NEW,4,"glue stick, yellow cube, orange cube, screwdriver",yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
-67,50,single,1/1,NEW,4,"orange cube, purple cube, eraser, green cube",eraser,1,black,black,eraser 세워서,Put the eraser into the black bin
-68,51,single,1/1,NEW,2,"blue cube, orange cube",orange cube,3,pink,pink,,Put the orange cube into the pink bin
-69,52,single,1/1,NEW,3,"red cube, yellow cube, screwdriver",red cube,1,black,black,,Put the red cube into the black bin
-70,53,pair,1/2,NEW,1,marker,marker,3,pink,pink,,Put the marker into the pink bin
-71,53,pair,2/2,KEEP,1,marker,marker,1,black,black,,Put the marker into the black bin
-72,54,single,1/1,NEW,3,"screwdriver, purple cube, green cube",green cube,4,white,white,,Put the green cube into the white bin
-73,55,single,1/1,NEW,2,"blue cube, screwdriver",blue cube,1,black,black,,Put the blue cube into the black bin
-74,56,single,1/1,NEW,3,"yellow cube, orange cube, purple cube",yellow cube,4,white,white,,Put the yellow cube into the white bin
-75,57,pair,1/2,NEW,4,"orange cube, screwdriver, eraser, red cube",eraser,3,pink,pink,eraser 세워서,Put the eraser into the pink bin
-76,57,pair,2/2,KEEP,4,"orange cube, screwdriver, eraser, red cube",eraser,2,cyan,cyan,eraser 세워서,Put the eraser into the cyan bin
-77,58,single,1/1,NEW,3,"purple cube, eraser, marker",purple cube,1,black,black,eraser 세워서,Put the purple cube into the black bin
-78,59,single,1/1,NEW,4,"blue cube, red cube, marker, green cube",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
-79,60,quad,1/4,NEW,2,"red cube, yellow cube",red cube,3,pink,pink,,Put the red cube into the pink bin
-80,60,quad,2/4,KEEP,2,"red cube, yellow cube",red cube,2,cyan,cyan,,Put the red cube into the cyan bin
-81,60,quad,3/4,KEEP,2,"red cube, yellow cube",red cube,4,white,white,,Put the red cube into the white bin
-82,60,quad,4/4,KEEP,2,"red cube, yellow cube",red cube,1,black,black,,Put the red cube into the black bin
-83,61,single,1/1,NEW,3,"yellow cube, orange cube, eraser",orange cube,2,cyan,cyan,eraser 세워서,Put the orange cube into the cyan bin
-84,62,single,1/1,NEW,3,"glue stick, screwdriver, blue cube",glue stick,3,pink,pink,,Put the glue stick into the pink bin
-85,63,single,1/1,NEW,3,"yellow cube, purple cube, green cube",green cube,4,white,white,,Put the green cube into the white bin
-86,64,single,1/1,NEW,2,"blue cube, orange cube",orange cube,1,black,black,,Put the orange cube into the black bin
-87,65,single,1/1,NEW,1,marker,marker,4,white,white,,Put the marker into the white bin
-88,66,single,1/1,NEW,4,"screwdriver, yellow cube, blue cube, green cube",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
-89,67,single,1/1,NEW,3,"yellow cube, red cube, screwdriver",yellow cube,4,white,white,,Put the yellow cube into the white bin
-90,68,single,1/1,NEW,3,"eraser, green cube, blue cube",blue cube,1,black,black,eraser 세워서,Put the blue cube into the black bin
-91,69,pair,1/2,NEW,3,"glue stick, screwdriver, eraser",glue stick,2,cyan,cyan,eraser 세워서,Put the glue stick into the cyan bin
-92,69,pair,2/2,KEEP,3,"glue stick, screwdriver, eraser",glue stick,3,pink,pink,eraser 세워서,Put the glue stick into the pink bin
-93,70,single,1/1,NEW,1,purple cube,purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
-94,71,single,1/1,NEW,3,"orange cube, glue stick, green cube",orange cube,4,white,white,,Put the orange cube into the white bin
-95,72,single,1/1,NEW,2,"purple cube, screwdriver",screwdriver,1,black,black,,Put the screwdriver into the black bin
-96,73,single,1/1,NEW,3,"marker, orange cube, purple cube",purple cube,3,pink,pink,,Put the purple cube into the pink bin
-97,74,single,1/1,NEW,4,"glue stick, orange cube, green cube, purple cube",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
-98,75,single,1/1,NEW,3,"blue cube, screwdriver, eraser",blue cube,4,white,white,eraser 세워서,Put the blue cube into the white bin
-99,76,quad,1/4,NEW,2,"eraser, marker",eraser,3,pink,pink,eraser 세워서,Put the eraser into the pink bin
-100,76,quad,2/4,KEEP,2,"eraser, marker",eraser,1,black,black,eraser 세워서,Put the eraser into the black bin
-101,76,quad,3/4,KEEP,2,"eraser, marker",eraser,4,white,white,eraser 세워서,Put the eraser into the white bin
-102,76,quad,4/4,KEEP,2,"eraser, marker",eraser,2,cyan,cyan,eraser 세워서,Put the eraser into the cyan bin
-103,77,single,1/1,NEW,3,"marker, screwdriver, red cube",marker,1,black,black,,Put the marker into the black bin
-104,78,single,1/1,NEW,2,"glue stick, yellow cube",yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
-105,79,pair,1/2,NEW,3,"yellow cube, marker, glue stick",glue stick,4,white,white,,Put the glue stick into the white bin
-106,79,pair,2/2,KEEP,3,"yellow cube, marker, glue stick",glue stick,1,black,black,,Put the glue stick into the black bin
-107,80,single,1/1,NEW,4,"purple cube, marker, orange cube, yellow cube",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
-108,81,single,1/1,NEW,2,"marker, green cube",green cube,3,pink,pink,,Put the green cube into the pink bin
-109,82,single,1/1,NEW,3,"blue cube, purple cube, yellow cube",blue cube,3,pink,pink,,Put the blue cube into the pink bin
-110,83,single,1/1,NEW,4,"purple cube, marker, green cube, screwdriver",purple cube,4,white,white,,Put the purple cube into the white bin
-111,84,pair,1/2,NEW,4,"orange cube, glue stick, red cube, marker",marker,3,pink,pink,,Put the marker into the pink bin
-112,84,pair,2/2,KEEP,4,"orange cube, glue stick, red cube, marker",marker,2,cyan,cyan,,Put the marker into the cyan bin
-113,85,single,1/1,NEW,1,screwdriver,screwdriver,4,white,white,,Put the screwdriver into the white bin
-114,86,pair,1/2,NEW,4,"blue cube, screwdriver, green cube, yellow cube",yellow cube,1,black,black,,Put the yellow cube into the black bin
-115,86,pair,2/2,KEEP,4,"blue cube, screwdriver, green cube, yellow cube",yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
-116,87,single,1/1,NEW,3,"blue cube, purple cube, marker",blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
-117,88,single,1/1,NEW,4,"screwdriver, red cube, eraser, purple cube",red cube,4,white,white,eraser 세워서,Put the red cube into the white bin
-118,89,pair,1/2,NEW,1,purple cube,purple cube,3,pink,pink,,Put the purple cube into the pink bin
-119,89,pair,2/2,KEEP,1,purple cube,purple cube,1,black,black,,Put the purple cube into the black bin
-120,90,single,1/1,NEW,3,"glue stick, blue cube, green cube",green cube,1,black,black,,Put the green cube into the black bin
+1,1,single,1/1,NEW,4,"screwdriver, eraser, red cube, purple cube",eraser,2,cyan,cyan,,Put the eraser into the cyan bin
+2,2,single,1/1,NEW,3,"marker, blue cube, glue stick",blue cube,3,pink,pink,,Put the blue cube into the pink bin
+3,3,pair,1/2,NEW,3,"purple cube, eraser, glue stick",purple cube,1,black,black,,Put the purple cube into the black bin
+4,3,pair,2/2,KEEP,3,"purple cube, eraser, glue stick",purple cube,4,white,white,,Put the purple cube into the white bin
+5,4,single,1/1,NEW,4,"screwdriver, marker, red cube, blue cube",marker,3,pink,pink,,Put the marker into the pink bin
+6,5,single,1/1,NEW,3,"yellow cube, screwdriver, marker",yellow cube,4,white,white,,Put the yellow cube into the white bin
+7,6,pair,1/2,NEW,2,"screwdriver, green cube",green cube,1,black,black,,Put the green cube into the black bin
+8,6,pair,2/2,KEEP,2,"screwdriver, green cube",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
+9,7,single,1/1,NEW,3,"yellow cube, red cube, eraser",red cube,4,white,white,,Put the red cube into the white bin
+10,8,single,1/1,NEW,2,"eraser, glue stick",glue stick,3,pink,pink,,Put the glue stick into the pink bin
+11,9,single,1/1,NEW,4,"screwdriver, blue cube, yellow cube, marker",screwdriver,1,black,black,,Put the screwdriver into the black bin
+12,10,single,1/1,NEW,3,"orange cube, screwdriver, glue stick",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+13,11,single,1/1,NEW,4,"green cube, red cube, purple cube, yellow cube",yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
+14,12,pair,1/2,NEW,2,"red cube, marker",marker,4,white,white,,Put the marker into the white bin
+15,12,pair,2/2,KEEP,2,"red cube, marker",marker,1,black,black,,Put the marker into the black bin
+16,13,single,1/1,NEW,2,"marker, eraser",eraser,3,pink,pink,,Put the eraser into the pink bin
+17,14,single,1/1,NEW,4,"red cube, screwdriver, purple cube, green cube",screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
+18,15,single,1/1,NEW,3,"orange cube, eraser, glue stick",glue stick,1,black,black,,Put the glue stick into the black bin
+19,16,pair,1/2,NEW,4,"green cube, orange cube, eraser, red cube",orange cube,3,pink,pink,,Put the orange cube into the pink bin
+20,16,pair,2/2,KEEP,4,"green cube, orange cube, eraser, red cube",orange cube,4,white,white,,Put the orange cube into the white bin
+21,17,pair,1/2,NEW,3,"green cube, marker, blue cube",blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
+22,17,pair,2/2,KEEP,3,"green cube, marker, blue cube",blue cube,4,white,white,,Put the blue cube into the white bin
+23,18,pair,1/2,NEW,2,"glue stick, red cube",red cube,1,black,black,,Put the red cube into the black bin
+24,18,pair,2/2,KEEP,2,"glue stick, red cube",red cube,3,pink,pink,,Put the red cube into the pink bin
+25,19,single,1/1,NEW,3,"blue cube, purple cube, yellow cube",purple cube,1,black,black,,Put the purple cube into the black bin
+26,20,single,1/1,NEW,2,"glue stick, yellow cube",yellow cube,4,white,white,,Put the yellow cube into the white bin
+27,21,quad,1/4,NEW,2,"green cube, glue stick",green cube,3,pink,pink,,Put the green cube into the pink bin
+28,21,quad,2/4,KEEP,2,"green cube, glue stick",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
+29,21,quad,3/4,KEEP,2,"green cube, glue stick",green cube,4,white,white,,Put the green cube into the white bin
+30,21,quad,4/4,KEEP,2,"green cube, glue stick",green cube,1,black,black,,Put the green cube into the black bin
+31,22,single,1/1,NEW,3,"glue stick, screwdriver, green cube",screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
+32,23,single,1/1,NEW,3,"eraser, glue stick, orange cube",glue stick,3,pink,pink,,Put the glue stick into the pink bin
+33,24,single,1/1,NEW,4,"red cube, eraser, orange cube, yellow cube",eraser,4,white,white,,Put the eraser into the white bin
+34,25,pair,1/2,NEW,4,"eraser, purple cube, marker, glue stick",eraser,1,black,black,,Put the eraser into the black bin
+35,25,pair,2/2,KEEP,4,"eraser, purple cube, marker, glue stick",eraser,2,cyan,cyan,,Put the eraser into the cyan bin
+36,26,single,1/1,NEW,4,"purple cube, marker, blue cube, screwdriver",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
+37,27,single,1/1,NEW,2,"green cube, yellow cube",yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
+38,28,single,1/1,NEW,3,"glue stick, purple cube, eraser",glue stick,1,black,black,,Put the glue stick into the black bin
+39,29,single,1/1,NEW,2,"orange cube, yellow cube",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+40,30,single,1/1,NEW,4,"red cube, marker, glue stick, screwdriver",red cube,4,white,white,,Put the red cube into the white bin
+41,31,single,1/1,NEW,4,"marker, glue stick, orange cube, screwdriver",marker,1,black,black,,Put the marker into the black bin
+42,32,single,1/1,NEW,4,"marker, yellow cube, purple cube, blue cube",purple cube,4,white,white,,Put the purple cube into the white bin
+43,33,single,1/1,NEW,3,"eraser, orange cube, blue cube",blue cube,3,pink,pink,,Put the blue cube into the pink bin
+44,34,single,1/1,NEW,3,"yellow cube, orange cube, purple cube",yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
+45,35,single,1/1,NEW,4,"red cube, purple cube, yellow cube, glue stick",glue stick,3,pink,pink,,Put the glue stick into the pink bin
+46,36,single,1/1,NEW,3,"orange cube, purple cube, blue cube",orange cube,1,black,black,,Put the orange cube into the black bin
+47,37,single,1/1,NEW,2,"purple cube, green cube",purple cube,4,white,white,,Put the purple cube into the white bin
+48,38,single,1/1,NEW,1,marker,marker,2,cyan,cyan,,Put the marker into the cyan bin
+49,39,pair,1/2,NEW,2,"blue cube, screwdriver",screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
+50,39,pair,2/2,KEEP,2,"blue cube, screwdriver",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
+51,40,pair,1/2,NEW,3,"red cube, purple cube, glue stick",red cube,1,black,black,,Put the red cube into the black bin
+52,40,pair,2/2,KEEP,3,"red cube, purple cube, glue stick",red cube,4,white,white,,Put the red cube into the white bin
+53,41,single,1/1,NEW,1,blue cube,blue cube,3,pink,pink,,Put the blue cube into the pink bin
+54,42,single,1/1,NEW,4,"green cube, screwdriver, marker, yellow cube",marker,2,cyan,cyan,,Put the marker into the cyan bin
+55,43,single,1/1,NEW,4,"glue stick, red cube, blue cube, orange cube",glue stick,1,black,black,,Put the glue stick into the black bin
+56,44,single,1/1,NEW,2,"purple cube, blue cube",purple cube,4,white,white,,Put the purple cube into the white bin
+57,45,single,1/1,NEW,4,"yellow cube, orange cube, glue stick, purple cube",yellow cube,1,black,black,,Put the yellow cube into the black bin
+58,46,single,1/1,NEW,4,"red cube, eraser, yellow cube, blue cube",blue cube,4,white,white,,Put the blue cube into the white bin
+59,47,single,1/1,NEW,3,"screwdriver, purple cube, eraser",eraser,2,cyan,cyan,,Put the eraser into the cyan bin
+60,48,quad,1/4,NEW,3,"eraser, blue cube, orange cube",orange cube,3,pink,pink,,Put the orange cube into the pink bin
+61,48,quad,2/4,KEEP,3,"eraser, blue cube, orange cube",orange cube,1,black,black,,Put the orange cube into the black bin
+62,48,quad,3/4,KEEP,3,"eraser, blue cube, orange cube",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+63,48,quad,4/4,KEEP,3,"eraser, blue cube, orange cube",orange cube,4,white,white,,Put the orange cube into the white bin
+64,49,single,1/1,NEW,3,"red cube, glue stick, marker",glue stick,3,pink,pink,,Put the glue stick into the pink bin
+65,50,single,1/1,NEW,4,"blue cube, screwdriver, marker, glue stick",blue cube,4,white,white,,Put the blue cube into the white bin
+66,51,single,1/1,NEW,3,"purple cube, marker, orange cube",marker,1,black,black,,Put the marker into the black bin
+67,52,single,1/1,NEW,4,"yellow cube, green cube, glue stick, screwdriver",green cube,3,pink,pink,,Put the green cube into the pink bin
+68,53,pair,1/2,NEW,4,"green cube, red cube, orange cube, eraser",eraser,2,cyan,cyan,,Put the eraser into the cyan bin
+69,53,pair,2/2,KEEP,4,"green cube, red cube, orange cube, eraser",eraser,1,black,black,,Put the eraser into the black bin
+70,54,single,1/1,NEW,4,"marker, blue cube, screwdriver, red cube",red cube,3,pink,pink,,Put the red cube into the pink bin
+71,55,single,1/1,NEW,4,"yellow cube, green cube, screwdriver, blue cube",yellow cube,4,white,white,,Put the yellow cube into the white bin
+72,56,single,1/1,NEW,3,"screwdriver, glue stick, orange cube",screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
+73,57,single,1/1,NEW,1,purple cube,purple cube,3,pink,pink,,Put the purple cube into the pink bin
+74,58,single,1/1,NEW,1,screwdriver,screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
+75,59,pair,1/2,NEW,2,"orange cube, purple cube",purple cube,4,white,white,,Put the purple cube into the white bin
+76,59,pair,2/2,KEEP,2,"orange cube, purple cube",purple cube,1,black,black,,Put the purple cube into the black bin
+77,60,single,1/1,NEW,3,"blue cube, marker, green cube",blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
+78,61,single,1/1,NEW,3,"marker, glue stick, blue cube",glue stick,1,black,black,,Put the glue stick into the black bin
+79,62,single,1/1,NEW,4,"blue cube, red cube, purple cube, green cube",red cube,4,white,white,,Put the red cube into the white bin
+80,63,single,1/1,NEW,4,"marker, glue stick, eraser, screwdriver",marker,3,pink,pink,,Put the marker into the pink bin
+81,64,pair,1/2,NEW,1,yellow cube,yellow cube,4,white,white,,Put the yellow cube into the white bin
+82,64,pair,2/2,KEEP,1,yellow cube,yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
+83,65,quad,1/4,NEW,4,"green cube, blue cube, screwdriver, marker",green cube,1,black,black,,Put the green cube into the black bin
+84,65,quad,2/4,KEEP,4,"green cube, blue cube, screwdriver, marker",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
+85,65,quad,3/4,KEEP,4,"green cube, blue cube, screwdriver, marker",green cube,4,white,white,,Put the green cube into the white bin
+86,65,quad,4/4,KEEP,4,"green cube, blue cube, screwdriver, marker",green cube,3,pink,pink,,Put the green cube into the pink bin
+87,66,pair,1/2,NEW,1,eraser,eraser,3,pink,pink,,Put the eraser into the pink bin
+88,66,pair,2/2,KEEP,1,eraser,eraser,1,black,black,,Put the eraser into the black bin
+89,67,single,1/1,NEW,2,"green cube, marker",marker,3,pink,pink,,Put the marker into the pink bin
+90,68,single,1/1,NEW,3,"yellow cube, purple cube, screwdriver",screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
+91,69,single,1/1,NEW,2,"blue cube, glue stick",blue cube,4,white,white,,Put the blue cube into the white bin
+92,70,single,1/1,NEW,4,"orange cube, marker, glue stick, eraser",glue stick,1,black,black,,Put the glue stick into the black bin
+93,71,single,1/1,NEW,1,red cube,red cube,4,white,white,,Put the red cube into the white bin
+94,72,single,1/1,NEW,4,"orange cube, marker, screwdriver, red cube",orange cube,3,pink,pink,,Put the orange cube into the pink bin
+95,73,single,1/1,NEW,4,"red cube, orange cube, eraser, purple cube",red cube,1,black,black,,Put the red cube into the black bin
+96,74,single,1/1,NEW,4,"orange cube, purple cube, glue stick, yellow cube",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
+97,75,single,1/1,NEW,2,"marker, screwdriver",marker,2,cyan,cyan,,Put the marker into the cyan bin
+98,76,single,1/1,NEW,2,"orange cube, blue cube",blue cube,3,pink,pink,,Put the blue cube into the pink bin
+99,77,single,1/1,NEW,2,"marker, yellow cube",yellow cube,4,white,white,,Put the yellow cube into the white bin
+100,78,single,1/1,NEW,1,glue stick,glue stick,1,black,black,,Put the glue stick into the black bin
+101,79,single,1/1,NEW,4,"red cube, marker, orange cube, screwdriver",screwdriver,1,black,black,,Put the screwdriver into the black bin
+102,80,pair,1/2,NEW,4,"eraser, yellow cube, red cube, marker",eraser,3,pink,pink,,Put the eraser into the pink bin
+103,80,pair,2/2,KEEP,4,"eraser, yellow cube, red cube, marker",eraser,2,cyan,cyan,,Put the eraser into the cyan bin
+104,81,single,1/1,NEW,4,"red cube, glue stick, purple cube, screwdriver",purple cube,4,white,white,,Put the purple cube into the white bin
+105,82,single,1/1,NEW,4,"purple cube, red cube, eraser, orange cube",red cube,1,black,black,,Put the red cube into the black bin
+106,83,single,1/1,NEW,4,"blue cube, purple cube, orange cube, screwdriver",screwdriver,4,white,white,,Put the screwdriver into the white bin
+107,84,single,1/1,NEW,2,"orange cube, screwdriver",orange cube,3,pink,pink,,Put the orange cube into the pink bin
+108,85,single,1/1,NEW,1,glue stick,glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
+109,86,quad,1/4,NEW,4,"purple cube, blue cube, glue stick, yellow cube",blue cube,1,black,black,,Put the blue cube into the black bin
+110,86,quad,2/4,KEEP,4,"purple cube, blue cube, glue stick, yellow cube",blue cube,3,pink,pink,,Put the blue cube into the pink bin
+111,86,quad,3/4,KEEP,4,"purple cube, blue cube, glue stick, yellow cube",blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
+112,86,quad,4/4,KEEP,4,"purple cube, blue cube, glue stick, yellow cube",blue cube,4,white,white,,Put the blue cube into the white bin
+113,87,single,1/1,NEW,1,marker,marker,4,white,white,,Put the marker into the white bin
+114,88,single,1/1,NEW,3,"glue stick, eraser, yellow cube",yellow cube,1,black,black,,Put the yellow cube into the black bin
+115,89,quad,1/4,NEW,4,"screwdriver, green cube, orange cube, eraser",green cube,4,white,white,,Put the green cube into the white bin
+116,89,quad,2/4,KEEP,4,"screwdriver, green cube, orange cube, eraser",green cube,3,pink,pink,,Put the green cube into the pink bin
+117,89,quad,3/4,KEEP,4,"screwdriver, green cube, orange cube, eraser",green cube,1,black,black,,Put the green cube into the black bin
+118,89,quad,4/4,KEEP,4,"screwdriver, green cube, orange cube, eraser",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
+119,90,single,1/1,NEW,4,"green cube, red cube, blue cube, purple cube",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
+120,91,single,1/1,NEW,4,"marker, orange cube, yellow cube, red cube",orange cube,3,pink,pink,,Put the orange cube into the pink bin
+121,92,single,1/1,NEW,3,"red cube, eraser, orange cube",red cube,4,white,white,,Put the red cube into the white bin
+122,93,pair,1/2,NEW,4,"purple cube, screwdriver, green cube, yellow cube",screwdriver,1,black,black,,Put the screwdriver into the black bin
+123,93,pair,2/2,KEEP,4,"purple cube, screwdriver, green cube, yellow cube",screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
+124,94,single,1/1,NEW,4,"purple cube, marker, glue stick, orange cube",glue stick,3,pink,pink,,Put the glue stick into the pink bin
+125,95,pair,1/2,NEW,1,yellow cube,yellow cube,4,white,white,,Put the yellow cube into the white bin
+126,95,pair,2/2,KEEP,1,yellow cube,yellow cube,1,black,black,,Put the yellow cube into the black bin
+127,96,single,1/1,NEW,3,"marker, yellow cube, red cube",marker,2,cyan,cyan,,Put the marker into the cyan bin
+128,97,single,1/1,NEW,2,"marker, purple cube",marker,3,pink,pink,,Put the marker into the pink bin
+129,98,single,1/1,NEW,3,"glue stick, eraser, orange cube",eraser,2,cyan,cyan,,Put the eraser into the cyan bin
+130,99,single,1/1,NEW,1,purple cube,purple cube,1,black,black,,Put the purple cube into the black bin
+131,100,pair,1/2,NEW,4,"blue cube, marker, glue stick, red cube",glue stick,4,white,white,,Put the glue stick into the white bin
+132,100,pair,2/2,KEEP,4,"blue cube, marker, glue stick, red cube",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
+133,101,single,1/1,NEW,3,"glue stick, eraser, red cube",red cube,2,cyan,cyan,,Put the red cube into the cyan bin
+134,102,quad,1/4,NEW,4,"marker, screwdriver, eraser, orange cube",orange cube,4,white,white,,Put the orange cube into the white bin
+135,102,quad,2/4,KEEP,4,"marker, screwdriver, eraser, orange cube",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+136,102,quad,3/4,KEEP,4,"marker, screwdriver, eraser, orange cube",orange cube,1,black,black,,Put the orange cube into the black bin
+137,102,quad,4/4,KEEP,4,"marker, screwdriver, eraser, orange cube",orange cube,3,pink,pink,,Put the orange cube into the pink bin
+138,103,single,1/1,NEW,4,"eraser, marker, yellow cube, red cube",red cube,2,cyan,cyan,,Put the red cube into the cyan bin
+139,104,single,1/1,NEW,4,"blue cube, eraser, orange cube, yellow cube",yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
+140,105,single,1/1,NEW,4,"red cube, eraser, purple cube, blue cube",eraser,4,white,white,,Put the eraser into the white bin
+141,106,pair,1/2,NEW,4,"orange cube, screwdriver, marker, blue cube",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
+142,106,pair,2/2,KEEP,4,"orange cube, screwdriver, marker, blue cube",screwdriver,4,white,white,,Put the screwdriver into the white bin
+143,107,single,1/1,NEW,3,"yellow cube, purple cube, blue cube",purple cube,3,pink,pink,,Put the purple cube into the pink bin
+144,108,single,1/1,NEW,3,"marker, yellow cube, orange cube",marker,4,white,white,,Put the marker into the white bin
+145,109,single,1/1,NEW,3,"glue stick, marker, red cube",glue stick,4,white,white,,Put the glue stick into the white bin
+146,110,pair,1/2,NEW,3,"red cube, blue cube, green cube",blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
+147,110,pair,2/2,KEEP,3,"red cube, blue cube, green cube",blue cube,1,black,black,,Put the blue cube into the black bin
+148,111,single,1/1,NEW,3,"yellow cube, screwdriver, marker",yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
+149,112,pair,1/2,NEW,1,red cube,red cube,2,cyan,cyan,,Put the red cube into the cyan bin
+150,112,pair,2/2,KEEP,1,red cube,red cube,3,pink,pink,,Put the red cube into the pink bin
+151,113,pair,1/2,NEW,1,eraser,eraser,1,black,black,,Put the eraser into the black bin
+152,113,pair,2/2,KEEP,1,eraser,eraser,4,white,white,,Put the eraser into the white bin
+153,114,single,1/1,NEW,2,"purple cube, glue stick",purple cube,3,pink,pink,,Put the purple cube into the pink bin
+154,115,pair,1/2,NEW,4,"marker, blue cube, yellow cube, eraser",marker,1,black,black,,Put the marker into the black bin
+155,115,pair,2/2,KEEP,4,"marker, blue cube, yellow cube, eraser",marker,4,white,white,,Put the marker into the white bin
+156,116,single,1/1,NEW,1,screwdriver,screwdriver,4,white,white,,Put the screwdriver into the white bin
+157,117,pair,1/2,NEW,2,"purple cube, blue cube",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
+158,117,pair,2/2,KEEP,2,"purple cube, blue cube",purple cube,3,pink,pink,,Put the purple cube into the pink bin
+159,118,single,1/1,NEW,2,"blue cube, glue stick",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
+160,119,single,1/1,NEW,2,"eraser, green cube",green cube,4,white,white,,Put the green cube into the white bin
+161,120,single,1/1,NEW,3,"eraser, red cube, yellow cube",yellow cube,1,black,black,,Put the yellow cube into the black bin
+162,121,single,1/1,NEW,3,"marker, glue stick, blue cube",blue cube,1,black,black,,Put the blue cube into the black bin
+163,122,pair,1/2,NEW,2,"glue stick, green cube",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
+164,122,pair,2/2,KEEP,2,"glue stick, green cube",glue stick,4,white,white,,Put the glue stick into the white bin
+165,123,single,1/1,NEW,4,"screwdriver, blue cube, yellow cube, orange cube",yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
+166,124,single,1/1,NEW,3,"eraser, screwdriver, blue cube",eraser,3,pink,pink,,Put the eraser into the pink bin
+167,125,single,1/1,NEW,3,"yellow cube, screwdriver, blue cube",screwdriver,1,black,black,,Put the screwdriver into the black bin
+168,126,single,1/1,NEW,3,"blue cube, orange cube, yellow cube",orange cube,1,black,black,,Put the orange cube into the black bin
+169,127,single,1/1,NEW,2,"glue stick, red cube",red cube,2,cyan,cyan,,Put the red cube into the cyan bin
+170,128,single,1/1,NEW,2,"green cube, glue stick",green cube,1,black,black,,Put the green cube into the black bin
+171,129,single,1/1,NEW,4,"marker, eraser, screwdriver, red cube",marker,3,pink,pink,,Put the marker into the pink bin
+172,130,single,1/1,NEW,1,eraser,eraser,4,white,white,,Put the eraser into the white bin
+173,131,pair,1/2,NEW,3,"eraser, orange cube, yellow cube",yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
+174,131,pair,2/2,KEEP,3,"eraser, orange cube, yellow cube",yellow cube,1,black,black,,Put the yellow cube into the black bin
+175,132,single,1/1,NEW,3,"red cube, green cube, yellow cube",red cube,3,pink,pink,,Put the red cube into the pink bin
+176,133,single,1/1,NEW,4,"marker, eraser, screwdriver, green cube",screwdriver,4,white,white,,Put the screwdriver into the white bin
+177,134,single,1/1,NEW,4,"eraser, screwdriver, marker, orange cube",orange cube,4,white,white,,Put the orange cube into the white bin
+178,135,single,1/1,NEW,4,"green cube, blue cube, eraser, marker",blue cube,1,black,black,,Put the blue cube into the black bin
+179,136,pair,1/2,NEW,4,"orange cube, glue stick, purple cube, eraser",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
+180,136,pair,2/2,KEEP,4,"orange cube, glue stick, purple cube, eraser",purple cube,1,black,black,,Put the purple cube into the black bin
+181,137,single,1/1,NEW,3,"marker, orange cube, glue stick",marker,2,cyan,cyan,,Put the marker into the cyan bin
+182,138,single,1/1,NEW,3,"glue stick, green cube, screwdriver",green cube,3,pink,pink,,Put the green cube into the pink bin
+183,139,single,1/1,NEW,2,"glue stick, blue cube",glue stick,4,white,white,,Put the glue stick into the white bin
+184,140,single,1/1,NEW,3,"marker, screwdriver, yellow cube",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
+185,141,single,1/1,NEW,3,"eraser, blue cube, marker",blue cube,1,black,black,,Put the blue cube into the black bin
+186,142,single,1/1,NEW,4,"glue stick, green cube, red cube, blue cube",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
+187,143,single,1/1,NEW,4,"marker, orange cube, eraser, purple cube",marker,1,black,black,,Put the marker into the black bin
+188,144,single,1/1,NEW,3,"purple cube, marker, eraser",eraser,3,pink,pink,,Put the eraser into the pink bin
+189,145,single,1/1,NEW,4,"red cube, marker, orange cube, eraser",orange cube,1,black,black,,Put the orange cube into the black bin
+190,146,single,1/1,NEW,2,"red cube, orange cube",red cube,3,pink,pink,,Put the red cube into the pink bin
+191,147,pair,1/2,NEW,2,"eraser, glue stick",glue stick,4,white,white,,Put the glue stick into the white bin
+192,147,pair,2/2,KEEP,2,"eraser, glue stick",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
+193,148,single,1/1,NEW,4,"glue stick, green cube, screwdriver, yellow cube",screwdriver,4,white,white,,Put the screwdriver into the white bin
+194,149,single,1/1,NEW,3,"marker, purple cube, green cube",marker,4,white,white,,Put the marker into the white bin
+195,150,single,1/1,NEW,1,blue cube,blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
+196,151,single,1/1,NEW,1,green cube,green cube,4,white,white,,Put the green cube into the white bin
+197,152,single,1/1,NEW,4,"blue cube, orange cube, purple cube, yellow cube",yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
+198,153,pair,1/2,NEW,4,"purple cube, orange cube, glue stick, green cube",purple cube,3,pink,pink,,Put the purple cube into the pink bin
+199,153,pair,2/2,KEEP,4,"purple cube, orange cube, glue stick, green cube",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
+200,154,single,1/1,NEW,4,"eraser, orange cube, glue stick, blue cube",eraser,1,black,black,,Put the eraser into the black bin
+201,155,quad,1/4,NEW,4,"orange cube, blue cube, green cube, red cube",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+202,155,quad,2/4,KEEP,4,"orange cube, blue cube, green cube, red cube",orange cube,1,black,black,,Put the orange cube into the black bin
+203,155,quad,3/4,KEEP,4,"orange cube, blue cube, green cube, red cube",orange cube,4,white,white,,Put the orange cube into the white bin
+204,155,quad,4/4,KEEP,4,"orange cube, blue cube, green cube, red cube",orange cube,3,pink,pink,,Put the orange cube into the pink bin
+205,156,pair,1/2,NEW,2,"red cube, green cube",red cube,1,black,black,,Put the red cube into the black bin
+206,156,pair,2/2,KEEP,2,"red cube, green cube",red cube,2,cyan,cyan,,Put the red cube into the cyan bin
+207,157,single,1/1,NEW,3,"red cube, eraser, marker",eraser,4,white,white,,Put the eraser into the white bin
+208,158,single,1/1,NEW,4,"green cube, screwdriver, marker, purple cube",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
+209,159,single,1/1,NEW,3,"blue cube, eraser, yellow cube",yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
+210,160,single,1/1,NEW,4,"yellow cube, marker, orange cube, blue cube",blue cube,1,black,black,,Put the blue cube into the black bin
+211,161,single,1/1,NEW,3,"purple cube, green cube, yellow cube",green cube,1,black,black,,Put the green cube into the black bin
+212,162,single,1/1,NEW,4,"orange cube, red cube, screwdriver, marker",marker,3,pink,pink,,Put the marker into the pink bin
+213,163,pair,1/2,NEW,4,"screwdriver, yellow cube, glue stick, blue cube",screwdriver,1,black,black,,Put the screwdriver into the black bin
+214,163,pair,2/2,KEEP,4,"screwdriver, yellow cube, glue stick, blue cube",screwdriver,4,white,white,,Put the screwdriver into the white bin
+215,164,single,1/1,NEW,3,"eraser, yellow cube, marker",marker,2,cyan,cyan,,Put the marker into the cyan bin
+216,165,single,1/1,NEW,1,red cube,red cube,3,pink,pink,,Put the red cube into the pink bin
+217,166,pair,1/2,NEW,2,"purple cube, eraser",eraser,4,white,white,,Put the eraser into the white bin
+218,166,pair,2/2,KEEP,2,"purple cube, eraser",eraser,3,pink,pink,,Put the eraser into the pink bin
+219,167,single,1/1,NEW,3,"yellow cube, marker, green cube",yellow cube,1,black,black,,Put the yellow cube into the black bin
+220,168,single,1/1,NEW,2,"marker, glue stick",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
+221,169,single,1/1,NEW,4,"red cube, green cube, purple cube, yellow cube",green cube,4,white,white,,Put the green cube into the white bin
+222,170,pair,1/2,NEW,4,"blue cube, glue stick, eraser, screwdriver",blue cube,3,pink,pink,,Put the blue cube into the pink bin
+223,170,pair,2/2,KEEP,4,"blue cube, glue stick, eraser, screwdriver",blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
+224,171,single,1/1,NEW,3,"blue cube, purple cube, green cube",purple cube,1,black,black,,Put the purple cube into the black bin
+225,172,pair,1/2,NEW,4,"red cube, purple cube, orange cube, eraser",red cube,2,cyan,cyan,,Put the red cube into the cyan bin
+226,172,pair,2/2,KEEP,4,"red cube, purple cube, orange cube, eraser",red cube,1,black,black,,Put the red cube into the black bin
+227,173,quad,1/4,NEW,1,yellow cube,yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
+228,173,quad,2/4,KEEP,1,yellow cube,yellow cube,4,white,white,,Put the yellow cube into the white bin
+229,173,quad,3/4,KEEP,1,yellow cube,yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
+230,173,quad,4/4,KEEP,1,yellow cube,yellow cube,1,black,black,,Put the yellow cube into the black bin
+231,174,single,1/1,NEW,4,"marker, purple cube, yellow cube, orange cube",purple cube,3,pink,pink,,Put the purple cube into the pink bin
+232,175,single,1/1,NEW,3,"green cube, orange cube, purple cube",green cube,3,pink,pink,,Put the green cube into the pink bin
+233,176,single,1/1,NEW,3,"glue stick, orange cube, marker",glue stick,4,white,white,,Put the glue stick into the white bin
+234,177,single,1/1,NEW,3,"marker, red cube, yellow cube",marker,4,white,white,,Put the marker into the white bin
+235,178,single,1/1,NEW,1,eraser,eraser,1,black,black,,Put the eraser into the black bin
+236,179,pair,1/2,NEW,3,"eraser, purple cube, marker",marker,1,black,black,,Put the marker into the black bin
+237,179,pair,2/2,KEEP,3,"eraser, purple cube, marker",marker,2,cyan,cyan,,Put the marker into the cyan bin
+238,180,quad,1/4,NEW,4,"green cube, glue stick, yellow cube, eraser",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
+239,180,quad,2/4,KEEP,4,"green cube, glue stick, yellow cube, eraser",glue stick,1,black,black,,Put the glue stick into the black bin
+240,180,quad,3/4,KEEP,4,"green cube, glue stick, yellow cube, eraser",glue stick,4,white,white,,Put the glue stick into the white bin
+241,180,quad,4/4,KEEP,4,"green cube, glue stick, yellow cube, eraser",glue stick,3,pink,pink,,Put the glue stick into the pink bin
+242,181,single,1/1,NEW,4,"red cube, green cube, eraser, screwdriver",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
+243,182,single,1/1,NEW,4,"yellow cube, purple cube, eraser, orange cube",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
+244,183,single,1/1,NEW,4,"yellow cube, orange cube, red cube, screwdriver",orange cube,4,white,white,,Put the orange cube into the white bin
+245,184,single,1/1,NEW,1,green cube,green cube,2,cyan,cyan,,Put the green cube into the cyan bin
+246,185,single,1/1,NEW,1,blue cube,blue cube,4,white,white,,Put the blue cube into the white bin
+247,186,single,1/1,NEW,1,orange cube,orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+248,187,single,1/1,NEW,4,"marker, yellow cube, screwdriver, green cube",screwdriver,1,black,black,,Put the screwdriver into the black bin
+249,188,single,1/1,NEW,4,"purple cube, screwdriver, blue cube, marker",purple cube,3,pink,pink,,Put the purple cube into the pink bin
+250,189,single,1/1,NEW,2,"eraser, purple cube",eraser,4,white,white,,Put the eraser into the white bin
+251,190,single,1/1,NEW,2,"green cube, blue cube",blue cube,1,black,black,,Put the blue cube into the black bin
+252,191,pair,1/2,NEW,1,green cube,green cube,4,white,white,,Put the green cube into the white bin
+253,191,pair,2/2,KEEP,1,green cube,green cube,3,pink,pink,,Put the green cube into the pink bin
+254,192,single,1/1,NEW,2,"red cube, blue cube",red cube,1,black,black,,Put the red cube into the black bin
+255,193,single,1/1,NEW,3,"screwdriver, blue cube, red cube",red cube,3,pink,pink,,Put the red cube into the pink bin
+256,194,single,1/1,NEW,4,"green cube, orange cube, purple cube, blue cube",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+257,195,single,1/1,NEW,4,"screwdriver, glue stick, purple cube, yellow cube",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
+258,196,pair,1/2,NEW,3,"marker, red cube, yellow cube",marker,4,white,white,,Put the marker into the white bin
+259,196,pair,2/2,KEEP,3,"marker, red cube, yellow cube",marker,1,black,black,,Put the marker into the black bin
+260,197,single,1/1,NEW,3,"blue cube, marker, green cube",blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
+261,198,single,1/1,NEW,2,"purple cube, glue stick",purple cube,4,white,white,,Put the purple cube into the white bin
+262,199,single,1/1,NEW,4,"eraser, glue stick, screwdriver, red cube",eraser,3,pink,pink,eraser 세워서,Put the eraser into the pink bin
+263,200,single,1/1,NEW,3,"orange cube, screwdriver, purple cube",screwdriver,1,black,black,,Put the screwdriver into the black bin
+264,201,single,1/1,NEW,2,"orange cube, marker",orange cube,1,black,black,,Put the orange cube into the black bin
+265,202,single,1/1,NEW,3,"orange cube, yellow cube, blue cube",yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
+266,203,single,1/1,NEW,4,"marker, orange cube, purple cube, blue cube",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
+267,204,single,1/1,NEW,2,"red cube, eraser",red cube,4,white,white,eraser 세워서,Put the red cube into the white bin
+268,205,single,1/1,NEW,2,"eraser, marker",eraser,2,cyan,cyan,eraser 세워서,Put the eraser into the cyan bin
+269,206,single,1/1,NEW,4,"green cube, red cube, eraser, glue stick",green cube,1,black,black,eraser 세워서,Put the green cube into the black bin
+270,207,single,1/1,NEW,2,"blue cube, orange cube",blue cube,3,pink,pink,,Put the blue cube into the pink bin
+271,208,single,1/1,NEW,4,"red cube, orange cube, green cube, yellow cube",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
+272,209,single,1/1,NEW,2,"purple cube, eraser",purple cube,1,black,black,eraser 세워서,Put the purple cube into the black bin
+273,210,single,1/1,NEW,3,"glue stick, blue cube, eraser",blue cube,4,white,white,eraser 세워서,Put the blue cube into the white bin
+274,211,single,1/1,NEW,4,"blue cube, yellow cube, green cube, orange cube",yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
+275,212,single,1/1,NEW,4,"yellow cube, red cube, eraser, screwdriver",red cube,2,cyan,cyan,eraser 세워서,Put the red cube into the cyan bin
+276,213,single,1/1,NEW,3,"glue stick, eraser, marker",marker,3,pink,pink,eraser 세워서,Put the marker into the pink bin
+277,214,single,1/1,NEW,1,screwdriver,screwdriver,4,white,white,,Put the screwdriver into the white bin
+278,215,single,1/1,NEW,2,"green cube, glue stick",glue stick,3,pink,pink,,Put the glue stick into the pink bin
+279,216,quad,1/4,NEW,4,"eraser, yellow cube, glue stick, blue cube",eraser,2,cyan,cyan,eraser 세워서,Put the eraser into the cyan bin
+280,216,quad,2/4,KEEP,4,"eraser, yellow cube, glue stick, blue cube",eraser,1,black,black,eraser 세워서,Put the eraser into the black bin
+281,216,quad,3/4,KEEP,4,"eraser, yellow cube, glue stick, blue cube",eraser,3,pink,pink,eraser 세워서,Put the eraser into the pink bin
+282,216,quad,4/4,KEEP,4,"eraser, yellow cube, glue stick, blue cube",eraser,4,white,white,eraser 세워서,Put the eraser into the white bin
+283,217,single,1/1,NEW,1,orange cube,orange cube,4,white,white,,Put the orange cube into the white bin
+284,218,single,1/1,NEW,1,purple cube,purple cube,1,black,black,,Put the purple cube into the black bin
+285,219,pair,1/2,NEW,4,"screwdriver, red cube, glue stick, blue cube",glue stick,4,white,white,,Put the glue stick into the white bin
+286,219,pair,2/2,KEEP,4,"screwdriver, red cube, glue stick, blue cube",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
+287,220,single,1/1,NEW,3,"yellow cube, marker, green cube",marker,3,pink,pink,,Put the marker into the pink bin
+288,221,quad,1/4,NEW,4,"glue stick, blue cube, orange cube, red cube",red cube,1,black,black,,Put the red cube into the black bin
+289,221,quad,2/4,KEEP,4,"glue stick, blue cube, orange cube, red cube",red cube,4,white,white,,Put the red cube into the white bin
+290,221,quad,3/4,KEEP,4,"glue stick, blue cube, orange cube, red cube",red cube,3,pink,pink,,Put the red cube into the pink bin
+291,221,quad,4/4,KEEP,4,"glue stick, blue cube, orange cube, red cube",red cube,2,cyan,cyan,,Put the red cube into the cyan bin
+292,222,pair,1/2,NEW,3,"yellow cube, screwdriver, orange cube",screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
+293,222,pair,2/2,KEEP,3,"yellow cube, screwdriver, orange cube",screwdriver,1,black,black,,Put the screwdriver into the black bin
+294,223,single,1/1,NEW,3,"orange cube, marker, screwdriver",orange cube,4,white,white,,Put the orange cube into the white bin
+295,224,single,1/1,NEW,4,"purple cube, yellow cube, eraser, red cube",yellow cube,1,black,black,eraser 세워서,Put the yellow cube into the black bin
+296,225,pair,1/2,NEW,4,"purple cube, green cube, orange cube, blue cube",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
+297,225,pair,2/2,KEEP,4,"purple cube, green cube, orange cube, blue cube",green cube,1,black,black,,Put the green cube into the black bin
+298,226,single,1/1,NEW,3,"orange cube, blue cube, glue stick",blue cube,2,cyan,cyan,,Put the blue cube into the cyan bin
+299,227,pair,1/2,NEW,3,"yellow cube, glue stick, orange cube",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+300,227,pair,2/2,KEEP,3,"yellow cube, glue stick, orange cube",orange cube,3,pink,pink,,Put the orange cube into the pink bin
+301,228,pair,1/2,NEW,3,"blue cube, screwdriver, eraser",blue cube,4,white,white,eraser 세워서,Put the blue cube into the white bin
+302,228,pair,2/2,KEEP,3,"blue cube, screwdriver, eraser",blue cube,1,black,black,eraser 세워서,Put the blue cube into the black bin
+303,229,pair,1/2,NEW,4,"blue cube, screwdriver, yellow cube, marker",yellow cube,4,white,white,,Put the yellow cube into the white bin
+304,229,pair,2/2,KEEP,4,"blue cube, screwdriver, yellow cube, marker",yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
+305,230,pair,1/2,NEW,4,"orange cube, yellow cube, purple cube, blue cube",purple cube,4,white,white,,Put the purple cube into the white bin
+306,230,pair,2/2,KEEP,4,"orange cube, yellow cube, purple cube, blue cube",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
+307,231,single,1/1,NEW,4,"red cube, marker, screwdriver, purple cube",marker,1,black,black,,Put the marker into the black bin
+308,232,single,1/1,NEW,3,"screwdriver, purple cube, marker",marker,2,cyan,cyan,,Put the marker into the cyan bin
+309,233,single,1/1,NEW,4,"screwdriver, glue stick, yellow cube, blue cube",glue stick,3,pink,pink,,Put the glue stick into the pink bin
+310,234,single,1/1,NEW,3,"green cube, marker, screwdriver",green cube,3,pink,pink,,Put the green cube into the pink bin
+311,235,pair,1/2,NEW,4,"eraser, purple cube, yellow cube, screwdriver",screwdriver,2,cyan,cyan,eraser 세워서,Put the screwdriver into the cyan bin
+312,235,pair,2/2,KEEP,4,"eraser, purple cube, yellow cube, screwdriver",screwdriver,4,white,white,eraser 세워서,Put the screwdriver into the white bin
+313,236,pair,1/2,NEW,4,"orange cube, blue cube, eraser, yellow cube",orange cube,1,black,black,eraser 세워서,Put the orange cube into the black bin
+314,236,pair,2/2,KEEP,4,"orange cube, blue cube, eraser, yellow cube",orange cube,3,pink,pink,eraser 세워서,Put the orange cube into the pink bin
+315,237,single,1/1,NEW,2,"glue stick, green cube",glue stick,1,black,black,,Put the glue stick into the black bin
+316,238,single,1/1,NEW,1,purple cube,purple cube,3,pink,pink,,Put the purple cube into the pink bin
+317,239,single,1/1,NEW,1,eraser,eraser,1,black,black,eraser 세워서,Put the eraser into the black bin
+318,240,single,1/1,NEW,2,"screwdriver, blue cube",blue cube,3,pink,pink,,Put the blue cube into the pink bin
+319,241,single,1/1,NEW,4,"red cube, eraser, green cube, screwdriver",green cube,4,white,white,eraser 세워서,Put the green cube into the white bin
+320,242,pair,1/2,NEW,4,"blue cube, orange cube, marker, yellow cube",marker,4,white,white,,Put the marker into the white bin
+321,242,pair,2/2,KEEP,4,"blue cube, orange cube, marker, yellow cube",marker,2,cyan,cyan,,Put the marker into the cyan bin
+322,243,single,1/1,NEW,4,"purple cube, yellow cube, green cube, screwdriver",yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
+323,244,single,1/1,NEW,3,"red cube, blue cube, marker",blue cube,1,black,black,,Put the blue cube into the black bin
+324,245,single,1/1,NEW,3,"eraser, screwdriver, green cube",eraser,4,white,white,eraser 세워서,Put the eraser into the white bin
+325,246,pair,1/2,NEW,2,"orange cube, green cube",green cube,3,pink,pink,,Put the green cube into the pink bin
+326,246,pair,2/2,KEEP,2,"orange cube, green cube",green cube,1,black,black,,Put the green cube into the black bin
+327,247,single,1/1,NEW,1,red cube,red cube,2,cyan,cyan,,Put the red cube into the cyan bin
+328,248,single,1/1,NEW,4,"glue stick, eraser, green cube, purple cube",purple cube,4,white,white,eraser 세워서,Put the purple cube into the white bin
+329,249,quad,1/4,NEW,3,"green cube, yellow cube, glue stick",glue stick,3,pink,pink,,Put the glue stick into the pink bin
+330,249,quad,2/4,KEEP,3,"green cube, yellow cube, glue stick",glue stick,2,cyan,cyan,,Put the glue stick into the cyan bin
+331,249,quad,3/4,KEEP,3,"green cube, yellow cube, glue stick",glue stick,1,black,black,,Put the glue stick into the black bin
+332,249,quad,4/4,KEEP,3,"green cube, yellow cube, glue stick",glue stick,4,white,white,,Put the glue stick into the white bin
+333,250,single,1/1,NEW,3,"yellow cube, screwdriver, blue cube",yellow cube,4,white,white,,Put the yellow cube into the white bin
+334,251,single,1/1,NEW,3,"yellow cube, green cube, screwdriver",screwdriver,2,cyan,cyan,,Put the screwdriver into the cyan bin
+335,252,single,1/1,NEW,2,"blue cube, eraser",eraser,1,black,black,eraser 세워서,Put the eraser into the black bin
+336,253,single,1/1,NEW,3,"orange cube, red cube, yellow cube",red cube,3,pink,pink,,Put the red cube into the pink bin
+337,254,single,1/1,NEW,4,"marker, screwdriver, purple cube, orange cube",marker,3,pink,pink,,Put the marker into the pink bin
+338,255,single,1/1,NEW,3,"screwdriver, glue stick, red cube",screwdriver,4,white,white,,Put the screwdriver into the white bin
+339,256,single,1/1,NEW,2,"marker, orange cube",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+340,257,single,1/1,NEW,4,"purple cube, screwdriver, red cube, glue stick",purple cube,1,black,black,,Put the purple cube into the black bin
+341,258,pair,1/2,NEW,3,"screwdriver, blue cube, yellow cube",yellow cube,2,cyan,cyan,,Put the yellow cube into the cyan bin
+342,258,pair,2/2,KEEP,3,"screwdriver, blue cube, yellow cube",yellow cube,1,black,black,,Put the yellow cube into the black bin
+343,259,single,1/1,NEW,4,"blue cube, purple cube, screwdriver, orange cube",blue cube,3,pink,pink,,Put the blue cube into the pink bin
+344,260,single,1/1,NEW,2,"glue stick, orange cube",orange cube,4,white,white,,Put the orange cube into the white bin
+345,261,single,1/1,NEW,3,"orange cube, purple cube, screwdriver",screwdriver,1,black,black,,Put the screwdriver into the black bin
+346,262,single,1/1,NEW,2,"eraser, green cube",eraser,3,pink,pink,eraser 세워서,Put the eraser into the pink bin
+347,263,single,1/1,NEW,1,red cube,red cube,4,white,white,,Put the red cube into the white bin
+348,264,single,1/1,NEW,1,marker,marker,4,white,white,,Put the marker into the white bin
+349,265,quad,1/4,NEW,2,"purple cube, green cube",green cube,3,pink,pink,,Put the green cube into the pink bin
+350,265,quad,2/4,KEEP,2,"purple cube, green cube",green cube,4,white,white,,Put the green cube into the white bin
+351,265,quad,3/4,KEEP,2,"purple cube, green cube",green cube,1,black,black,,Put the green cube into the black bin
+352,265,quad,4/4,KEEP,2,"purple cube, green cube",green cube,2,cyan,cyan,,Put the green cube into the cyan bin
+353,266,single,1/1,NEW,3,"glue stick, purple cube, marker",purple cube,2,cyan,cyan,,Put the purple cube into the cyan bin
+354,267,single,1/1,NEW,3,"eraser, screwdriver, blue cube",blue cube,2,cyan,cyan,eraser 세워서,Put the blue cube into the cyan bin
+355,268,pair,1/2,NEW,1,screwdriver,screwdriver,1,black,black,,Put the screwdriver into the black bin
+356,268,pair,2/2,KEEP,1,screwdriver,screwdriver,3,pink,pink,,Put the screwdriver into the pink bin
+357,269,single,1/1,NEW,3,"glue stick, purple cube, green cube",purple cube,3,pink,pink,,Put the purple cube into the pink bin
+358,270,single,1/1,NEW,3,"blue cube, green cube, marker",blue cube,4,white,white,,Put the blue cube into the white bin
+359,271,single,1/1,NEW,1,yellow cube,yellow cube,3,pink,pink,,Put the yellow cube into the pink bin
+360,272,single,1/1,NEW,2,"red cube, orange cube",orange cube,1,black,black,,Put the orange cube into the black bin
+361,273,pair,1/2,NEW,4,"marker, orange cube, yellow cube, blue cube",marker,1,black,black,,Put the marker into the black bin
+362,273,pair,2/2,KEEP,4,"marker, orange cube, yellow cube, blue cube",marker,2,cyan,cyan,,Put the marker into the cyan bin
+363,274,single,1/1,NEW,2,"red cube, eraser",red cube,1,black,black,eraser 세워서,Put the red cube into the black bin
+364,275,pair,1/2,NEW,4,"blue cube, red cube, screwdriver, eraser",eraser,4,white,white,eraser 세워서,Put the eraser into the white bin
+365,275,pair,2/2,KEEP,4,"blue cube, red cube, screwdriver, eraser",eraser,2,cyan,cyan,eraser 세워서,Put the eraser into the cyan bin
+366,276,single,1/1,NEW,4,"eraser, green cube, orange cube, glue stick",glue stick,2,cyan,cyan,eraser 세워서,Put the glue stick into the cyan bin
+367,277,single,1/1,NEW,3,"screwdriver, green cube, red cube",red cube,3,pink,pink,,Put the red cube into the pink bin
+368,278,pair,1/2,NEW,3,"purple cube, blue cube, orange cube",orange cube,4,white,white,,Put the orange cube into the white bin
+369,278,pair,2/2,KEEP,3,"purple cube, blue cube, orange cube",orange cube,2,cyan,cyan,,Put the orange cube into the cyan bin
+370,279,single,1/1,NEW,3,"red cube, blue cube, green cube",blue cube,3,pink,pink,,Put the blue cube into the pink bin

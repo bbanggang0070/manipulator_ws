@@ -113,22 +113,28 @@ green cube   색상 H=158°   채도 75%   (대조)
 
 ```bash
 cd ~/manipulator_ws/setup/data
-
-# 계획표는 이미 생성돼 있다 (120ep · 4칸 · 지시문 40종 · 검사 전항 통과)
-#   python3 gen_real_lang_plan.py --episodes 120 --seed 20261008 \
-#       --out ~/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv
-
-# ⚠️ v2 데이터셋에 **이어서** 모은다. 경로를 그대로 두면 251행부터 쌓인다.
 PLAN=~/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv ./record_real_lang.sh
+#   → "251행부터 재개" 가 떠야 정상. 남은 120행.
+```
+
+⚠️ **계획표는 v2 250행 + 신규 120행 = 370행 한 파일**이다. 신규 120행만 담은
+파일을 주면 안 된다 — 진행 기록(`collect_progress.txt`)에 250행이 차 있어
+`251 ~ 120행` 이라는 빈 구간이 되고 **아무것도 안 하고 끝난다**(실제로 겪음).
+
+```bash
+# 다시 만들어야 한다면 (앞 250행은 바이트 단위로 보존된다)
+python3 gen_real_lang_plan.py --episodes 370 --seed 20261008 \
+    --base ~/manipulator_ws/manipulator_md/real/real_lang_plan_v2.csv --keep-head 250 \
+    --out ~/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv
 ```
 
 | 항목 | 값 |
 | --- | --- |
-| 에피소드 | 120 (신규 배치 90 + 배치재사용 30) |
+| 에피소드 | **251~370행 = 120개** (계획표는 370행짜리 한 파일) |
 | 예상 시간 | **약 4.7시간** |
 | 그룹 | 4연속 16ep · 쌍 36ep · 단독 68ep |
-| 지시문 | 40종 (물체 10 × 칸 4, 문형 1종) |
-| eraser 자세 | **세움 36** (눕힘은 v2 88회로 충분) |
+| 지시문 | 40종 · (물체×칸) 40조합이 전체 370행에서 9~10회씩 |
+| eraser 자세 | **세움 30행** (눕힘은 v2 88회로 충분) |
 
 수집 중 50ep 마다:
 
@@ -138,8 +144,8 @@ REAL_LANG_PLAN=~/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv \
   uv run python ../../setup/data/verify_real_lang_dataset.py
 ```
 
-> ⚠️ 검증기의 계획표 대조는 **v3 계획표 기준**이라 1~250행(v2)이 "계획표에 없는
-> 지시문"으로 잡힐 수 있다. 순서·쌍 무결성·칸 균형·재파지·칸 분리도는 그대로 쓴다.
+v3 계획표가 v2 의 250행을 그대로 품고 있으므로 **검증기 전 항목이 그대로 동작한다**
+(계획표 대조·순서·쌍 무결성 포함).
 
 **수집이 끝나면 반드시** 검증기가 찍어 주는 "배포용 홈 자세"를
 `setup/gr00t/goto_home_cleanup.py` 의 `TARGET` 에 옮긴다. v1 에서 이 한 줄을 빼먹어
