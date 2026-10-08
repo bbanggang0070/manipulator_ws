@@ -413,7 +413,9 @@ def main():
                    help="로봇을 띄우지 않고 기록만 한다(다른 터미널에서 돌릴 때)")
     l.add_argument("--no-home", action="store_true",
                    help="시행이 끝나도 rest 로 복귀시키지 않는다(팔이 그 자리에 선다)")
-    l.add_argument("--max-sec", type=float, default=30,
+    # 30초로 시작했는데 모자랐다 — 4칸이 되며 cyan·pink 같은 중간 칸까지 가야 하고,
+    # 수집 시연의 중앙값이 21.8초(최대 48.9초)다. 추론은 시연보다 느리므로 1분을 준다.
+    l.add_argument("--max-sec", type=float, default=60,
                    help="시행 1회 제한 시간(초). 지나면 다음 시행으로 넘어간다. 0=무제한")
     l.add_argument("--eval-name", default="cleanup",
                    help="run_eval_real.sh 의 평가 이름 — 영상 저장 폴더가 된다")
