@@ -89,6 +89,7 @@ esac
 mkdir -p "$OUT"
 cat > "$OUT/run.json" <<META
 {"eval":"$EVAL","cond":"$COND","trial":$n,"ensemble":"${ENSEMBLE}","ensemble_w":"${ENSEMBLE_W}",
+ "max_sec":"${MAX_SEC:-0}","stop_on_rest":"${STOP_ON_REST:-0}",
  "step_dt":"${STEP_DT}","video_fps":"${VIDEO_FPS}","home":"${HOME_SCRIPT}","server":"${SERVER_HOST}",
  "model":"${MODEL_PATH}","host_kind":"$(echo)${SERVER_HOST}","lang":"${LANG_INSTRUCTION:-Pick up the block and place it in the box}",
  "started":"$(date -Is)"}

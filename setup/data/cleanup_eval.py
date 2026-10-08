@@ -182,7 +182,10 @@ def cmd_log(a):
             #     **최악(1/5)**으로 적혀 있고 0.8 이 최적으로 적혀 있다. 0.8 로 둔다.
             #     (그 표는 co-train blocktask 모델 실측이므로 이 모델에서 재확인 필요)
             env.setdefault("HOME_SCRIPT", "goto_home_cleanup.py")
-            env.setdefault("ENSEMBLE_W", "0.8")
+            # 작업이 끝나면(rest 로 복귀해 머물면) 스스로 멈춘다. 없으면 MAX_SEC
+            # 까지 rest 를 유지하는 행동을 계속 내놓는다 — 모델에 종료 신호가 없다.
+            env.setdefault("STOP_ON_REST", "1")
+            env.setdefault("ENSEMBLE_W", "0.3")
             runner = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                   "..", "gr00t", "run_eval_real.sh")
             if not os.path.exists(runner):

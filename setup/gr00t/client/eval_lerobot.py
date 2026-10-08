@@ -102,6 +102,23 @@ _CROSSFADE = int(os.environ.get("CROSSFADE", "0"))           # 0 = 끔(원래 �
 #   ⚠️ 끝날 때 **disconnect 하지 않는다.** 토크를 풀면 팔이 떨어지며 씬을 흐트러
 #      놓고, 그러면 "어느 칸에 들어갔나"를 볼 수 없다. Ctrl+C 때와 같게 둔다.
 _MAX_SEC = float(os.environ.get("MAX_SEC", "0"))
+
+# ── 작업이 끝나면 스스로 멈춘다 ────────────────────────────────────────
+# **GR00T 에는 종료 신호가 없다.** 관측을 주면 언제나 다음 16스텝을 내놓는 구조라,
+# "끝났다"를 알릴 출력이 아예 없다. 학습 데이터의 에피소드는 끝이 있지만 그 경계는
+# 모델이 표현할 수 없고, 배운 것은 "다음에 올 행동"뿐이다. 그래서 물체를 다 넣고
+# rest 로 돌아와도 **rest 를 유지하는 행동을 영원히 계속 내놓는다.**
+# 지금까지는 MAX_SEC 나 Ctrl+C 만이 끝냈고, 그래서 끝난 뒤에도 출력이 계속됐다.
+#
+# 판정 기준은 궤적에서 직접 온다: 시연은 전부 **rest 에서 나가 → 작업 → rest 로 복귀**
+# 로 끝난다. 그래서 '한 번 떠났다가(LEAVE) 다시 돌아와서(BACK) 머물면(HOLD) 끝'이다.
+# 기준 자세는 step 0 의 관측을 쓴다 — 추론 직전에 홈 복귀를 마쳤으므로 그게 rest 다.
+# ⚠️ 멈춰 있다고 끝난 것으로 보면 안 된다. 앙상블은 **작업 중에도 길게 정지**한다
+#    (W=0.3 실측 평균 정지 24.8초). 정지가 아니라 **rest 복귀**로 판정해야 한다.
+_STOP_ON_REST = os.environ.get("STOP_ON_REST", "0") == "1"
+_REST_LEAVE = float(os.environ.get("REST_LEAVE_DEG", "20"))   # 이만큼 벗어나야 '출발'
+_REST_BACK = float(os.environ.get("REST_BACK_DEG", "6"))      # 이 안에 들면 '복귀'
+_REST_HOLD = float(os.environ.get("REST_HOLD_SEC", "2.0"))    # 이만큼 머물면 '종료'
 _grip_hist = {}
 
 
@@ -490,6 +507,9 @@ def eval(cfg: EvalConfig):
         t = 0
         _tl = time.perf_counter()
         _t0 = time.perf_counter()
+        _rest0 = None      # step 0 의 자세 = rest 기준
+        _left = False      # 한 번이라도 rest 를 벗어났는가
+        _back_since = None # 복귀해서 머물기 시작한 시각
         while True:
             if _MAX_SEC and time.perf_counter() - _t0 >= _MAX_SEC:
                 print(f"\n[timeout] {_MAX_SEC:.0f}s 경과 — 시행 종료 (step={t})")
@@ -497,6 +517,23 @@ def eval(cfg: EvalConfig):
                 return
             obs = robot.get_observation()
             _rr_obs(obs, camera_keys, robot_state_keys)  # 매 스텝 → rerun 카메라 부드러움
+            if _STOP_ON_REST:
+                _q = {k: float(obs[k]) for k in robot_state_keys if k in obs}
+                if _rest0 is None:
+                    _rest0 = dict(_q)
+                _dev = max((abs(_q[k] - _rest0[k]) for k in _rest0 if k in _q), default=0.0)
+                if not _left:
+                    _left = _dev > _REST_LEAVE
+                elif _dev < _REST_BACK:
+                    if _back_since is None:
+                        _back_since = time.perf_counter()
+                    elif time.perf_counter() - _back_since >= _REST_HOLD:
+                        print(f"\n[done] rest 복귀 후 {_REST_HOLD:.0f}s 유지 — 시행 종료 "
+                              f"(step={t}, {time.perf_counter() - _t0:.0f}s)")
+                        _sh["stop"] = True
+                        return
+                else:
+                    _back_since = None
             with _lk:
                 _sh["obs"] = obs
                 _sh["step"] = t
