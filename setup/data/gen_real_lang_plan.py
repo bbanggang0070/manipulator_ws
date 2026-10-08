@@ -82,6 +82,17 @@ OBJECTS = ["red cube", "blue cube", "yellow cube", "green cube",
 #   잘못 집으면 그 에피소드가 "언어를 무시해도 된다"는 반례가 되기 때문이다.
 EXCLUSIVE = []
 
+# ── 같은 물체를 **여러 자세로** 놓게 한다 ───────────────────────────────
+#   v2 수집본 실측: eraser 는 재파지율 20% 로 1위였고(큐브는 4~8%), 파지 시
+#   shoulder_lift 가 +4.0° 로 다른 물체(-3.6 ~ -11.3°)보다 훨씬 깊이 내려가는
+#   유일한 outlier 였다. 납작해서 책상에 바싹 붙기 때문이다.
+#   그 결과 평가에서 "eraser" 지시의 절반이 marker 로 샜다 — 생김새가 아니라
+#   **파지가 불안정해 행동이 안 정해진 것**이다.
+#   눕힘/세움을 번갈아 시연하면 (a) 세운 자세는 파지 높이가 올라가 책상에 안 닿고
+#   (b) 두 자세를 모두 덮어 자세 일반화가 생긴다.
+#   값은 시연자에게 주는 **배치 지시**다. 지시문에는 들어가지 않는다.
+POSE_VARIANTS = {"eraser": ["눕혀서", "세워서"]}
+
 # ── 목적지 4칸. 색↔칸은 **고정**이다(선반이 고정이므로) ──────────────────
 #   번호는 **물리적 왼쪽→오른쪽** 순서다. 색지를 이 순서로 붙일 것.
 #   1단계는 1·4번만 쓰므로 **양 끝이 black·white** — 휘도 양극단이 공간적으로도
@@ -130,7 +141,7 @@ TEMPLATES_PLAIN = [
 
 FIELDS = ["ep", "group", "group_kind", "group_pos", "keep_layout",
           "n_objects", "objects", "target", "slot", "slot_color",
-          "dest_named", "instruction"]
+          "dest_named", "pose_hint", "instruction"]
 
 
 def pick_least(counter, candidates, rng):
@@ -179,6 +190,7 @@ def main():
     slot_nums = [n for n, _ in slots]
 
     tgt_count, slot_count, combo_count = Counter(), Counter(), Counter()
+    pose_count = Counter()
     rows, single_i, ep = [], 0, 0
 
     # ── 0) 이어 짜기 ────────────────────────────────────────────────────
@@ -284,6 +296,19 @@ def main():
             instr = (rng.choice(TEMPLATES_DEST).format(obj=target, dst=scol) if named
                      else rng.choice(TEMPLATES_PLAIN).format(obj=target))
 
+            # 자세 지시 — 화면에 있는 물체 중 POSE_VARIANTS 에 든 것만.
+            # 그룹 안에서는 배치를 바꾸지 않으므로 1회차(NEW)에 정하고 그대로 쓴다.
+            if pos == 1:
+                hints = []
+                for o in objs:
+                    if o in POSE_VARIANTS:
+                        v = pick_least(pose_count, POSE_VARIANTS[o], rng)
+                        # 그룹 크기만큼 센다 — 4연속에서 고른 자세는 4에피소드에
+                        # 쓰인다. 그룹당 1로 세면 22 vs 14 로 벌어진다(실측).
+                        pose_count[v] += len(picks)
+                        hints.append(f"{o} {v}")
+                group_hint = " · ".join(hints)
+
             rows.append({
                 "ep": ep,
                 "group": gi + 1,
@@ -297,6 +322,7 @@ def main():
                 "slot": snum,
                 "slot_color": scol,
                 "dest_named": scol if named else "",
+                "pose_hint": group_hint,
                 "instruction": instr,
             })
 

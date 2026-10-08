@@ -50,6 +50,22 @@ CHANCE = 1.0 / len(SLOTS)
 # 측정한 것이 "목적지를 읽는가"가 아니라 "문형 일반화"가 섞인 값이 된다.
 TEMPLATES = ["Put the {obj} into the {dst} bin"]
 
+# ── 같은 화면에 두지 않을 쌍 (평가 전용) ────────────────────────────────
+#   ⚠️ **학습에서는 같이 둔다.** 모델이 구별을 배울 기회를 없애면 안 된다.
+#      여기서 거르는 건 측정 쪽이다.
+#   red cube ↔ orange cube: v2 수집본 실측으로 색상환에서 **18° 차이**이고
+#   (red 4° · orange 22°) 둘 다 채도가 낮다(33% · 42%, 초록 큐브는 75%).
+#   사람이 봐도 구별이 어렵다. v2 평가에서 "orange" 지시의 40%(4/10)가 red 로 샜고,
+#   그 4건이 전체 물체 오답 10건의 40% 였다 — **한 쌍이 물체 축 전체를 끌어내린다.**
+#   측정하려는 것은 "지시문을 읽는가"이지 "18° 색차를 가르는가"가 아니므로 분리한다.
+#   ⚠️ 보고서에서 물체 축의 범위를 이 결정에 맞춰 쓸 것 —
+#      "red/orange 를 함께 두지 않은 조건에서 N%" 라고 적어야 한다.
+EXCLUSIVE = [("red cube", "orange cube")]
+
+
+def partners_of(x):
+    return {b for pr in EXCLUSIVE for a, b in (pr, pr[::-1]) if a == x}
+
 FIELDS = ["trial", "group", "kind", "pos", "keep_layout",
           "objects", "target", "slot", "slot_color", "instruction"]
 RFIELDS = FIELDS + ["picked", "landed", "note"]
@@ -74,8 +90,18 @@ def cmd_plan(a):
         n_trials = len(SLOTS) if kind == "dest" else 1
         tgt = min(OBJECTS, key=lambda o: (tgt_count[o], rng.random()))
         tgt_count[tgt] += n_trials
-        others = [o for o in OBJECTS if o != tgt]
-        objs = [tgt] + rng.sample(others, n_obj - 1)
+        # 상호 배제 — 타깃만이 아니라 **방해물끼리도** 막아야 한다.
+        # 타깃이 marker 여도 red 와 orange 가 둘 다 방해물로 뽑힐 수 있다.
+        pool = [o for o in OBJECTS if o != tgt and o not in partners_of(tgt)]
+        objs = [tgt]
+        for _ in range(n_obj - 1):
+            if not pool:
+                break
+            pick = rng.choice(pool)
+            objs.append(pick)
+            drop = partners_of(pick) | {pick}
+            pool = [o for o in pool if o not in drop]
+        n_obj = len(objs)
         rng.shuffle(objs)
         if kind == "dest":
             # 같은 배치·같은 물체로 **4칸 전부** 돌린다.
@@ -116,6 +142,11 @@ def cmd_plan(a):
     print(f"    dest 4연속 {gq}그룹 = {kc['dest']}시행 — 같은 물체, 칸 4개 전부  → 목적지 축")
     print(f"    obj  쌍    {gp}그룹 = {kc['obj']}시행 — 같은 화면, 지시 물체만 변경 → 물체 축")
     print(f"\n  칸 분포: {dict(Counter(r['slot_color'] for r in rows))}")
+    bad = [r["trial"] for r in rows
+           for a, b in EXCLUSIVE
+           if a in r["objects"] and b in r["objects"]]
+    print(f"  상호 배제({', '.join(a + '↔' + b for a, b in EXCLUSIVE)}): "
+          + (f"✅ 위반 0건" if not bad else f"❌ 위반 {len(bad)}건 {bad[:5]}"))
     print(f"  예상 시간: 약 {len(rows) * 2.5 / 60:.1f}시간 (시행당 2.5분)")
 
     # ── 표본이 충분한가 — 돌리기 **전에** 따진다 ──────────────────────

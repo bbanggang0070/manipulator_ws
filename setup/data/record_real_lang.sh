@@ -161,7 +161,8 @@ python3 - "$PLAN" "$START" "$END" <<'PY' > /tmp/real_lang_rows.txt
 import csv, sys
 plan, s, e = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
 need = ["ep", "group_kind", "group_pos", "keep_layout", "n_objects",
-        "objects", "target", "slot", "slot_color", "dest_named", "instruction"]
+        "objects", "target", "slot", "slot_color", "dest_named", "pose_hint",
+        "instruction"]
 rows = list(csv.DictReader(open(plan)))
 missing = [c for c in need if rows and c not in rows[0]]
 if missing:
@@ -178,7 +179,7 @@ for r in rows:
 PY
 
 N=0
-while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; do
+while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED PHINT INSTR; do
   N=$((N+1))
   echo
   if [ "$KEEP" = "KEEP" ]; then
@@ -195,6 +196,11 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; d
     printf "  놓을 물체 (%s개) :  \033[1m%s\033[0m\n" "$NOBJ" "$OBJS"
   fi
   printf "  집을 것          :  \033[1;33m%s\033[0m\n" "$TGT"
+  # 납작한 물체는 자세에 따라 파지 높이가 달라진다. v2 에서 eraser 가 재파지율
+  # 20%(1위)였고 파지 자세가 유일한 outlier 였다 — 눕힘/세움을 번갈아 덮는다.
+  if [ "$PHINT" != "-" ] && [ -n "$PHINT" ]; then
+    printf "  놓는 자세        :  \033[1;35m%s\033[0m\n" "$PHINT"
+  fi
   if [ "$DNAMED" != "-" ]; then
     printf "  넣을 칸          :  \033[1;33m%s번 (%s)\033[0m\n" "$SLOT" "$SCOL"
   else
@@ -207,6 +213,7 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL DNAMED INSTR; d
   printf "  지시문           :  \033[1;36m\"%s\"\033[0m\n" "$INSTR"
   echo "════════════════════════════════════════════════════════════════"
   printf "  \033[2m파지 직후 목표 칸 위로 먼저 횡이동 → 그다음 하강. 마지막에 갈라지지 말 것.\033[0m\n"
+  printf "  \033[2m놓은 뒤에는 **곧장 rest 로** 가서 1~2초 멈춘 다음 종료할 것 (확인하러 머물지 말 것).\033[0m\n"
   echo
   read -r -p "  물체를 놓았으면 Enter (s=이 행 건너뛰기, q=종료): " KEY </dev/tty
   case "$KEY" in
