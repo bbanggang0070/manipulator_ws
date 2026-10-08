@@ -8,7 +8,7 @@
 #   STEP_DT=0.033 SERVER_HOST=192.168.0.56 ENSEMBLE=1 ENSEMBLE_W=0.3 ./home_then_infer.sh
 #
 # 환경변수:
-#   TOL        홈 도달 허용 오차(°). 기본 1.0.
+#   TOL        홈 도달 허용 오차(°). 기본 2.0 (아래 주석 참조).
 #   MAX_TRIES  홈 재시도 최대 횟수. 기본 20. 초과 시 추론 안 하고 중단.
 #   그 외 STEP_DT/SERVER_HOST/ENSEMBLE/ENSEMBLE_W/MRT/HORIZON 등은 그대로 추론 스크립트로 전달.
 #
@@ -17,7 +17,12 @@ set -u
 
 GR00T_DIR="$(cd "$(dirname "$0")" && pwd)"
 LEROBOT_DIR="$GR00T_DIR/../../envs/lerobot"
-TOL="${TOL:-1.0}"
+# 허용 오차(°). 1.0 은 **서보 반복정밀도보다 빡빡하다** — 홈 복귀를 네 번 연속
+# 재어 보니 0.5 · 1.9 · 1.8 · 1.0 로 elbow_flex 가 1.8~1.9° 에 수렴했다.
+# 1.0 으로 두면 도달해 놓고도 20회를 모두 재시도하고 추론을 시작하지 못한다
+# (2026-10-08 평가 중 실제로 막혔다). 2.0 은 학습 시작 자세 편차(elbow ±4.6°)
+# 안쪽이라 분포를 벗어나지 않는다.
+TOL="${TOL:-2.0}"
 MAX_TRIES="${MAX_TRIES:-20}"
 # 홈 스크립트 선택. 기본 goto_home_sim.py(옛 sim rest). co-train 실기 배포는
 # HOME_SCRIPT=goto_home_real.py (실기 rest, elbow +89.8 → 초반 rest 지연 제거).
@@ -46,7 +51,7 @@ while : ; do
 
   if [ "$i" -ge "$MAX_TRIES" ]; then
     echo "[home] ❌ ${MAX_TRIES}회 시도했지만 <= ${TOL}° 미달 — 추론 실행 안 함." >&2
-    echo "       (허용치를 완화하려면 TOL 값을 올려서 재실행: TOL=1.5 ./home_then_infer.sh)" >&2
+    echo "       (허용치를 완화하려면 TOL 값을 올려서 재실행: TOL=3.0 ./home_then_infer.sh)" >&2
     exit 1
   fi
   sleep 1
