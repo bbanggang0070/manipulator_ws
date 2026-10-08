@@ -332,6 +332,50 @@ def main(root):
                 else:
                     print(f"  ✅ 가장 가까운 인접 쌍 {a}↔{b} = {z:.1f}σ")
 
+        # ── 끝맺음 ───────────────────────────────────────────────────
+        #   **모델에는 종료 신호가 없다.** "이제 멈춰라"를 오직 궤적으로만 배우므로
+        #   에피소드가 rest 에서 **멈춘 채** 끝나야 한다. v2(250ep)는 복귀 도중
+        #   녹화가 끝나 끝 정지가 중앙 3프레임(0.1초)뿐이었고, 그 모델은 평가에서
+        #   42%가 칸 위에 머문 채 타임아웃했다.
+        def tail_still(x, tol=1.0):
+            v = np.abs(np.diff(x, axis=0)).max(axis=1)
+            n = 0
+            for q in v[::-1]:
+                if q < tol:
+                    n += 1
+                else:
+                    break
+            return n
+
+        end_dev, end_still = [], []
+        for e, sub in d.groupby("episode_index"):
+            a = np.stack(sub.sort_values("frame_index")["observation.state"].values).astype(float)
+            end_dev.append(float(np.abs(a[-1] - a[0]).max()))
+            end_still.append(tail_still(a))
+        end_dev = np.array(end_dev); end_still = np.array(end_still)
+        # ⚠️ **최근 구간을 따로 본다.** 수집 규칙을 도중에 바꾸면 전체 중앙값은
+        #    옛 방식이 끌어내려, 지금 제대로 하고 있어도 경고가 뜬다(실제로 겪음:
+        #    v3 120개는 10° 이내 99% 인데 전체는 75% 로 찍혔다).
+        #    판정은 **최근 100개**로 한다 — 그게 지금 수집 방식을 말해 준다.
+        RECENT = min(100, len(end_dev))
+        rd, rs = end_dev[-RECENT:], end_still[-RECENT:]
+        print(f"\n  끝맺음 — rest 로 돌아와 멈춘 채 끝났는가")
+        print(f"    {'전체':<8}{len(end_dev):>4}ep  끝 자세 중앙 {np.median(end_dev):>5.1f}° · "
+              f"10° 이내 {(end_dev < 10).mean() * 100:>3.0f}% · "
+              f"끝 정지 중앙 {np.median(end_still) / fps:>4.1f}s")
+        print(f"    {'최근':<8}{RECENT:>4}ep  끝 자세 중앙 {np.median(rd):>5.1f}° · "
+              f"10° 이내 {(rd < 10).mean() * 100:>3.0f}% · "
+              f"끝 정지 중앙 {np.median(rs) / fps:>4.1f}s   ← 판정 기준")
+        print(f"    끝 정지 합계 {end_still.sum():,} 프레임 — 모델이 '멈춰라'를 배우는 유일한 신호")
+        end_dev, end_still = rd, rs
+        if np.median(end_still) < fps * 0.5:
+            print(f"  ⚠️  끝 정지가 0.5초 미만이다 — 복귀 도중 녹화가 끝나고 있다."
+                  f" 놓은 뒤 rest 에서 1~2초 멈춘 뒤 종료할 것")
+        elif np.median(end_dev) > 10:
+            print(f"  ⚠️  끝 자세가 시작에서 10° 넘게 벗어난다 — rest 까지 안 갔다")
+        else:
+            print(f"  ✅ rest 에서 멈춘 채 끝난다")
+
         J = ["pan", "lift", "elbow", "w_flex", "w_roll", "grip"]
         sd = starts.std(axis=0)
         print(f"\n  시작 자세 표준편차: " + " · ".join(f"{j} ±{v:.1f}°" for j, v in zip(J, sd)))

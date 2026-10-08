@@ -6,14 +6,11 @@
    2026-08-03 에 goto_home_sim 의 elbow 가 4~7° 높아 겪은 것과 같은 실패다.
    값은 verify_real_lang_dataset.py 가 "배포용 홈 자세" 로 찍어 준다.
 
-TARGET = cleanup_real v2 **250ep** 첫 프레임 state 평균 (괄호는 표준편차):
-  pan +1.9 (2.0) · lift -96.5 (3.7) · elbow +92.5 (4.6)
-  wrist_flex +68.3 (4.8) · wrist_roll +1.5 (2.5) · gripper +2.0 (0.3)
-  ✅ 전 관절 5° 미만 — 수집 때 rest_gate.py 가 매 에피소드 리더 자세를
-     기준과 대조(허용 6°)한 덕분이다. v1 은 wrist_flex ±14.3 · gripper ±11.0 이었다.
-
-v1(80ep) 대비 차이: wrist_flex +10.1 · gripper -13.0 · lift +1.8 · pan +1.8
-  → v1 체크포인트를 쓸 일이 있으면 이 파일을 쓰면 안 된다.
+TARGET = cleanup_real v3 **370ep** 첫 프레임 state 평균 (괄호는 표준편차):
+  pan +2.0 (1.9) · lift -97.1 (3.2) · elbow +92.5 (4.2)
+  wrist_flex +69.5 (4.4) · wrist_roll +0.8 (2.7) · gripper +1.9 (0.3)
+  ✅ 전 관절 5° 미만 — rest_gate.py 가 매 에피소드 리더 자세를 대조한 덕분이다.
+  (v2 250ep 기준값과는 1° 안쪽 차이다 — rest 가 안정적으로 유지됐다는 뜻)
 """
 import logging
 import os
@@ -25,11 +22,11 @@ logging.disable(logging.WARNING)  # 이동 중 매 스텝 찍히는 클램프 �
 from lerobot.robots.so_follower.so_follower import SOFollower
 from lerobot.robots.so_follower.config_so_follower import SOFollowerRobotConfig
 
-# cleanup_real 80ep 의 rest(에피소드 시작) 평균 자세 — 실측값이다.
+# cleanup_real v3 370ep 의 rest(에피소드 시작) 평균 자세 — 실측값이다.
 #   재계산: 데이터셋 parquet 의 frame_index==0 인 observation.state 평균.
 TARGET = {
-    "shoulder_pan.pos": 1.9, "shoulder_lift.pos": -96.5, "elbow_flex.pos": 92.5,
-    "wrist_flex.pos": 68.3, "wrist_roll.pos": 1.5, "gripper.pos": 2.0,
+    "shoulder_pan.pos": 2.0, "shoulder_lift.pos": -97.1, "elbow_flex.pos": 92.5,
+    "wrist_flex.pos": 69.5, "wrist_roll.pos": 0.8, "gripper.pos": 1.9,
 }
 
 r = None
