@@ -62,12 +62,18 @@ TEMPLATES = ["Put the {obj} into the {dst} bin"]
 #      "red/orange 를 함께 두지 않은 조건에서 N%" 라고 적어야 한다.
 EXCLUSIVE = [("red cube", "orange cube")]
 
+# 평가 때 물체를 놓는 자세. **학습 때와 같게 두어야** 측정이 의미를 갖는다.
+#   v3 수집은 eraser 를 세워서 모은다(v2 88회가 전부 눕힘이었으므로).
+#   ⚠️ 그래서 이 평가는 **세운 eraser 만** 잰다. 눕힌 eraser 성능은 여기서
+#      안 나온다 — 보고서에 그 범위를 적을 것.
+POSE_VARIANTS = {"eraser": "세워서"}
+
 
 def partners_of(x):
     return {b for pr in EXCLUSIVE for a, b in (pr, pr[::-1]) if a == x}
 
 FIELDS = ["trial", "group", "kind", "pos", "keep_layout",
-          "objects", "target", "slot", "slot_color", "instruction"]
+          "objects", "target", "slot", "slot_color", "pose_hint", "instruction"]
 RFIELDS = FIELDS + ["picked", "landed", "note"]
 
 
@@ -128,6 +134,8 @@ def cmd_plan(a):
                 "pos": f"{pos}/{len(picks)}", "keep_layout": "NEW" if pos == 1 else "KEEP",
                 "objects": ", ".join(objs), "target": tgt,
                 "slot": snum, "slot_color": scol,
+                "pose_hint": " · ".join(f"{o} {POSE_VARIANTS[o]}"
+                                        for o in objs if o in POSE_VARIANTS),
                 "instruction": rng.choice(TEMPLATES).format(obj=tgt, dst=scol),
             })
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
@@ -196,6 +204,8 @@ def cmd_log(a):
         else:
             print(f"  물체      :  \033[2m{r['objects']}  (그대로)\033[0m")
         print(f"  지시문    :  \033[1;36m\"{r['instruction']}\"\033[0m")
+        if r.get("pose_hint"):
+            print(f"  놓는 자세 :  \033[1;35m{r['pose_hint']}\033[0m")
         print(f"  정답      :  {r['target']} → {r['slot']}번({r['slot_color']})")
         print("=" * 64)
 
