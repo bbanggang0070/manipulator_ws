@@ -16,6 +16,7 @@ v1(80ep) 대비 차이: wrist_flex +10.1 · gripper -13.0 · lift +1.8 · pan +1
   → v1 체크포인트를 쓸 일이 있으면 이 파일을 쓰면 안 된다.
 """
 import logging
+import os
 import sys
 import time
 
@@ -46,8 +47,15 @@ if r is None:
     print("홈 복귀 실패: 로봇 연결 불가", flush=True)
     sys.exit(1)
 
+# ⚠️ **수렴할 때까지 반복해야 한다.** max_relative_target=4.0 이라 한 번의
+#    send_action 이 관절당 4° 까지만 움직인다. 150회면 가까운 데서는 충분하지만,
+#    추론이 끝난 자리(보통 칸 위)에서 출발하면 모자란다 — 실측으로 shoulder_lift
+#    가 36° 남은 채 "도달"로 찍히고 rc=1 로 끝났다(2026-10-08).
+#    한 라운드로 못 가면 그냥 더 보낸다. 가까워질수록 금방 수렴한다.
+TOL = float(os.environ.get("HOME_TOL", "5.0"))
+ROUNDS = int(os.environ.get("HOME_ROUNDS", "6"))
 ok = False
-for _ in range(3):  # 이동도 재시도 (일시적 no-status-packet 대응)
+for rnd in range(ROUNDS):
     try:
         for _ in range(150):
             r.send_action(TARGET)
@@ -58,8 +66,10 @@ for _ in range(3):  # 이동도 재시도 (일시적 no-status-packet 대응)
         # 출력 형식은 goto_home_sim.py와 동일("최대 오차 X.X°") → home_then_infer.sh 파서 호환
         print("실기-홈 도달 (최대 오차 {:.1f}°): ".format(worst)
               + ", ".join(f"{k.split('.')[0]}{v:+.1f}" for k, v in diffs.items()), flush=True)
-        ok = worst < 5.0
-        break
+        if worst < TOL:
+            ok = True
+            break
+        # 아직 멀다 — 더 보낸다(예외가 아니므로 조용히 다음 라운드)
     except Exception as e:
         print(f"이동 재시도: {type(e).__name__}", flush=True)
         time.sleep(1)

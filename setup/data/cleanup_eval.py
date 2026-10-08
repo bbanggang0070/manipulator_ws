@@ -193,6 +193,23 @@ def cmd_log(a):
                 print(f"     ({_lim} · 먼저 끝내려면 Ctrl+C)\n")
                 subprocess.call(["bash", runner, a.eval_name, cond],
                                 cwd=os.path.dirname(runner), env=env)
+                # 시행이 끝나면 **rest 로 돌려놓는다.** 추론 루프는 멈춘 자리에서
+                # 그대로 끝나는데, 그 자리가 보통 칸 바로 위라 **어느 칸에 들어갔는지
+                # 가린다.** 다음 시행의 홈 복귀는 물체를 다시 놓은 뒤에 일어나므로
+                # 판정 시점에는 늦다. 여기서 먼저 비켜 준다.
+                # env(러너에 넘긴 것)에서 읽는다 — os.environ 에는 setdefault 로
+                # 넣은 HOME_SCRIPT 가 없어서 러너와 다른 홈을 쓸 뻔했다.
+                home = os.path.join(os.path.dirname(runner), env["HOME_SCRIPT"])
+                lerobot = os.path.join(os.path.dirname(runner), "..", "..", "envs", "lerobot")
+                if os.path.exists(home) and not a.no_home:
+                    print("  ▶ rest 자세로 복귀 중...", end=" ", flush=True)
+                    # 실패를 삼키지 않는다. 복귀가 안 되면 팔이 칸을 가린 채로
+                    # 판정하게 되고, 다음 시행의 출발 자세도 틀어진다.
+                    rc = subprocess.call(["uv", "run", "python", os.path.abspath(home)],
+                                         cwd=os.path.abspath(lerobot),
+                                         stdout=subprocess.DEVNULL,
+                                         stderr=subprocess.DEVNULL)
+                    print("완료" if rc == 0 else f"⚠️ 실패(rc={rc}) — 팔을 손으로 치우고 판정하세요")
                 print()
         else:
             print("  로봇을 직접 돌린 뒤 결과를 입력하세요.")
@@ -220,16 +237,21 @@ def cmd_log(a):
             landed = "(없음)"
             print("  들어간 칸: (집지 못해 자동 '없음')")
         else:
-            print("  들어간 칸:  1) black   4) white   0) 어느 칸도 아님")
+            # ⚠️ 선택지는 **SLOTS 에서 만든다.** 예전에 black·white 를 박아 두었다가
+            #    4칸으로 넓힌 뒤에도 두 칸만 입력할 수 있어 cyan·pink 를 기록할 수 없었다.
+            menu = "   ".join(f"{n}) {c}" for n, c in SLOTS)
+            print(f"  들어간 칸:  {menu}   0) 어느 칸도 아님")
+            by_num = {str(n): c for n, c in SLOTS}
+            by_name = {c: c for _, c in SLOTS}
             while True:
-                s = input("  > ").strip()
+                s = input("  > ").strip().lower()
                 if s == "0":
                     landed = "(없음)"; break
-                if s in ("1", "black"):
-                    landed = "black"; break
-                if s in ("4", "white"):
-                    landed = "white"; break
-                print("    1 / 4 / 0 중에서 고르세요")
+                if s in by_num:
+                    landed = by_num[s]; break
+                if s in by_name:
+                    landed = by_name[s]; break
+                print(f"    {'/'.join(by_num)} 또는 색 이름, 아니면 0")
 
         note = input("  메모(선택, Enter로 건너뜀): ").strip()
         row = dict(r); row.update(picked=picked, landed=landed, note=note)
@@ -389,6 +411,8 @@ def main():
     l.add_argument("--out", default=RESULT); l.add_argument("--redo", action="store_true")
     l.add_argument("--no-run", action="store_true",
                    help="로봇을 띄우지 않고 기록만 한다(다른 터미널에서 돌릴 때)")
+    l.add_argument("--no-home", action="store_true",
+                   help="시행이 끝나도 rest 로 복귀시키지 않는다(팔이 그 자리에 선다)")
     l.add_argument("--max-sec", type=float, default=30,
                    help="시행 1회 제한 시간(초). 지나면 다음 시행으로 넘어간다. 0=무제한")
     l.add_argument("--eval-name", default="cleanup",
