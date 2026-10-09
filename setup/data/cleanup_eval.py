@@ -224,14 +224,24 @@ def cmd_log(a):
             #   HOME_SCRIPT — goto_home_real.py 는 so101_blocktask_real 50ep 기준이라
             #     cleanup_real 의 시작 자세와 wrist_flex 가 18.3° 다르다. 그대로 쓰면
             #     정책이 학습 시작 분포 밖에서 출발한다.
-            #   ENSEMBLE_W — run_eval_real.sh 기본값 0.6 은 그 스크립트 자신의 실측표에서
-            #     **최악(1/5)**으로 적혀 있고 0.8 이 최적으로 적혀 있다. 0.8 로 둔다.
-            #     (그 표는 co-train blocktask 모델 실측이므로 이 모델에서 재확인 필요)
+            #   ENSEMBLE_W — run_eval_real.sh 의 표는 co-train blocktask 모델 실측이라
+            #     "재확인 필요"라고 적어 뒀었다. **이 모델로 직접 재었다**(2026-10-10,
+            #     cleanup v3 20시행 스윕). v3 평가 60시행은 전부 W=0.3 으로 돌았는데
+            #     표에서 두 번째로 나쁜 설정이었다 — 실제로 물체 위에서 길게 얼어붙는
+            #     현상(최장 52.5초)이 다수 나왔다. W 를 올리자 바로 좋아졌다:
+            #         W=0.3 (v3 60시행)  물체축 70.0%  타임아웃 27%(16/60)
+            #         W=0.6 (스윕 10시행) 물체축 70%   타임아웃 20%(2/10)  최장배회 12.2s
+            #         W=0.8 (스윕 10시행) 물체축 90%   타임아웃 20%(2/10)  최장배회 17.8s(1건 예외)
+            #     W=0.8 이 물체 정확도에서 가장 낫고 중앙 길이도 가장 짧다(24.0s).
+            #     ⚠️ 남은 타임아웃 4건 중 2건은 **다른 원인**이다 — wrist_roll straggler가
+            #     아니라 성공 후 rest 복귀 동작 자체를 안 만든다(끝 자세가 시작과
+            #     elbow 140~160° 차이, 그중 하나는 끝까지 계속 움직임). 재학습 없는
+            #     수정이 아직 없어 미해결로 남겨 둔다(v4_plan.md 참고).
             env.setdefault("HOME_SCRIPT", "goto_home_cleanup.py")
             # 작업이 끝나면(rest 로 복귀해 머물면) 스스로 멈춘다. 없으면 MAX_SEC
             # 까지 rest 를 유지하는 행동을 계속 내놓는다 — 모델에 종료 신호가 없다.
             env.setdefault("STOP_ON_REST", "1")
-            env.setdefault("ENSEMBLE_W", "0.3")
+            env.setdefault("ENSEMBLE_W", "0.8")
             runner = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                   "..", "gr00t", "run_eval_real.sh")
             if not os.path.exists(runner):
