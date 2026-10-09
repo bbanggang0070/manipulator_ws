@@ -117,8 +117,17 @@ _MAX_SEC = float(os.environ.get("MAX_SEC", "0"))
 #    (W=0.3 실측 평균 정지 24.8초). 정지가 아니라 **rest 복귀**로 판정해야 한다.
 _STOP_ON_REST = os.environ.get("STOP_ON_REST", "0") == "1"
 _REST_LEAVE = float(os.environ.get("REST_LEAVE_DEG", "20"))   # 이만큼 벗어나야 '출발'
-_REST_BACK = float(os.environ.get("REST_BACK_DEG", "6"))      # 이 안에 들면 '복귀'
+_REST_BACK = float(os.environ.get("REST_BACK_DEG", "6"))      # 이 안에 들면 '복귀' (기본)
 _REST_HOLD = float(os.environ.get("REST_HOLD_SEC", "2.0"))    # 이만큼 머물면 '종료'
+# wrist_roll 만 따로 느슨하게 둔다. v3 평가(2026-10) 에서 "성공했는데 타임아웃"
+# 4건을 전수 조사하니 **wrist_roll 하나만** 6~12° 어긋난 채 완전히 안정돼 있었고
+# (흔들림이 아니라 그 값에 고정) 나머지 5관절은 1~3.5° 안이었다. wrist_roll 은
+# 그리퍼로 물체를 놓는 성패와 무관한 자유도이고, 수집 데이터의 rest 자세 자체도
+# wrist_roll 표준편차가 ±2.5~2.7°(그리퍼는 ±0.3°)로 가장 느슨했다 — 모델이
+# 이 축만 정밀하게 못 맞추는 게 아니라, 애초에 "느슨해도 되는" 축이라 덜 배운
+# 것으로 보인다. 전역 6° 하나로 재면 이 관절이 매번 병목이 된다(60시행 중 6건,
+# 10%가 "다른 관절은 다 됐는데 wrist_roll 만 기준 초과"였다).
+_REST_BACK_JOINT = {"wrist_roll.pos": float(os.environ.get("REST_BACK_WROLL_DEG", "15"))}
 _grip_hist = {}
 
 
@@ -521,10 +530,15 @@ def eval(cfg: EvalConfig):
                 _q = {k: float(obs[k]) for k in robot_state_keys if k in obs}
                 if _rest0 is None:
                     _rest0 = dict(_q)
+                # '출발' 판정은 그대로 전체 최댓값(하나라도 크게 움직이면 작업 시작).
+                # '복귀' 판정만 관절별 허용치로 나눈다 — wrist_roll 하나가
+                # 나머지 5관절의 정상적인 복귀를 가리면 안 된다.
                 _dev = max((abs(_q[k] - _rest0[k]) for k in _rest0 if k in _q), default=0.0)
+                _back_ok = all(abs(_q[k] - _rest0[k]) < _REST_BACK_JOINT.get(k, _REST_BACK)
+                               for k in _rest0 if k in _q)
                 if not _left:
                     _left = _dev > _REST_LEAVE
-                elif _dev < _REST_BACK:
+                elif _back_ok:
                     if _back_since is None:
                         _back_since = time.perf_counter()
                     elif time.perf_counter() - _back_since >= _REST_HOLD:
