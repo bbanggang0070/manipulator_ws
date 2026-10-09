@@ -9,13 +9,3 @@ trial,group,kind,pos,keep_layout,objects,target,slot,slot_color,pose_hint,instru
 8,8,single,1/1,NEW,"glue stick, green cube, marker, yellow cube",yellow cube,4,white,,Put the yellow cube into the white bin
 9,9,single,1/1,NEW,"blue cube, screwdriver, glue stick",screwdriver,1,black,,Put the screwdriver into the black bin
 10,10,single,1/1,NEW,"purple cube, blue cube, marker",marker,3,pink,,Put the marker into the pink bin
-11,11,single,1/1,NEW,"purple cube, blue cube, marker",purple cube,2,cyan,,Put the purple cube into the cyan bin
-12,12,single,1/1,NEW,"glue stick, green cube, purple cube",glue stick,3,pink,,Put the glue stick into the pink bin
-13,13,single,1/1,NEW,"blue cube, purple cube, marker",marker,4,white,,Put the marker into the white bin
-14,14,single,1/1,NEW,"marker, purple cube, red cube",red cube,3,pink,,Put the red cube into the pink bin
-15,15,single,1/1,NEW,"orange cube, green cube, eraser",orange cube,3,pink,eraser 세워서,Put the orange cube into the pink bin
-16,16,single,1/1,NEW,"purple cube, red cube, yellow cube",yellow cube,2,cyan,,Put the yellow cube into the cyan bin
-17,17,single,1/1,NEW,"purple cube, eraser, green cube, blue cube",blue cube,1,black,eraser 세워서,Put the blue cube into the black bin
-18,18,single,1/1,NEW,"red cube, green cube, eraser, yellow cube",eraser,4,white,eraser 세워서,Put the eraser into the white bin
-19,19,single,1/1,NEW,"green cube, screwdriver, purple cube",green cube,2,cyan,,Put the green cube into the cyan bin
-20,20,single,1/1,NEW,"yellow cube, screwdriver, orange cube",screwdriver,4,white,,Put the screwdriver into the white bin
