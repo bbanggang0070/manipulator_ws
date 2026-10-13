@@ -248,16 +248,17 @@ sim cleanup 단계를 생략하고, 언어 조건화에서 확인한 두 가지(
 **물체·목적지를 바꿔도 되는지** — 같은 체크포인트·같은 W로 돌린 세 장면을 더 둔다.
 전부 60시행 중 완전 정답(물체·목적지 모두 일치)만 골랐다.
 
-<table>
-<tr>
-<td width="33%"><img src="docs/figures/cleanup_real_v3_gluestick_pink.gif" width="260" alt="glue stick → pink"><br>
-<sub>"glue stick → **pink**" — 큐브가 아닌 막대형 물체</sub></td>
-<td width="33%"><img src="docs/figures/cleanup_real_v3_marker_white.gif" width="260" alt="marker → white"><br>
-<sub>"marker → **white**" — 가늘고 파지가 까다로운 물체</sub></td>
-<td width="33%"><img src="docs/figures/cleanup_real_v3_blue_black.gif" width="260" alt="blue cube → black, 4물체"><br>
-<sub>"blue cube → **black**" — 화면에 방해물 4개(eraser 포함)</sub></td>
-</tr>
-</table>
+<img src="docs/figures/cleanup_real_v3_gluestick_pink.gif" width="620" alt="glue stick → pink">
+
+<sub>"glue stick → **pink**" — 큐브가 아닌 막대형 물체. 19.8초.</sub>
+
+<img src="docs/figures/cleanup_real_v3_marker_white.gif" width="620" alt="marker → white">
+
+<sub>"marker → **white**" — 가늘고 파지가 까다로운 물체. 23.9초.</sub>
+
+<img src="docs/figures/cleanup_real_v3_blue_black.gif" width="620" alt="blue cube → black, 4물체">
+
+<sub>"blue cube → **black**" — 화면에 방해물 4개(eraser 포함). 26.8초.</sub>
 
 **풀어낸 문제 셋.**
 
