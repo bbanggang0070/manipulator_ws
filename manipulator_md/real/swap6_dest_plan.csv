@@ -1,0 +1,97 @@
+trial,group,kind,pos,keep_layout,objects,target,slot,slot_color,pose_hint,layout_hint,instruction
+1,1,dest,1/4,NEW,"marker, red cube, glue stick",red cube,1,black,,배치 L1 (원래 학습 배치): 1번=black · 2번=cyan · 3번=pink · 4번=white,Put the red cube into the black bin
+2,1,dest,2/4,KEEP,"marker, red cube, glue stick",red cube,2,cyan,,,Put the red cube into the cyan bin
+3,1,dest,3/4,KEEP,"marker, red cube, glue stick",red cube,3,pink,,,Put the red cube into the pink bin
+4,1,dest,4/4,KEEP,"marker, red cube, glue stick",red cube,4,white,,,Put the red cube into the white bin
+5,2,dest,1/4,NEW,"yellow cube, red cube",yellow cube,4,white,,배치 L1 (원래 학습 배치): 1번=black · 2번=cyan · 3번=pink · 4번=white,Put the yellow cube into the white bin
+6,2,dest,2/4,KEEP,"yellow cube, red cube",yellow cube,3,pink,,,Put the yellow cube into the pink bin
+7,2,dest,3/4,KEEP,"yellow cube, red cube",yellow cube,1,black,,,Put the yellow cube into the black bin
+8,2,dest,4/4,KEEP,"yellow cube, red cube",yellow cube,2,cyan,,,Put the yellow cube into the cyan bin
+9,3,dest,1/4,NEW,"green cube, yellow cube, orange cube",orange cube,4,white,,배치 L1 (원래 학습 배치): 1번=black · 2번=cyan · 3번=pink · 4번=white,Put the orange cube into the white bin
+10,3,dest,2/4,KEEP,"green cube, yellow cube, orange cube",orange cube,2,cyan,,,Put the orange cube into the cyan bin
+11,3,dest,3/4,KEEP,"green cube, yellow cube, orange cube",orange cube,1,black,,,Put the orange cube into the black bin
+12,3,dest,4/4,KEEP,"green cube, yellow cube, orange cube",orange cube,3,pink,,,Put the orange cube into the pink bin
+13,4,dest,1/4,NEW,"green cube, glue stick",green cube,2,cyan,,배치 L1 (원래 학습 배치): 1번=black · 2번=cyan · 3번=pink · 4번=white,Put the green cube into the cyan bin
+14,4,dest,2/4,KEEP,"green cube, glue stick",green cube,4,white,,,Put the green cube into the white bin
+15,4,dest,3/4,KEEP,"green cube, glue stick",green cube,1,black,,,Put the green cube into the black bin
+16,4,dest,4/4,KEEP,"green cube, glue stick",green cube,3,pink,,,Put the green cube into the pink bin
+17,5,dest,1/4,NEW,"marker, green cube, purple cube",purple cube,4,pink,,배치 L2: 1번=white · 2번=black · 3번=cyan · 4번=pink,Put the purple cube into the pink bin
+18,5,dest,2/4,KEEP,"marker, green cube, purple cube",purple cube,3,cyan,,,Put the purple cube into the cyan bin
+19,5,dest,3/4,KEEP,"marker, green cube, purple cube",purple cube,1,white,,,Put the purple cube into the white bin
+20,5,dest,4/4,KEEP,"marker, green cube, purple cube",purple cube,2,black,,,Put the purple cube into the black bin
+21,6,dest,1/4,NEW,"yellow cube, blue cube",blue cube,2,black,,배치 L2: 1번=white · 2번=black · 3번=cyan · 4번=pink,Put the blue cube into the black bin
+22,6,dest,2/4,KEEP,"yellow cube, blue cube",blue cube,4,pink,,,Put the blue cube into the pink bin
+23,6,dest,3/4,KEEP,"yellow cube, blue cube",blue cube,3,cyan,,,Put the blue cube into the cyan bin
+24,6,dest,4/4,KEEP,"yellow cube, blue cube",blue cube,1,white,,,Put the blue cube into the white bin
+25,7,dest,1/4,NEW,"blue cube, glue stick",blue cube,1,white,,배치 L2: 1번=white · 2번=black · 3번=cyan · 4번=pink,Put the blue cube into the white bin
+26,7,dest,2/4,KEEP,"blue cube, glue stick",blue cube,2,black,,,Put the blue cube into the black bin
+27,7,dest,3/4,KEEP,"blue cube, glue stick",blue cube,4,pink,,,Put the blue cube into the pink bin
+28,7,dest,4/4,KEEP,"blue cube, glue stick",blue cube,3,cyan,,,Put the blue cube into the cyan bin
+29,8,dest,1/4,NEW,"red cube, purple cube",red cube,3,cyan,,배치 L2: 1번=white · 2번=black · 3번=cyan · 4번=pink,Put the red cube into the cyan bin
+30,8,dest,2/4,KEEP,"red cube, purple cube",red cube,2,black,,,Put the red cube into the black bin
+31,8,dest,3/4,KEEP,"red cube, purple cube",red cube,4,pink,,,Put the red cube into the pink bin
+32,8,dest,4/4,KEEP,"red cube, purple cube",red cube,1,white,,,Put the red cube into the white bin
+33,9,dest,1/4,NEW,"red cube, green cube, screwdriver",green cube,1,pink,,배치 L3: 1번=pink · 2번=white · 3번=black · 4번=cyan,Put the green cube into the pink bin
+34,9,dest,2/4,KEEP,"red cube, green cube, screwdriver",green cube,4,cyan,,,Put the green cube into the cyan bin
+35,9,dest,3/4,KEEP,"red cube, green cube, screwdriver",green cube,3,black,,,Put the green cube into the black bin
+36,9,dest,4/4,KEEP,"red cube, green cube, screwdriver",green cube,2,white,,,Put the green cube into the white bin
+37,10,dest,1/4,NEW,"yellow cube, purple cube, red cube",yellow cube,1,pink,,배치 L3: 1번=pink · 2번=white · 3번=black · 4번=cyan,Put the yellow cube into the pink bin
+38,10,dest,2/4,KEEP,"yellow cube, purple cube, red cube",yellow cube,4,cyan,,,Put the yellow cube into the cyan bin
+39,10,dest,3/4,KEEP,"yellow cube, purple cube, red cube",yellow cube,2,white,,,Put the yellow cube into the white bin
+40,10,dest,4/4,KEEP,"yellow cube, purple cube, red cube",yellow cube,3,black,,,Put the yellow cube into the black bin
+41,11,dest,1/4,NEW,"purple cube, yellow cube",purple cube,3,black,,배치 L3: 1번=pink · 2번=white · 3번=black · 4번=cyan,Put the purple cube into the black bin
+42,11,dest,2/4,KEEP,"purple cube, yellow cube",purple cube,4,cyan,,,Put the purple cube into the cyan bin
+43,11,dest,3/4,KEEP,"purple cube, yellow cube",purple cube,1,pink,,,Put the purple cube into the pink bin
+44,11,dest,4/4,KEEP,"purple cube, yellow cube",purple cube,2,white,,,Put the purple cube into the white bin
+45,12,dest,1/4,NEW,"purple cube, yellow cube, orange cube",orange cube,2,white,,배치 L3: 1번=pink · 2번=white · 3번=black · 4번=cyan,Put the orange cube into the white bin
+46,12,dest,2/4,KEEP,"purple cube, yellow cube, orange cube",orange cube,1,pink,,,Put the orange cube into the pink bin
+47,12,dest,3/4,KEEP,"purple cube, yellow cube, orange cube",orange cube,3,black,,,Put the orange cube into the black bin
+48,12,dest,4/4,KEEP,"purple cube, yellow cube, orange cube",orange cube,4,cyan,,,Put the orange cube into the cyan bin
+49,13,dest,1/4,NEW,"screwdriver, orange cube, blue cube",blue cube,3,white,,배치 L4: 1번=cyan · 2번=pink · 3번=white · 4번=black,Put the blue cube into the white bin
+50,13,dest,2/4,KEEP,"screwdriver, orange cube, blue cube",blue cube,1,cyan,,,Put the blue cube into the cyan bin
+51,13,dest,3/4,KEEP,"screwdriver, orange cube, blue cube",blue cube,4,black,,,Put the blue cube into the black bin
+52,13,dest,4/4,KEEP,"screwdriver, orange cube, blue cube",blue cube,2,pink,,,Put the blue cube into the pink bin
+53,14,dest,1/4,NEW,"eraser, orange cube, yellow cube",yellow cube,3,white,,배치 L4: 1번=cyan · 2번=pink · 3번=white · 4번=black,Put the yellow cube into the white bin
+54,14,dest,2/4,KEEP,"eraser, orange cube, yellow cube",yellow cube,4,black,,,Put the yellow cube into the black bin
+55,14,dest,3/4,KEEP,"eraser, orange cube, yellow cube",yellow cube,1,cyan,,,Put the yellow cube into the cyan bin
+56,14,dest,4/4,KEEP,"eraser, orange cube, yellow cube",yellow cube,2,pink,,,Put the yellow cube into the pink bin
+57,15,dest,1/4,NEW,"orange cube, blue cube, purple cube",purple cube,2,pink,,배치 L4: 1번=cyan · 2번=pink · 3번=white · 4번=black,Put the purple cube into the pink bin
+58,15,dest,2/4,KEEP,"orange cube, blue cube, purple cube",purple cube,1,cyan,,,Put the purple cube into the cyan bin
+59,15,dest,3/4,KEEP,"orange cube, blue cube, purple cube",purple cube,3,white,,,Put the purple cube into the white bin
+60,15,dest,4/4,KEEP,"orange cube, blue cube, purple cube",purple cube,4,black,,,Put the purple cube into the black bin
+61,16,dest,1/4,NEW,"eraser, glue stick, orange cube",orange cube,2,pink,,배치 L4: 1번=cyan · 2번=pink · 3번=white · 4번=black,Put the orange cube into the pink bin
+62,16,dest,2/4,KEEP,"eraser, glue stick, orange cube",orange cube,4,black,,,Put the orange cube into the black bin
+63,16,dest,3/4,KEEP,"eraser, glue stick, orange cube",orange cube,3,white,,,Put the orange cube into the white bin
+64,16,dest,4/4,KEEP,"eraser, glue stick, orange cube",orange cube,1,cyan,,,Put the orange cube into the cyan bin
+65,17,dest,1/4,NEW,"screwdriver, red cube, glue stick",red cube,1,white,,배치 L5: 1번=white · 2번=pink · 3번=cyan · 4번=black,Put the red cube into the white bin
+66,17,dest,2/4,KEEP,"screwdriver, red cube, glue stick",red cube,2,pink,,,Put the red cube into the pink bin
+67,17,dest,3/4,KEEP,"screwdriver, red cube, glue stick",red cube,4,black,,,Put the red cube into the black bin
+68,17,dest,4/4,KEEP,"screwdriver, red cube, glue stick",red cube,3,cyan,,,Put the red cube into the cyan bin
+69,18,dest,1/4,NEW,"orange cube, green cube, purple cube",green cube,4,black,,배치 L5: 1번=white · 2번=pink · 3번=cyan · 4번=black,Put the green cube into the black bin
+70,18,dest,2/4,KEEP,"orange cube, green cube, purple cube",green cube,3,cyan,,,Put the green cube into the cyan bin
+71,18,dest,3/4,KEEP,"orange cube, green cube, purple cube",green cube,2,pink,,,Put the green cube into the pink bin
+72,18,dest,4/4,KEEP,"orange cube, green cube, purple cube",green cube,1,white,,,Put the green cube into the white bin
+73,19,dest,1/4,NEW,"purple cube, red cube, eraser",red cube,3,cyan,,배치 L5: 1번=white · 2번=pink · 3번=cyan · 4번=black,Put the red cube into the cyan bin
+74,19,dest,2/4,KEEP,"purple cube, red cube, eraser",red cube,2,pink,,,Put the red cube into the pink bin
+75,19,dest,3/4,KEEP,"purple cube, red cube, eraser",red cube,1,white,,,Put the red cube into the white bin
+76,19,dest,4/4,KEEP,"purple cube, red cube, eraser",red cube,4,black,,,Put the red cube into the black bin
+77,20,dest,1/4,NEW,"purple cube, marker",purple cube,4,black,,배치 L5: 1번=white · 2번=pink · 3번=cyan · 4번=black,Put the purple cube into the black bin
+78,20,dest,2/4,KEEP,"purple cube, marker",purple cube,1,white,,,Put the purple cube into the white bin
+79,20,dest,3/4,KEEP,"purple cube, marker",purple cube,3,cyan,,,Put the purple cube into the cyan bin
+80,20,dest,4/4,KEEP,"purple cube, marker",purple cube,2,pink,,,Put the purple cube into the pink bin
+81,21,dest,1/4,NEW,"green cube, orange cube",green cube,3,white,,배치 L6: 1번=cyan · 2번=black · 3번=white · 4번=pink,Put the green cube into the white bin
+82,21,dest,2/4,KEEP,"green cube, orange cube",green cube,2,black,,,Put the green cube into the black bin
+83,21,dest,3/4,KEEP,"green cube, orange cube",green cube,4,pink,,,Put the green cube into the pink bin
+84,21,dest,4/4,KEEP,"green cube, orange cube",green cube,1,cyan,,,Put the green cube into the cyan bin
+85,22,dest,1/4,NEW,"yellow cube, orange cube",orange cube,1,cyan,,배치 L6: 1번=cyan · 2번=black · 3번=white · 4번=pink,Put the orange cube into the cyan bin
+86,22,dest,2/4,KEEP,"yellow cube, orange cube",orange cube,4,pink,,,Put the orange cube into the pink bin
+87,22,dest,3/4,KEEP,"yellow cube, orange cube",orange cube,2,black,,,Put the orange cube into the black bin
+88,22,dest,4/4,KEEP,"yellow cube, orange cube",orange cube,3,white,,,Put the orange cube into the white bin
+89,23,dest,1/4,NEW,"yellow cube, green cube, red cube",yellow cube,2,black,,배치 L6: 1번=cyan · 2번=black · 3번=white · 4번=pink,Put the yellow cube into the black bin
+90,23,dest,2/4,KEEP,"yellow cube, green cube, red cube",yellow cube,1,cyan,,,Put the yellow cube into the cyan bin
+91,23,dest,3/4,KEEP,"yellow cube, green cube, red cube",yellow cube,3,white,,,Put the yellow cube into the white bin
+92,23,dest,4/4,KEEP,"yellow cube, green cube, red cube",yellow cube,4,pink,,,Put the yellow cube into the pink bin
+93,24,dest,1/4,NEW,"marker, blue cube, glue stick",blue cube,2,black,,배치 L6: 1번=cyan · 2번=black · 3번=white · 4번=pink,Put the blue cube into the black bin
+94,24,dest,2/4,KEEP,"marker, blue cube, glue stick",blue cube,4,pink,,,Put the blue cube into the pink bin
+95,24,dest,3/4,KEEP,"marker, blue cube, glue stick",blue cube,1,cyan,,,Put the blue cube into the cyan bin
+96,24,dest,4/4,KEEP,"marker, blue cube, glue stick",blue cube,3,white,,,Put the blue cube into the white bin
