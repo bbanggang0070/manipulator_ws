@@ -73,7 +73,13 @@ def partners_of(x):
     return {b for pr in EXCLUSIVE for a, b in (pr, pr[::-1]) if a == x}
 
 FIELDS = ["trial", "group", "kind", "pos", "keep_layout",
-          "objects", "target", "slot", "slot_color", "pose_hint", "instruction"]
+          "objects", "target", "slot", "slot_color", "pose_hint",
+          "layout_hint", "instruction"]
+# layout_hint: 선반 **물리 배치**가 바뀌는 지점에 배너를 띄우기 위한 선택 필드.
+#   cleanup_eval.py 자체는 배치가 몇 개인지, 어떻게 섞는지 전혀 모른다 — 그건
+#   계획표를 만드는 쪽(색지 교체 실험 생성기)의 책임이다. 여기서는 그저
+#   "이 값이 이전 행과 다르면 통째로 출력한다"만 한다. 일반 평가 계획표는
+#   이 열이 비어 있어(기존 cleanup_eval_plan.csv 등) 아무 영향이 없다.
 RFIELDS = FIELDS + ["picked", "landed", "note"]
 
 
@@ -191,9 +197,24 @@ def cmd_log(a):
     print(f"\n  계획 {len(plan)}시행 · 기록됨 {len(done)}시행\n")
 
     objs_all = sorted(OBJECTS)
+    prev_layout = None   # 선반 물리 배치가 바뀌는 지점에 배너를 띄운다(아래)
     for r in plan:
         if r["trial"] in done and not a.redo:
+            prev_layout = r.get("layout_hint") or prev_layout
             continue
+        # ── 물리 배치 전환 배너 ──────────────────────────────────────
+        #   이전 행과 layout_hint 가 다르면(빈 문자열끼리는 "안 바뀜"으로 본다)
+        #   크게 띄운다. 이 값이 뭘 의미하는지는 계획표를 만든 쪽만 알고
+        #   여기서는 그냥 "바뀌면 보여 준다"만 한다 — 일반 계획표(이 열이
+        #   계속 비어 있는)에서는 한 번도 안 뜬다.
+        cur_layout = r.get("layout_hint") or ""
+        if cur_layout and cur_layout != (prev_layout or ""):
+            print("\n" + "#" * 64)
+            print("  ▶▶▶ 선반 배치를 바꾸세요 ◀◀◀")
+            print(f"  {cur_layout}")
+            print("#" * 64)
+            input("  배치를 맞췄으면 Enter ")
+        prev_layout = cur_layout or prev_layout
         print("=" * 64)
         if r["keep_layout"] == "KEEP":
             print("  \033[1;41m  ████ 물체를 건드리지 마세요 — 배치 그대로 ████  \033[0m")
