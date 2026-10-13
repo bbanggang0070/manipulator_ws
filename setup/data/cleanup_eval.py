@@ -263,6 +263,16 @@ def cmd_log(a):
             # 까지 rest 를 유지하는 행동을 계속 내놓는다 — 모델에 종료 신호가 없다.
             env.setdefault("STOP_ON_REST", "1")
             env.setdefault("ENSEMBLE_W", "0.8")
+            # eval_lerobot.py 의 RERUN 기본값은 1(실시간 시각화 켬)인데, 매 시행마다
+            # 새 프로세스가 `rr.init(..., spawn=True)`로 **기존 뷰어에 계속 이어붙는다.**
+            # 그 뷰어 하나가 한 번도 안 닫힌 채 수십~수백 시행의 카메라·상태값을
+            # 누적하면 메모리를 수십 GB까지 먹어 시스템 전체가 스왑으로 밀린다
+            # (2026-10-14 실측: 96시행 배치 중 rerun 프로세스가 54GB/62GB 를 먹어
+            # 카메라 읽기 자체가 멈췄다 — GPU·추론과 무관한 문제였다).
+            # 이 도구는 자동화 배치용이라 매 시행 화면을 사람이 보고 있지 않으므로
+            # 기본으로 끈다. 라이브로 보고 싶으면 RERUN=1 로 켤 것(배치가 길면
+            # 중간에 한 번씩 rerun 프로세스를 직접 죽여 메모리를 비워 줘야 한다).
+            env.setdefault("RERUN", "0")
             runner = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                   "..", "gr00t", "run_eval_real.sh")
             if not os.path.exists(runner):

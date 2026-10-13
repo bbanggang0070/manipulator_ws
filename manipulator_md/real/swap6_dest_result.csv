@@ -1,0 +1,8 @@
+trial,group,kind,pos,keep_layout,objects,target,slot,slot_color,pose_hint,layout_hint,instruction,picked,landed,note
+1,1,dest,1/4,NEW,"marker, red cube, glue stick",red cube,1,black,,배치 L1 (원래 학습 배치): 1번=black · 2번=cyan · 3번=pink · 4번=white,Put the red cube into the black bin,red cube,black,
+2,1,dest,2/4,KEEP,"marker, red cube, glue stick",red cube,2,cyan,,,Put the red cube into the cyan bin,red cube,cyan,
+3,1,dest,3/4,KEEP,"marker, red cube, glue stick",red cube,3,pink,,,Put the red cube into the pink bin,red cube,pink,
+4,1,dest,4/4,KEEP,"marker, red cube, glue stick",red cube,4,white,,,Put the red cube into the white bin,red cube,white,
+5,2,dest,1/4,NEW,"yellow cube, red cube",yellow cube,4,white,,배치 L1 (원래 학습 배치): 1번=black · 2번=cyan · 3번=pink · 4번=white,Put the yellow cube into the white bin,yellow cube,white,
+6,2,dest,2/4,KEEP,"yellow cube, red cube",yellow cube,3,pink,,,Put the yellow cube into the pink bin,yellow cube,pink,
+7,2,dest,3/4,KEEP,"yellow cube, red cube",yellow cube,1,black,,,Put the yellow cube into the black bin,yellow cube,black,
