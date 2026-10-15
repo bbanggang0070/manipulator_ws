@@ -54,8 +54,18 @@ def snap_path(root):
 LIVE = [("팔로워", "robots/so_follower/follower.json"),
         ("리더  ", "teleoperators/so_leader/leader.json")]
 
+# 양팔(bi-manipulator) 버전 — BiSOFollower/BiSOLeader가 내부적으로 서브암을
+# f"{id}_left"/f"{id}_right"로 만들어 **같은 so_follower/so_leader 폴더**에
+# 저장한다(클래스 이름이 폴더를 정하므로). id는 setup/bi/data/record_bi.sh 와
+# 맞춰야 한다. fingerprint()는 CALIB_DIR 전체를 긁으므로 --check/--write는
+# 수정 없이 그대로 이 파일들도 감지한다 — 이 배너는 표시용일 뿐이다.
+LIVE_BI = [("왼팔 팔로워", "robots/so_follower/bi_follower_left.json"),
+           ("오른팔 팔로워", "robots/so_follower/bi_follower_right.json"),
+           ("왼팔 리더  ", "teleoperators/so_leader/bi_leader_left.json"),
+           ("오른팔 리더  ", "teleoperators/so_leader/bi_leader_right.json")]
 
-def cmd_banner():
+
+def cmd_banner(live=LIVE):
     """수집·텔레오프가 **실제로 쓸** 캘리브레이션을 한눈에 보여 준다.
 
     스크립트가 어떤 캘리브레이션으로 도는지 화면에 안 나오면, 재캘리브레이션을
@@ -64,7 +74,7 @@ def cmd_banner():
     fp = fingerprint()
     missing = False
     print("  캘리브레이션 (이 실행에 적용됨)")
-    for label, rel in LIVE:
+    for label, rel in live:
         full = os.path.join(CALIB_DIR, rel)
         if not os.path.exists(full):
             print(f"    {label}  ❌ 없음: {rel}")
@@ -152,10 +162,14 @@ def main():
     g.add_argument("--show", action="store_true")
     g.add_argument("--banner", action="store_true",
                    help="실제로 쓰이는 두 파일만 한 줄씩 — 스크립트 시작 배너용")
+    g.add_argument("--banner-bi", action="store_true",
+                   help="양팔(bi_follower_left/right, bi_leader_left/right) 네 파일 배너")
     ap.add_argument("--force", action="store_true", help="--write 시 기존 지문을 덮어쓴다")
     a = ap.parse_args()
     if a.banner:
         return cmd_banner()
+    if a.banner_bi:
+        return cmd_banner(LIVE_BI)
     if a.show:
         return cmd_show()
     if a.write:

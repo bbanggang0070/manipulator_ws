@@ -1,0 +1,301 @@
+ep,group,group_kind,group_pos,keep_layout,n_objects,objects,target,slot,slot_color,pose_hint,instruction,layout
+1,1,single,1/1,NEW,2,"red marker, yellow straw",yellow straw,1,black,,Put the yellow straw into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+2,2,single,1/1,NEW,3,"toothbrush, black marker, red marker",black marker,4,cyan,,Put the black marker into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+3,3,quad,1/4,NEW,4,"black marker, screwdriver, red marker, yellow straw",screwdriver,4,cyan,,Put the screwdriver into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+4,3,quad,2/4,KEEP,4,"black marker, screwdriver, red marker, yellow straw",screwdriver,3,pink,,Put the screwdriver into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+5,3,quad,3/4,KEEP,4,"black marker, screwdriver, red marker, yellow straw",screwdriver,2,white,,Put the screwdriver into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+6,3,quad,4/4,KEEP,4,"black marker, screwdriver, red marker, yellow straw",screwdriver,1,black,,Put the screwdriver into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+7,4,single,1/1,NEW,3,"screwdriver, red marker, eraser",red marker,2,white,eraser 세워서,Put the red marker into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+8,5,pair,1/2,NEW,2,"blue marker, toothbrush",blue marker,3,pink,,Put the blue marker into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+9,5,pair,2/2,KEEP,2,"blue marker, toothbrush",blue marker,1,black,,Put the blue marker into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+10,6,pair,1/2,NEW,3,"yellow straw, eraser, blue marker",eraser,3,pink,eraser 세워서,Put the eraser into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+11,6,pair,2/2,KEEP,3,"yellow straw, eraser, blue marker",eraser,4,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+12,7,single,1/1,NEW,3,"toothbrush, glue stick, black marker",glue stick,2,white,,Put the glue stick into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+13,8,single,1/1,NEW,2,"toothbrush, screwdriver",toothbrush,2,white,,Put the toothbrush into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+14,9,pair,1/2,NEW,3,"red marker, glue stick, eraser",red marker,3,pink,eraser 세워서,Put the red marker into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+15,9,pair,2/2,KEEP,3,"red marker, glue stick, eraser",red marker,1,black,eraser 세워서,Put the red marker into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+16,10,single,1/1,NEW,4,"glue stick, toothbrush, blue marker, eraser",glue stick,4,cyan,eraser 세워서,Put the glue stick into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+17,11,single,1/1,NEW,4,"glue stick, black marker, eraser, yellow straw",yellow straw,2,white,eraser 세워서,Put the yellow straw into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+18,12,single,1/1,NEW,2,"toothbrush, blue marker",toothbrush,4,cyan,,Put the toothbrush into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+19,13,single,1/1,NEW,2,"black marker, glue stick",black marker,1,black,,Put the black marker into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+20,14,pair,1/2,NEW,2,"glue stick, toothbrush",toothbrush,3,pink,,Put the toothbrush into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+21,14,pair,2/2,KEEP,2,"glue stick, toothbrush",toothbrush,1,black,,Put the toothbrush into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+22,15,single,1/1,NEW,4,"black marker, toothbrush, eraser, yellow straw",yellow straw,3,pink,eraser 세워서,Put the yellow straw into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+23,16,single,1/1,NEW,4,"toothbrush, black marker, blue marker, eraser",blue marker,4,cyan,eraser 세워서,Put the blue marker into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+24,17,quad,1/4,NEW,4,"red marker, screwdriver, eraser, yellow straw",eraser,1,black,eraser 세워서,Put the eraser into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+25,17,quad,2/4,KEEP,4,"red marker, screwdriver, eraser, yellow straw",eraser,2,white,eraser 세워서,Put the eraser into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+26,17,quad,3/4,KEEP,4,"red marker, screwdriver, eraser, yellow straw",eraser,3,pink,eraser 세워서,Put the eraser into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+27,17,quad,4/4,KEEP,4,"red marker, screwdriver, eraser, yellow straw",eraser,4,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+28,18,pair,1/2,NEW,3,"screwdriver, toothbrush, glue stick",glue stick,3,pink,,Put the glue stick into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+29,18,pair,2/2,KEEP,3,"screwdriver, toothbrush, glue stick",glue stick,1,black,,Put the glue stick into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+30,19,pair,1/2,NEW,2,"black marker, screwdriver",black marker,2,white,,Put the black marker into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+31,19,pair,2/2,KEEP,2,"black marker, screwdriver",black marker,3,pink,,Put the black marker into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+32,20,single,1/1,NEW,2,"yellow straw, blue marker",yellow straw,4,cyan,,Put the yellow straw into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+33,21,single,1/1,NEW,2,"blue marker, red marker",red marker,4,cyan,,Put the red marker into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+34,22,single,1/1,NEW,3,"blue marker, toothbrush, glue stick",blue marker,2,white,,Put the blue marker into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+35,23,single,1/1,NEW,4,"yellow straw, black marker, eraser, red marker",yellow straw,2,white,eraser 세워서,Put the yellow straw into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+36,24,single,1/1,NEW,2,"blue marker, toothbrush",toothbrush,1,black,,Put the toothbrush into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+37,25,pair,1/2,NEW,4,"glue stick, blue marker, black marker, yellow straw",glue stick,4,cyan,,Put the glue stick into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+38,25,pair,2/2,KEEP,4,"glue stick, blue marker, black marker, yellow straw",glue stick,1,black,,Put the glue stick into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+39,26,single,1/1,NEW,2,"toothbrush, blue marker",blue marker,3,pink,,Put the blue marker into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+40,27,single,1/1,NEW,2,"blue marker, red marker",red marker,2,white,,Put the red marker into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+41,28,single,1/1,NEW,2,"screwdriver, eraser",screwdriver,1,black,eraser 세워서,Put the screwdriver into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+42,29,single,1/1,NEW,2,"yellow straw, black marker",black marker,2,white,,Put the black marker into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+43,30,single,1/1,NEW,3,"black marker, yellow straw, eraser",yellow straw,3,pink,eraser 세워서,Put the yellow straw into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+44,31,single,1/1,NEW,2,"black marker, red marker",black marker,4,cyan,,Put the black marker into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+45,32,single,1/1,NEW,4,"red marker, toothbrush, screwdriver, glue stick",toothbrush,3,pink,,Put the toothbrush into the pink bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+46,33,single,1/1,NEW,4,"red marker, blue marker, yellow straw, screwdriver",screwdriver,2,white,,Put the screwdriver into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+47,34,single,1/1,NEW,4,"red marker, screwdriver, glue stick, eraser",red marker,1,black,eraser 세워서,Put the red marker into the black bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+48,35,single,1/1,NEW,2,"yellow straw, blue marker",blue marker,4,cyan,,Put the blue marker into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+49,36,single,1/1,NEW,4,"toothbrush, red marker, black marker, blue marker",toothbrush,4,cyan,,Put the toothbrush into the cyan bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+50,37,single,1/1,NEW,3,"eraser, black marker, red marker",eraser,2,white,eraser 세워서,Put the eraser into the white bin,1번 black · 2번 white · 3번 pink · 4번 cyan
+51,38,single,1/1,NEW,2,"black marker, red marker",black marker,4,black,,Put the black marker into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+52,39,single,1/1,NEW,2,"red marker, screwdriver",red marker,2,pink,,Put the red marker into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+53,40,single,1/1,NEW,4,"red marker, blue marker, eraser, toothbrush",blue marker,4,black,eraser 세워서,Put the blue marker into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+54,41,quad,1/4,NEW,2,"toothbrush, screwdriver",screwdriver,1,cyan,,Put the screwdriver into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+55,41,quad,2/4,KEEP,2,"toothbrush, screwdriver",screwdriver,3,white,,Put the screwdriver into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+56,41,quad,3/4,KEEP,2,"toothbrush, screwdriver",screwdriver,2,pink,,Put the screwdriver into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+57,41,quad,4/4,KEEP,2,"toothbrush, screwdriver",screwdriver,4,black,,Put the screwdriver into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+58,42,single,1/1,NEW,2,"black marker, glue stick",glue stick,3,white,,Put the glue stick into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+59,43,single,1/1,NEW,2,"yellow straw, toothbrush",yellow straw,1,cyan,,Put the yellow straw into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+60,44,pair,1/2,NEW,4,"glue stick, red marker, toothbrush, yellow straw",red marker,1,cyan,,Put the red marker into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+61,44,pair,2/2,KEEP,4,"glue stick, red marker, toothbrush, yellow straw",red marker,2,pink,,Put the red marker into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+62,45,single,1/1,NEW,4,"glue stick, red marker, eraser, black marker",eraser,4,black,eraser 세워서,Put the eraser into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+63,46,single,1/1,NEW,2,"blue marker, toothbrush",toothbrush,3,white,,Put the toothbrush into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+64,47,single,1/1,NEW,2,"black marker, yellow straw",yellow straw,4,black,,Put the yellow straw into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+65,48,single,1/1,NEW,3,"blue marker, red marker, black marker",blue marker,3,white,,Put the blue marker into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+66,49,single,1/1,NEW,4,"blue marker, screwdriver, glue stick, black marker",black marker,2,pink,,Put the black marker into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+67,50,single,1/1,NEW,2,"screwdriver, glue stick",glue stick,2,pink,,Put the glue stick into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+68,51,single,1/1,NEW,2,"glue stick, black marker",black marker,1,cyan,,Put the black marker into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+69,52,single,1/1,NEW,4,"eraser, toothbrush, blue marker, glue stick",toothbrush,4,black,eraser 세워서,Put the toothbrush into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+70,53,single,1/1,NEW,4,"blue marker, red marker, eraser, yellow straw",yellow straw,3,white,eraser 세워서,Put the yellow straw into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+71,54,single,1/1,NEW,4,"glue stick, eraser, yellow straw, blue marker",eraser,2,pink,eraser 세워서,Put the eraser into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+72,55,single,1/1,NEW,4,"glue stick, yellow straw, blue marker, screwdriver",glue stick,1,cyan,,Put the glue stick into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+73,56,single,1/1,NEW,4,"blue marker, eraser, red marker, toothbrush",blue marker,1,cyan,eraser 세워서,Put the blue marker into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+74,57,single,1/1,NEW,3,"yellow straw, glue stick, toothbrush",glue stick,2,pink,,Put the glue stick into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+75,58,single,1/1,NEW,3,"toothbrush, red marker, blue marker",toothbrush,3,white,,Put the toothbrush into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+76,59,pair,1/2,NEW,2,"red marker, yellow straw",yellow straw,2,pink,,Put the yellow straw into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+77,59,pair,2/2,KEEP,2,"red marker, yellow straw",yellow straw,4,black,,Put the yellow straw into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+78,60,pair,1/2,NEW,2,"yellow straw, eraser",eraser,1,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+79,60,pair,2/2,KEEP,2,"yellow straw, eraser",eraser,4,black,eraser 세워서,Put the eraser into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+80,61,single,1/1,NEW,3,"red marker, eraser, toothbrush",red marker,3,white,eraser 세워서,Put the red marker into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+81,62,pair,1/2,NEW,3,"red marker, yellow straw, black marker",black marker,2,pink,,Put the black marker into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+82,62,pair,2/2,KEEP,3,"red marker, yellow straw, black marker",black marker,4,black,,Put the black marker into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+83,63,pair,1/2,NEW,2,"blue marker, glue stick",blue marker,3,white,,Put the blue marker into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+84,63,pair,2/2,KEEP,2,"blue marker, glue stick",blue marker,4,black,,Put the blue marker into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+85,64,single,1/1,NEW,3,"blue marker, black marker, glue stick",glue stick,3,white,,Put the glue stick into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+86,65,pair,1/2,NEW,2,"yellow straw, red marker",red marker,1,cyan,,Put the red marker into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+87,65,pair,2/2,KEEP,2,"yellow straw, red marker",red marker,4,black,,Put the red marker into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+88,66,pair,1/2,NEW,4,"screwdriver, yellow straw, eraser, glue stick",screwdriver,1,cyan,eraser 세워서,Put the screwdriver into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+89,66,pair,2/2,KEEP,4,"screwdriver, yellow straw, eraser, glue stick",screwdriver,2,pink,eraser 세워서,Put the screwdriver into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+90,67,single,1/1,NEW,2,"toothbrush, yellow straw",toothbrush,2,pink,,Put the toothbrush into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+91,68,single,1/1,NEW,2,"toothbrush, screwdriver",toothbrush,1,cyan,,Put the toothbrush into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+92,69,single,1/1,NEW,4,"red marker, glue stick, yellow straw, screwdriver",yellow straw,1,cyan,,Put the yellow straw into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+93,70,single,1/1,NEW,4,"black marker, blue marker, eraser, screwdriver",black marker,3,white,eraser 세워서,Put the black marker into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+94,71,single,1/1,NEW,2,"glue stick, eraser",glue stick,4,black,eraser 세워서,Put the glue stick into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+95,72,single,1/1,NEW,2,"blue marker, screwdriver",blue marker,2,pink,,Put the blue marker into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+96,73,single,1/1,NEW,4,"yellow straw, eraser, blue marker, toothbrush",eraser,3,white,eraser 세워서,Put the eraser into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+97,74,pair,1/2,NEW,3,"glue stick, toothbrush, eraser",toothbrush,3,white,eraser 세워서,Put the toothbrush into the white bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+98,74,pair,2/2,KEEP,3,"glue stick, toothbrush, eraser",toothbrush,2,pink,eraser 세워서,Put the toothbrush into the pink bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+99,75,single,1/1,NEW,3,"red marker, yellow straw, eraser",yellow straw,4,black,eraser 세워서,Put the yellow straw into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+100,76,pair,1/2,NEW,4,"glue stick, blue marker, eraser, yellow straw",blue marker,4,black,eraser 세워서,Put the blue marker into the black bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+101,76,pair,2/2,KEEP,4,"glue stick, blue marker, eraser, yellow straw",blue marker,1,cyan,eraser 세워서,Put the blue marker into the cyan bin,1번 cyan · 2번 pink · 3번 white · 4번 black
+102,77,single,1/1,NEW,3,"black marker, screwdriver, eraser",black marker,4,white,eraser 세워서,Put the black marker into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+103,78,single,1/1,NEW,2,"glue stick, yellow straw",glue stick,3,pink,,Put the glue stick into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+104,79,single,1/1,NEW,3,"yellow straw, toothbrush, screwdriver",screwdriver,2,cyan,,Put the screwdriver into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+105,80,single,1/1,NEW,2,"red marker, glue stick",red marker,4,white,,Put the red marker into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+106,81,single,1/1,NEW,4,"blue marker, glue stick, red marker, eraser",eraser,1,black,eraser 세워서,Put the eraser into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+107,82,single,1/1,NEW,3,"toothbrush, eraser, red marker",eraser,3,pink,eraser 세워서,Put the eraser into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+108,83,single,1/1,NEW,4,"screwdriver, blue marker, black marker, toothbrush",black marker,2,cyan,,Put the black marker into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+109,84,single,1/1,NEW,3,"eraser, yellow straw, screwdriver",screwdriver,3,pink,eraser 세워서,Put the screwdriver into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+110,85,pair,1/2,NEW,3,"red marker, glue stick, toothbrush",glue stick,1,black,,Put the glue stick into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+111,85,pair,2/2,KEEP,3,"red marker, glue stick, toothbrush",glue stick,2,cyan,,Put the glue stick into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+112,86,pair,1/2,NEW,2,"red marker, screwdriver",red marker,3,pink,,Put the red marker into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+113,86,pair,2/2,KEEP,2,"red marker, screwdriver",red marker,1,black,,Put the red marker into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+114,87,single,1/1,NEW,4,"glue stick, yellow straw, black marker, screwdriver",yellow straw,4,white,,Put the yellow straw into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+115,88,pair,1/2,NEW,2,"yellow straw, blue marker",blue marker,3,pink,,Put the blue marker into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+116,88,pair,2/2,KEEP,2,"yellow straw, blue marker",blue marker,4,white,,Put the blue marker into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+117,89,pair,1/2,NEW,2,"eraser, screwdriver",screwdriver,1,black,eraser 세워서,Put the screwdriver into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+118,89,pair,2/2,KEEP,2,"eraser, screwdriver",screwdriver,4,white,eraser 세워서,Put the screwdriver into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+119,90,single,1/1,NEW,4,"eraser, blue marker, yellow straw, red marker",yellow straw,2,cyan,eraser 세워서,Put the yellow straw into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+120,91,single,1/1,NEW,3,"black marker, eraser, yellow straw",eraser,2,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+121,92,single,1/1,NEW,3,"toothbrush, red marker, yellow straw",toothbrush,2,cyan,,Put the toothbrush into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+122,93,pair,1/2,NEW,2,"black marker, yellow straw",black marker,1,black,,Put the black marker into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+123,93,pair,2/2,KEEP,2,"black marker, yellow straw",black marker,3,pink,,Put the black marker into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+124,94,pair,1/2,NEW,2,"eraser, blue marker",eraser,2,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+125,94,pair,2/2,KEEP,2,"eraser, blue marker",eraser,4,white,eraser 세워서,Put the eraser into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+126,95,single,1/1,NEW,3,"red marker, toothbrush, black marker",red marker,2,cyan,,Put the red marker into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+127,96,single,1/1,NEW,3,"glue stick, eraser, yellow straw",glue stick,4,white,eraser 세워서,Put the glue stick into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+128,97,single,1/1,NEW,4,"yellow straw, blue marker, eraser, black marker",yellow straw,3,pink,eraser 세워서,Put the yellow straw into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+129,98,single,1/1,NEW,4,"yellow straw, glue stick, screwdriver, toothbrush",toothbrush,1,black,,Put the toothbrush into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+130,99,pair,1/2,NEW,3,"blue marker, toothbrush, yellow straw",yellow straw,3,pink,,Put the yellow straw into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+131,99,pair,2/2,KEEP,3,"blue marker, toothbrush, yellow straw",yellow straw,4,white,,Put the yellow straw into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+132,100,single,1/1,NEW,3,"screwdriver, blue marker, yellow straw",blue marker,1,black,,Put the blue marker into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+133,101,single,1/1,NEW,2,"screwdriver, black marker",black marker,2,cyan,,Put the black marker into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+134,102,pair,1/2,NEW,3,"toothbrush, blue marker, yellow straw",toothbrush,1,black,,Put the toothbrush into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+135,102,pair,2/2,KEEP,3,"toothbrush, blue marker, yellow straw",toothbrush,3,pink,,Put the toothbrush into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+136,103,single,1/1,NEW,2,"red marker, eraser",red marker,4,white,eraser 세워서,Put the red marker into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+137,104,single,1/1,NEW,3,"screwdriver, blue marker, red marker",screwdriver,1,black,,Put the screwdriver into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+138,105,single,1/1,NEW,2,"yellow straw, glue stick",glue stick,4,white,,Put the glue stick into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+139,106,single,1/1,NEW,3,"eraser, toothbrush, red marker",eraser,3,pink,eraser 세워서,Put the eraser into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+140,107,single,1/1,NEW,4,"toothbrush, blue marker, screwdriver, eraser",blue marker,2,cyan,eraser 세워서,Put the blue marker into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+141,108,single,1/1,NEW,2,"black marker, blue marker",black marker,4,white,,Put the black marker into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+142,109,single,1/1,NEW,3,"yellow straw, glue stick, red marker",glue stick,1,black,,Put the glue stick into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+143,110,pair,1/2,NEW,4,"blue marker, screwdriver, eraser, toothbrush",screwdriver,3,pink,eraser 세워서,Put the screwdriver into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+144,110,pair,2/2,KEEP,4,"blue marker, screwdriver, eraser, toothbrush",screwdriver,2,cyan,eraser 세워서,Put the screwdriver into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+145,111,single,1/1,NEW,2,"red marker, yellow straw",red marker,1,black,,Put the red marker into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+146,112,single,1/1,NEW,3,"blue marker, glue stick, eraser",blue marker,3,pink,eraser 세워서,Put the blue marker into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+147,113,single,1/1,NEW,4,"screwdriver, blue marker, red marker, eraser",red marker,2,cyan,eraser 세워서,Put the red marker into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+148,114,pair,1/2,NEW,2,"eraser, black marker",black marker,3,pink,eraser 세워서,Put the black marker into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+149,114,pair,2/2,KEEP,2,"eraser, black marker",black marker,1,black,eraser 세워서,Put the black marker into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+150,115,single,1/1,NEW,2,"screwdriver, yellow straw",yellow straw,2,cyan,,Put the yellow straw into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+151,116,single,1/1,NEW,4,"glue stick, yellow straw, eraser, red marker",eraser,1,white,eraser 세워서,Put the eraser into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+152,117,single,1/1,NEW,3,"black marker, red marker, toothbrush",toothbrush,1,white,,Put the toothbrush into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+153,118,single,1/1,NEW,4,"glue stick, black marker, red marker, yellow straw",glue stick,4,cyan,,Put the glue stick into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+154,119,single,1/1,NEW,4,"glue stick, black marker, eraser, yellow straw",eraser,3,black,eraser 세워서,Put the eraser into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+155,120,single,1/1,NEW,3,"screwdriver, yellow straw, red marker",screwdriver,1,white,,Put the screwdriver into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+156,121,single,1/1,NEW,4,"black marker, toothbrush, glue stick, eraser",toothbrush,4,cyan,eraser 세워서,Put the toothbrush into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+157,122,single,1/1,NEW,3,"glue stick, eraser, toothbrush",glue stick,2,pink,eraser 세워서,Put the glue stick into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+158,123,single,1/1,NEW,3,"blue marker, glue stick, red marker",blue marker,1,white,,Put the blue marker into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+159,124,single,1/1,NEW,2,"yellow straw, screwdriver",yellow straw,3,black,,Put the yellow straw into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+160,125,pair,1/2,NEW,4,"eraser, toothbrush, glue stick, red marker",red marker,1,white,eraser 세워서,Put the red marker into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+161,125,pair,2/2,KEEP,4,"eraser, toothbrush, glue stick, red marker",red marker,2,pink,eraser 세워서,Put the red marker into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+162,126,single,1/1,NEW,4,"yellow straw, black marker, toothbrush, screwdriver",black marker,3,black,,Put the black marker into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+163,127,single,1/1,NEW,4,"blue marker, glue stick, red marker, screwdriver",blue marker,2,pink,,Put the blue marker into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+164,128,pair,1/2,NEW,4,"blue marker, black marker, red marker, screwdriver",screwdriver,4,cyan,,Put the screwdriver into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+165,128,pair,2/2,KEEP,4,"blue marker, black marker, red marker, screwdriver",screwdriver,3,black,,Put the screwdriver into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+166,129,single,1/1,NEW,4,"screwdriver, toothbrush, red marker, eraser",toothbrush,2,pink,eraser 세워서,Put the toothbrush into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+167,130,single,1/1,NEW,2,"eraser, screwdriver",eraser,1,white,eraser 세워서,Put the eraser into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+168,131,single,1/1,NEW,2,"glue stick, blue marker",glue stick,4,cyan,,Put the glue stick into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+169,132,single,1/1,NEW,2,"yellow straw, black marker",yellow straw,2,pink,,Put the yellow straw into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+170,133,single,1/1,NEW,4,"glue stick, blue marker, toothbrush, eraser",toothbrush,4,cyan,eraser 세워서,Put the toothbrush into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+171,134,single,1/1,NEW,3,"glue stick, black marker, eraser",black marker,1,white,eraser 세워서,Put the black marker into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+172,135,pair,1/2,NEW,2,"eraser, glue stick",eraser,2,pink,eraser 세워서,Put the eraser into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+173,135,pair,2/2,KEEP,2,"eraser, glue stick",eraser,3,black,eraser 세워서,Put the eraser into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+174,136,single,1/1,NEW,2,"red marker, toothbrush",red marker,4,cyan,,Put the red marker into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+175,137,pair,1/2,NEW,4,"toothbrush, black marker, yellow straw, eraser",yellow straw,3,black,eraser 세워서,Put the yellow straw into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+176,137,pair,2/2,KEEP,4,"toothbrush, black marker, yellow straw, eraser",yellow straw,1,white,eraser 세워서,Put the yellow straw into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+177,138,single,1/1,NEW,4,"glue stick, red marker, eraser, blue marker",glue stick,1,white,eraser 세워서,Put the glue stick into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+178,139,single,1/1,NEW,2,"screwdriver, blue marker",blue marker,3,black,,Put the blue marker into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+179,140,quad,1/4,NEW,3,"toothbrush, yellow straw, black marker",black marker,3,black,,Put the black marker into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+180,140,quad,2/4,KEEP,3,"toothbrush, yellow straw, black marker",black marker,4,cyan,,Put the black marker into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+181,140,quad,3/4,KEEP,3,"toothbrush, yellow straw, black marker",black marker,2,pink,,Put the black marker into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+182,140,quad,4/4,KEEP,3,"toothbrush, yellow straw, black marker",black marker,1,white,,Put the black marker into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+183,141,pair,1/2,NEW,3,"black marker, screwdriver, red marker",red marker,3,black,,Put the red marker into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+184,141,pair,2/2,KEEP,3,"black marker, screwdriver, red marker",red marker,2,pink,,Put the red marker into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+185,142,pair,1/2,NEW,2,"eraser, glue stick",glue stick,2,pink,eraser 세워서,Put the glue stick into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+186,142,pair,2/2,KEEP,2,"eraser, glue stick",glue stick,3,black,eraser 세워서,Put the glue stick into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+187,143,quad,1/4,NEW,2,"screwdriver, yellow straw",screwdriver,1,white,,Put the screwdriver into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+188,143,quad,2/4,KEEP,2,"screwdriver, yellow straw",screwdriver,3,black,,Put the screwdriver into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+189,143,quad,3/4,KEEP,2,"screwdriver, yellow straw",screwdriver,2,pink,,Put the screwdriver into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+190,143,quad,4/4,KEEP,2,"screwdriver, yellow straw",screwdriver,4,cyan,,Put the screwdriver into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+191,144,single,1/1,NEW,2,"eraser, blue marker",blue marker,4,cyan,eraser 세워서,Put the blue marker into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+192,145,single,1/1,NEW,4,"black marker, screwdriver, yellow straw, toothbrush",toothbrush,1,white,,Put the toothbrush into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+193,146,single,1/1,NEW,2,"toothbrush, screwdriver",toothbrush,3,black,,Put the toothbrush into the black bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+194,147,single,1/1,NEW,2,"red marker, blue marker",blue marker,1,white,,Put the blue marker into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+195,148,single,1/1,NEW,2,"glue stick, yellow straw",yellow straw,4,cyan,,Put the yellow straw into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+196,149,single,1/1,NEW,3,"toothbrush, eraser, glue stick",eraser,4,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+197,150,pair,1/2,NEW,2,"screwdriver, toothbrush",toothbrush,4,cyan,,Put the toothbrush into the cyan bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+198,150,pair,2/2,KEEP,2,"screwdriver, toothbrush",toothbrush,2,pink,,Put the toothbrush into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+199,151,single,1/1,NEW,2,"screwdriver, blue marker",blue marker,1,white,,Put the blue marker into the white bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+200,152,single,1/1,NEW,2,"blue marker, red marker",red marker,2,pink,,Put the red marker into the pink bin,1번 white · 2번 pink · 3번 black · 4번 cyan
+201,153,single,1/1,NEW,2,"black marker, glue stick",glue stick,4,pink,,Put the glue stick into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+202,154,single,1/1,NEW,4,"eraser, black marker, toothbrush, yellow straw",eraser,2,black,eraser 세워서,Put the eraser into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+203,155,single,1/1,NEW,3,"yellow straw, blue marker, screwdriver",yellow straw,3,white,,Put the yellow straw into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+204,156,single,1/1,NEW,3,"yellow straw, blue marker, eraser",yellow straw,1,cyan,eraser 세워서,Put the yellow straw into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+205,157,pair,1/2,NEW,3,"blue marker, black marker, toothbrush",blue marker,2,black,,Put the blue marker into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+206,157,pair,2/2,KEEP,3,"blue marker, black marker, toothbrush",blue marker,4,pink,,Put the blue marker into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+207,158,pair,1/2,NEW,3,"eraser, yellow straw, red marker",eraser,3,white,eraser 세워서,Put the eraser into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+208,158,pair,2/2,KEEP,3,"eraser, yellow straw, red marker",eraser,1,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+209,159,single,1/1,NEW,4,"eraser, glue stick, yellow straw, red marker",glue stick,1,cyan,eraser 세워서,Put the glue stick into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+210,160,single,1/1,NEW,2,"yellow straw, red marker",red marker,2,black,,Put the red marker into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+211,161,single,1/1,NEW,2,"blue marker, red marker",red marker,3,white,,Put the red marker into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+212,162,single,1/1,NEW,2,"screwdriver, eraser",screwdriver,4,pink,eraser 세워서,Put the screwdriver into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+213,163,single,1/1,NEW,4,"glue stick, toothbrush, black marker, blue marker",toothbrush,2,black,,Put the toothbrush into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+214,164,single,1/1,NEW,3,"toothbrush, glue stick, eraser",glue stick,3,white,eraser 세워서,Put the glue stick into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+215,165,single,1/1,NEW,3,"yellow straw, screwdriver, black marker",black marker,4,pink,,Put the black marker into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+216,166,single,1/1,NEW,2,"yellow straw, glue stick",yellow straw,4,pink,,Put the yellow straw into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+217,167,single,1/1,NEW,2,"eraser, black marker",black marker,1,cyan,eraser 세워서,Put the black marker into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+218,168,single,1/1,NEW,3,"blue marker, red marker, eraser",eraser,4,pink,eraser 세워서,Put the eraser into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+219,169,single,1/1,NEW,4,"eraser, red marker, glue stick, blue marker",red marker,1,cyan,eraser 세워서,Put the red marker into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+220,170,quad,1/4,NEW,3,"blue marker, eraser, yellow straw",yellow straw,1,cyan,eraser 세워서,Put the yellow straw into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+221,170,quad,2/4,KEEP,3,"blue marker, eraser, yellow straw",yellow straw,4,pink,eraser 세워서,Put the yellow straw into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+222,170,quad,3/4,KEEP,3,"blue marker, eraser, yellow straw",yellow straw,2,black,eraser 세워서,Put the yellow straw into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+223,170,quad,4/4,KEEP,3,"blue marker, eraser, yellow straw",yellow straw,3,white,eraser 세워서,Put the yellow straw into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+224,171,single,1/1,NEW,4,"blue marker, glue stick, black marker, screwdriver",screwdriver,3,white,,Put the screwdriver into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+225,172,single,1/1,NEW,2,"toothbrush, red marker",toothbrush,3,white,,Put the toothbrush into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+226,173,single,1/1,NEW,4,"red marker, black marker, glue stick, blue marker",glue stick,2,black,,Put the glue stick into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+227,174,quad,1/4,NEW,4,"toothbrush, yellow straw, glue stick, blue marker",blue marker,4,pink,,Put the blue marker into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+228,174,quad,2/4,KEEP,4,"toothbrush, yellow straw, glue stick, blue marker",blue marker,2,black,,Put the blue marker into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+229,174,quad,3/4,KEEP,4,"toothbrush, yellow straw, glue stick, blue marker",blue marker,3,white,,Put the blue marker into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+230,174,quad,4/4,KEEP,4,"toothbrush, yellow straw, glue stick, blue marker",blue marker,1,cyan,,Put the blue marker into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+231,175,single,1/1,NEW,2,"blue marker, glue stick",glue stick,1,cyan,,Put the glue stick into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+232,176,single,1/1,NEW,3,"black marker, blue marker, red marker",red marker,2,black,,Put the red marker into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+233,177,single,1/1,NEW,2,"red marker, eraser",eraser,2,black,eraser 세워서,Put the eraser into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+234,178,pair,1/2,NEW,2,"blue marker, black marker",black marker,1,cyan,,Put the black marker into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+235,178,pair,2/2,KEEP,2,"blue marker, black marker",black marker,4,pink,,Put the black marker into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+236,179,single,1/1,NEW,2,"toothbrush, yellow straw",toothbrush,3,white,,Put the toothbrush into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+237,180,single,1/1,NEW,2,"red marker, screwdriver",screwdriver,2,black,,Put the screwdriver into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+238,181,single,1/1,NEW,3,"yellow straw, glue stick, black marker",glue stick,4,pink,,Put the glue stick into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+239,182,quad,1/4,NEW,2,"red marker, toothbrush",toothbrush,1,cyan,,Put the toothbrush into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+240,182,quad,2/4,KEEP,2,"red marker, toothbrush",toothbrush,4,pink,,Put the toothbrush into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+241,182,quad,3/4,KEEP,2,"red marker, toothbrush",toothbrush,2,black,,Put the toothbrush into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+242,182,quad,4/4,KEEP,2,"red marker, toothbrush",toothbrush,3,white,,Put the toothbrush into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+243,183,pair,1/2,NEW,2,"eraser, glue stick",eraser,1,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+244,183,pair,2/2,KEEP,2,"eraser, glue stick",eraser,3,white,eraser 세워서,Put the eraser into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+245,184,single,1/1,NEW,3,"eraser, toothbrush, screwdriver",screwdriver,3,white,eraser 세워서,Put the screwdriver into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+246,185,single,1/1,NEW,4,"blue marker, eraser, red marker, yellow straw",red marker,1,cyan,eraser 세워서,Put the red marker into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+247,186,single,1/1,NEW,2,"black marker, glue stick",glue stick,2,black,,Put the glue stick into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+248,187,quad,1/4,NEW,2,"screwdriver, eraser",screwdriver,4,pink,eraser 세워서,Put the screwdriver into the pink bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+249,187,quad,2/4,KEEP,2,"screwdriver, eraser",screwdriver,2,black,eraser 세워서,Put the screwdriver into the black bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+250,187,quad,3/4,KEEP,2,"screwdriver, eraser",screwdriver,1,cyan,eraser 세워서,Put the screwdriver into the cyan bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+251,187,quad,4/4,KEEP,2,"screwdriver, eraser",screwdriver,3,white,eraser 세워서,Put the screwdriver into the white bin,1번 cyan · 2번 black · 3번 white · 4번 pink
+252,188,pair,1/2,NEW,3,"black marker, yellow straw, screwdriver",black marker,2,white,,Put the black marker into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+253,188,pair,2/2,KEEP,3,"black marker, yellow straw, screwdriver",black marker,4,black,,Put the black marker into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+254,189,quad,1/4,NEW,4,"screwdriver, toothbrush, black marker, red marker",red marker,2,white,,Put the red marker into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+255,189,quad,2/4,KEEP,4,"screwdriver, toothbrush, black marker, red marker",red marker,4,black,,Put the red marker into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+256,189,quad,3/4,KEEP,4,"screwdriver, toothbrush, black marker, red marker",red marker,3,cyan,,Put the red marker into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+257,189,quad,4/4,KEEP,4,"screwdriver, toothbrush, black marker, red marker",red marker,1,pink,,Put the red marker into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+258,190,pair,1/2,NEW,4,"eraser, screwdriver, blue marker, glue stick",glue stick,1,pink,eraser 세워서,Put the glue stick into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+259,190,pair,2/2,KEEP,4,"eraser, screwdriver, blue marker, glue stick",glue stick,2,white,eraser 세워서,Put the glue stick into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+260,191,single,1/1,NEW,4,"red marker, toothbrush, eraser, yellow straw",eraser,1,pink,eraser 세워서,Put the eraser into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+261,192,single,1/1,NEW,3,"black marker, yellow straw, blue marker",blue marker,3,cyan,,Put the blue marker into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+262,193,single,1/1,NEW,4,"blue marker, eraser, toothbrush, yellow straw",yellow straw,4,black,eraser 세워서,Put the yellow straw into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+263,194,single,1/1,NEW,2,"glue stick, eraser",eraser,3,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+264,195,pair,1/2,NEW,3,"glue stick, blue marker, yellow straw",yellow straw,1,pink,,Put the yellow straw into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+265,195,pair,2/2,KEEP,3,"glue stick, blue marker, yellow straw",yellow straw,2,white,,Put the yellow straw into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+266,196,single,1/1,NEW,4,"screwdriver, black marker, toothbrush, glue stick",black marker,1,pink,,Put the black marker into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+267,197,pair,1/2,NEW,4,"blue marker, red marker, eraser, toothbrush",blue marker,4,black,eraser 세워서,Put the blue marker into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+268,197,pair,2/2,KEEP,4,"blue marker, red marker, eraser, toothbrush",blue marker,3,cyan,eraser 세워서,Put the blue marker into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+269,198,pair,1/2,NEW,3,"toothbrush, yellow straw, glue stick",toothbrush,4,black,,Put the toothbrush into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+270,198,pair,2/2,KEEP,3,"toothbrush, yellow straw, glue stick",toothbrush,3,cyan,,Put the toothbrush into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+271,199,single,1/1,NEW,3,"blue marker, red marker, eraser",eraser,2,white,eraser 세워서,Put the eraser into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+272,200,single,1/1,NEW,3,"eraser, black marker, yellow straw",black marker,4,black,eraser 세워서,Put the black marker into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+273,201,pair,1/2,NEW,4,"black marker, glue stick, toothbrush, yellow straw",glue stick,3,cyan,,Put the glue stick into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+274,201,pair,2/2,KEEP,4,"black marker, glue stick, toothbrush, yellow straw",glue stick,2,white,,Put the glue stick into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+275,202,single,1/1,NEW,4,"blue marker, toothbrush, red marker, glue stick",blue marker,1,pink,,Put the blue marker into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+276,203,single,1/1,NEW,4,"screwdriver, eraser, black marker, toothbrush",eraser,1,pink,eraser 세워서,Put the eraser into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+277,204,single,1/1,NEW,3,"blue marker, red marker, yellow straw",red marker,1,pink,,Put the red marker into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+278,205,single,1/1,NEW,2,"red marker, yellow straw",yellow straw,4,black,,Put the yellow straw into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+279,206,single,1/1,NEW,3,"screwdriver, black marker, eraser",screwdriver,3,cyan,eraser 세워서,Put the screwdriver into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+280,207,single,1/1,NEW,3,"toothbrush, black marker, eraser",black marker,2,white,eraser 세워서,Put the black marker into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+281,208,single,1/1,NEW,2,"blue marker, black marker",blue marker,2,white,,Put the blue marker into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+282,209,single,1/1,NEW,4,"blue marker, toothbrush, yellow straw, red marker",red marker,2,white,,Put the red marker into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+283,210,single,1/1,NEW,3,"blue marker, eraser, glue stick",eraser,4,black,eraser 세워서,Put the eraser into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+284,211,single,1/1,NEW,3,"yellow straw, screwdriver, glue stick",screwdriver,1,pink,,Put the screwdriver into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+285,212,single,1/1,NEW,3,"yellow straw, screwdriver, red marker",yellow straw,3,cyan,,Put the yellow straw into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+286,213,single,1/1,NEW,2,"blue marker, black marker",black marker,3,cyan,,Put the black marker into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+287,214,quad,1/4,NEW,2,"glue stick, yellow straw",glue stick,1,pink,,Put the glue stick into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+288,214,quad,2/4,KEEP,2,"glue stick, yellow straw",glue stick,3,cyan,,Put the glue stick into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+289,214,quad,3/4,KEEP,2,"glue stick, yellow straw",glue stick,2,white,,Put the glue stick into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+290,214,quad,4/4,KEEP,2,"glue stick, yellow straw",glue stick,4,black,,Put the glue stick into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+291,215,pair,1/2,NEW,3,"toothbrush, red marker, eraser",toothbrush,4,black,eraser 세워서,Put the toothbrush into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+292,215,pair,2/2,KEEP,3,"toothbrush, red marker, eraser",toothbrush,1,pink,eraser 세워서,Put the toothbrush into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+293,216,quad,1/4,NEW,3,"red marker, eraser, yellow straw",yellow straw,4,black,eraser 세워서,Put the yellow straw into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+294,216,quad,2/4,KEEP,3,"red marker, eraser, yellow straw",yellow straw,2,white,eraser 세워서,Put the yellow straw into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+295,216,quad,3/4,KEEP,3,"red marker, eraser, yellow straw",yellow straw,3,cyan,eraser 세워서,Put the yellow straw into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+296,216,quad,4/4,KEEP,3,"red marker, eraser, yellow straw",yellow straw,1,pink,eraser 세워서,Put the yellow straw into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+297,217,single,1/1,NEW,3,"screwdriver, blue marker, eraser",screwdriver,2,white,eraser 세워서,Put the screwdriver into the white bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+298,218,single,1/1,NEW,3,"red marker, yellow straw, blue marker",red marker,1,pink,,Put the red marker into the pink bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+299,219,single,1/1,NEW,3,"eraser, blue marker, yellow straw",eraser,3,cyan,eraser 세워서,Put the eraser into the cyan bin,1번 pink · 2번 white · 3번 cyan · 4번 black
+300,220,single,1/1,NEW,3,"blue marker, screwdriver, red marker",blue marker,4,black,,Put the blue marker into the black bin,1번 pink · 2번 white · 3번 cyan · 4번 black

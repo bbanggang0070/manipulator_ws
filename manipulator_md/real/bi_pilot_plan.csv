@@ -1,0 +1,51 @@
+ep,group,group_kind,group_pos,keep_layout,n_objects,objects,target,slot,slot_color,pose_hint,instruction
+1,1,single,1/1,NEW,2,"red marker, yellow straw",yellow straw,1,black,,Put the yellow straw into the black bin
+2,2,single,1/1,NEW,3,"toothbrush, black marker, red marker",black marker,2,cyan,,Put the black marker into the cyan bin
+3,3,quad,1/4,NEW,4,"black marker, screwdriver, red marker, yellow straw",screwdriver,2,cyan,,Put the screwdriver into the cyan bin
+4,3,quad,2/4,KEEP,4,"black marker, screwdriver, red marker, yellow straw",screwdriver,3,pink,,Put the screwdriver into the pink bin
+5,3,quad,3/4,KEEP,4,"black marker, screwdriver, red marker, yellow straw",screwdriver,4,white,,Put the screwdriver into the white bin
+6,3,quad,4/4,KEEP,4,"black marker, screwdriver, red marker, yellow straw",screwdriver,1,black,,Put the screwdriver into the black bin
+7,4,single,1/1,NEW,3,"screwdriver, red marker, eraser",red marker,4,white,eraser 세워서,Put the red marker into the white bin
+8,5,pair,1/2,NEW,2,"blue marker, toothbrush",blue marker,3,pink,,Put the blue marker into the pink bin
+9,5,pair,2/2,KEEP,2,"blue marker, toothbrush",blue marker,1,black,,Put the blue marker into the black bin
+10,6,pair,1/2,NEW,3,"yellow straw, eraser, blue marker",eraser,3,pink,eraser 세워서,Put the eraser into the pink bin
+11,6,pair,2/2,KEEP,3,"yellow straw, eraser, blue marker",eraser,2,cyan,eraser 세워서,Put the eraser into the cyan bin
+12,7,single,1/1,NEW,3,"toothbrush, glue stick, black marker",glue stick,4,white,,Put the glue stick into the white bin
+13,8,single,1/1,NEW,2,"toothbrush, screwdriver",toothbrush,4,white,,Put the toothbrush into the white bin
+14,9,pair,1/2,NEW,3,"red marker, glue stick, eraser",red marker,3,pink,eraser 세워서,Put the red marker into the pink bin
+15,9,pair,2/2,KEEP,3,"red marker, glue stick, eraser",red marker,1,black,eraser 세워서,Put the red marker into the black bin
+16,10,single,1/1,NEW,4,"glue stick, toothbrush, blue marker, eraser",glue stick,2,cyan,eraser 세워서,Put the glue stick into the cyan bin
+17,11,single,1/1,NEW,4,"glue stick, black marker, eraser, yellow straw",yellow straw,4,white,eraser 세워서,Put the yellow straw into the white bin
+18,12,single,1/1,NEW,2,"toothbrush, blue marker",toothbrush,2,cyan,,Put the toothbrush into the cyan bin
+19,13,single,1/1,NEW,2,"black marker, glue stick",black marker,1,black,,Put the black marker into the black bin
+20,14,pair,1/2,NEW,2,"glue stick, toothbrush",toothbrush,3,pink,,Put the toothbrush into the pink bin
+21,14,pair,2/2,KEEP,2,"glue stick, toothbrush",toothbrush,1,black,,Put the toothbrush into the black bin
+22,15,single,1/1,NEW,4,"black marker, toothbrush, eraser, yellow straw",yellow straw,3,pink,eraser 세워서,Put the yellow straw into the pink bin
+23,16,single,1/1,NEW,4,"toothbrush, black marker, blue marker, eraser",blue marker,2,cyan,eraser 세워서,Put the blue marker into the cyan bin
+24,17,quad,1/4,NEW,4,"red marker, screwdriver, eraser, yellow straw",eraser,1,black,eraser 세워서,Put the eraser into the black bin
+25,17,quad,2/4,KEEP,4,"red marker, screwdriver, eraser, yellow straw",eraser,4,white,eraser 세워서,Put the eraser into the white bin
+26,17,quad,3/4,KEEP,4,"red marker, screwdriver, eraser, yellow straw",eraser,3,pink,eraser 세워서,Put the eraser into the pink bin
+27,17,quad,4/4,KEEP,4,"red marker, screwdriver, eraser, yellow straw",eraser,2,cyan,eraser 세워서,Put the eraser into the cyan bin
+28,18,pair,1/2,NEW,3,"screwdriver, toothbrush, glue stick",glue stick,3,pink,,Put the glue stick into the pink bin
+29,18,pair,2/2,KEEP,3,"screwdriver, toothbrush, glue stick",glue stick,1,black,,Put the glue stick into the black bin
+30,19,pair,1/2,NEW,2,"black marker, screwdriver",black marker,4,white,,Put the black marker into the white bin
+31,19,pair,2/2,KEEP,2,"black marker, screwdriver",black marker,3,pink,,Put the black marker into the pink bin
+32,20,single,1/1,NEW,2,"yellow straw, blue marker",yellow straw,2,cyan,,Put the yellow straw into the cyan bin
+33,21,single,1/1,NEW,2,"blue marker, red marker",red marker,2,cyan,,Put the red marker into the cyan bin
+34,22,single,1/1,NEW,3,"blue marker, toothbrush, glue stick",blue marker,4,white,,Put the blue marker into the white bin
+35,23,single,1/1,NEW,4,"yellow straw, black marker, eraser, red marker",yellow straw,4,white,eraser 세워서,Put the yellow straw into the white bin
+36,24,single,1/1,NEW,2,"blue marker, toothbrush",toothbrush,1,black,,Put the toothbrush into the black bin
+37,25,pair,1/2,NEW,4,"glue stick, blue marker, black marker, yellow straw",glue stick,2,cyan,,Put the glue stick into the cyan bin
+38,25,pair,2/2,KEEP,4,"glue stick, blue marker, black marker, yellow straw",glue stick,1,black,,Put the glue stick into the black bin
+39,26,single,1/1,NEW,2,"toothbrush, blue marker",blue marker,3,pink,,Put the blue marker into the pink bin
+40,27,single,1/1,NEW,2,"blue marker, red marker",red marker,4,white,,Put the red marker into the white bin
+41,28,single,1/1,NEW,2,"screwdriver, eraser",screwdriver,1,black,eraser 세워서,Put the screwdriver into the black bin
+42,29,single,1/1,NEW,2,"yellow straw, black marker",black marker,4,white,,Put the black marker into the white bin
+43,30,single,1/1,NEW,3,"black marker, yellow straw, eraser",yellow straw,3,pink,eraser 세워서,Put the yellow straw into the pink bin
+44,31,single,1/1,NEW,2,"black marker, red marker",black marker,2,cyan,,Put the black marker into the cyan bin
+45,32,single,1/1,NEW,4,"red marker, toothbrush, screwdriver, glue stick",toothbrush,3,pink,,Put the toothbrush into the pink bin
+46,33,single,1/1,NEW,4,"red marker, blue marker, yellow straw, screwdriver",screwdriver,4,white,,Put the screwdriver into the white bin
+47,34,single,1/1,NEW,4,"red marker, screwdriver, glue stick, eraser",red marker,1,black,eraser 세워서,Put the red marker into the black bin
+48,35,single,1/1,NEW,2,"yellow straw, blue marker",blue marker,2,cyan,,Put the blue marker into the cyan bin
+49,36,single,1/1,NEW,4,"toothbrush, red marker, black marker, blue marker",toothbrush,2,cyan,,Put the toothbrush into the cyan bin
+50,37,single,1/1,NEW,3,"eraser, black marker, red marker",eraser,4,white,eraser 세워서,Put the eraser into the white bin

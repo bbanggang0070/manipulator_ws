@@ -1,0 +1,23 @@
+{
+  "_설명": "손으로 영상 프레임을 열어 확인한 정답(2026-10-15). handoff_events.py 의 지표가 이걸 재현해야 한다.",
+  "_만든_방법": [
+    "1) 그리퍼 궤적을 평탄구간으로 압축 → left_grasp_frame(왼팔이 처음 닫히는 평탄구간 시작)과",
+    "   right_release_frame(오른팔 마지막 보유 평탄구간이 끝나는 지점, 열림 평탄구간이 따로 안",
+    "   잡히면 보유 평탄구간의 끝을 대신 쓴다) 후보를 뽑았다",
+    "2) 5090에 변환된 v2.1 에피소드 mp4(left_wrist·right_wrist)에서 ffmpeg로 그 프레임을 직접",
+    "   캡처해 — left_grasp_frame 시각에 왼팔이 물체를 쥐고 있는지, right_release_frame 시각에",
+    "   오른팔이 이미 열려 물체에서 손을 뗐는지 — 눈으로 확인했다",
+    "3) 범위를 다양하게 골랐다: ep43(여유 최소 0.67s) · ep0(전형 0.87s) · ep1(여유 최대 3.37s) ·",
+    "   ep8(전달 자체는 깨끗한데 이후 운반 중 한 번 놓쳤다 다시 쥐는 에피소드 — 전달 시점과",
+    "   혼동하지 않는지가 핵심 검증 대상이었다)"
+  ],
+  "_주의": "bi_cleanup 파일럿(2026-10-14 수집, 50ep)의 에피소드 인덱스다. 데이터셋을 다시 모으면 이 파일도 다시 만들어야 한다. tol_frames=5 — 평탄구간 경계는 ±몇 프레임 흔들릴 수 있어 정확히 같은 값이 아니라 그 안에 들면 통과로 본다.",
+  "dataset": "~/blocktask_ws/Sim-to-Real-SO-101-Workshop/datasets/_train/bi_cleanup",
+  "tol_frames": 5,
+  "episodes": {
+    "43": {"left_grasp_frame": 669, "right_release_frame": 689, "note": "여유 최소(0.67s) — 영상으로 겹침 확인"},
+    "0":  {"left_grasp_frame": 769, "right_release_frame": 795, "note": "전형적 사례(0.87s)"},
+    "1":  {"left_grasp_frame": 619, "right_release_frame": 720, "note": "여유 최대(3.37s)"},
+    "8":  {"left_grasp_frame": 691, "right_release_frame": 717, "note": "전달 자체는 정상(0.87s) — 이후 운반 중 재파지가 있지만 그건 별개 지표"}
+  }
+}
