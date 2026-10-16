@@ -490,5 +490,5 @@ manipulator_ws/
 |---|---|
 | [PIPELINE.md](PIPELINE.md) | 7단계 파이프라인, 태스크 교체 체크리스트 |
 | [sim2real 보고서](manipulator_md/sim/sim2real_generalization_report.md) | Phase 1 전이·일반화 실측 |
-| [언어 조건화 복원 계획](manipulator_md/sim/language_conditioning_plan.md) | 세 접근의 비교·선택 |
+| 언어 조건화 복원 계획 | 세 접근의 비교·선택 |
 | [1단계 실행 계획](manipulator_md/sim/language_conditioning_sim_plan.md) | 씬·수집·학습·평가 설계 |
