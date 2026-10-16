@@ -194,6 +194,14 @@ docker logs -f gr00t-train-bi                                       # 진행 확
 
 ## 7. 체크포인트 가져오기 (로컬)
 
+> **자동으로 하려면** — 학습을 시작한 뒤 아래를 한 번 띄워 두면, 학습이 끝날 때 7·8번(가져오기·로컬 서빙)을 알아서 한다.
+> ```bash
+> cd ~/manipulator_ws/setup/gr00t
+> setsid nohup ./auto_serve_after_train.sh gr00t_bi_cleanup300_n16_8bit checkpoint-52000 \
+>     > ~/manipulator_ws/logs/auto_serve.log 2>&1 < /dev/null &
+> tail -f ~/manipulator_ws/logs/auto_serve.log      # 진행 확인 · 중단: pkill -f auto_serve_after_train.sh
+> ```
+
 체크포인트 파일은 컨테이너가 root 로 만들어서, 먼저 5090 에서 읽기 권한을 열어 준다.
 추론에는 optimizer·scheduler 가 필요 없으므로 빼고 받는다(약 9GB).
 
