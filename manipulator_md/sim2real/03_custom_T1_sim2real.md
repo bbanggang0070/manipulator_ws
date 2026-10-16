@@ -1,12 +1,12 @@
 # 08. 커스텀 T1 Sim-to-Real (빨간 큐브 → 검은 박스, GR00T N1.6)
 
 > 워크숍 태스크(Vials-To-Rack)로 sim 파이프라인을 완전 검증(N1.6 8-bit 학습 sim SR **80%**,
-> [02_sim_to_real_gr00t.md](02_sim_to_real_gr00t.md))한 것을 바탕으로, **우리 고유 T1 태스크**
+> 02_sim_to_real_gr00t.md)한 것을 바탕으로, **우리 고유 T1 태스크**
 > (실기와 동일: 빨간 큐브를 검은 박스에 넣기)를 Isaac Sim에 만들고 전체 sim-to-real 사이클을 돈다.
 > 목표: sim에서 에셋 제작 → 리더암 데이터 수집 → GR00T N1.6 학습 → sim 추론 확인 → **실기 전이** →
 > (성능 부족 시) **실기 시연 데이터 co-training**.
 >
-> 계획: [05_SimToReal.md](../../archive/model_md/sim2real/05_SimToReal.md) | 실행 로그: [01_실행기록.md](01_실행기록.md)
+> 계획: 05_SimToReal.md | 실행 로그: 01_실행기록.md
 
 작성: 2026-07-23
 
@@ -58,9 +58,9 @@ fp32 사전학습본 60% 상회). T1은 **태스크·에셋만 교체**하고 �
 |---|---|
 | **NVIDIA 워크숍** (Vials-To-Rack) | 정확히 이 흐름(커스텀 태스크→sim 학습→sim 평가→실기 전이→co-training)의 **레퍼런스 구현**. 우리는 이 태스크 템플릿을 T1로 개조 |
 | [**LeIsaac**](https://wiki.seeedstudio.com/simulate_soarm101_by_leisaac/) | SO-101 sim teleop→LeRobot 포맷. "everyday manipulation tasks"를 커스텀 에셋으로 만들어 수집하는 워크플로 |
-| **우리 자체 검증** ([07](02_sim_to_real_gr00t.md)) | N1.6 8-bit 학습 **sim SR 80%** — Phase C~D 파이프라인이 이미 작동함을 입증. T1은 태스크만 다름 |
+| **우리 자체 검증** (07) | N1.6 8-bit 학습 **sim SR 80%** — Phase C~D 파이프라인이 이미 작동함을 입증. T1은 태스크만 다름 |
 | sim+real co-training **+38%** ([arXiv:2503.24361](https://arxiv.org/abs/2503.24361)) | Phase F 근거. 실데이터 단독 대비 평균 +38% |
-| 실기 GR00T covariate shift ([report/GR00T_report.md](../../archive/model_md/report/GR00T_report.md) §3.2) | Phase B 수집 규칙: **교정(recovery) 시연 필수**(어긋남→복구→성공 궤적) |
+| 실기 GR00T covariate shift (report/GR00T_report.md §3.2) | Phase B 수집 규칙: **교정(recovery) 시연 필수**(어긋남→복구→성공 궤적) |
 
 **핵심**: 커스텀 태스크 sim-to-real은 워크숍이 이미 end-to-end로 증명한 경로다. 새로운 리스크는
 "에셋 제작"과 "sim↔실기 카메라 구도 갭"뿐이며, 나머지(학습·평가)는 검증된 자산을 그대로 쓴다.
@@ -90,7 +90,7 @@ fp32 사전학습본 60% 상회). T1은 **태스크·에셋만 교체**하고 �
   (`vial_placed_on_rack`을 참고해 큐브용으로 축소)
 - **리셋** (`mdp/resets.py`에 `reset_cube` 신설): 큐브 위치를 workspace 내 무작위(5지점+주변).
   ⚠️ **교정 시연**은 teleop이 절대위치 추종이라 물체 위치만 무작위화(로봇 시작자세 무작위화는
-  무효 — [06](01_실행기록.md) §4). 교정은 Phase B에서 사람이 수동 생성.
+  무효 — 06 §4). 교정은 Phase B에서 사람이 수동 생성.
 - **DR 이벤트**: 조명·매트·색 무작위화는 vials-DR 그대로. 큐브 위치 무작위 범위만 조정.
 
 ### 2.3 gym 등록 (`tasks/__init__.py`)
@@ -102,7 +102,7 @@ vials 6종 등록을 참고해 T1 4종 추가:
 
 - `list_envs`로 T1 태스크 4종 등록 확인
 - `zero_agent --task Lerobot-So101-T1-CubeBox`로 씬에 빨간 큐브·검은 박스·SO-101 렌더링 육안 확인
-  (Phase 0에서 vials 씬 검증한 것과 동일 방식, [setup/sim/README.md](../../setup/sim/README.md))
+  (Phase 0에서 vials 씬 검증한 것과 동일 방식, setup/sim/README.md)
 
 > **✅ 체크포인트 A (게이트)**
 > - **코드 게이트 (2026-07-23 통과 ✅, headless)**:
@@ -125,7 +125,7 @@ vials 6종 등록을 참고해 T1 4종 추가:
 - **수집 규칙** (실기 교훈 반영):
   - 빨간색 **고정**(언어와 일치), 큐브 위치 **다양화**(5지점+주변), **성공 종결**만 저장
   - **정상 ~35ep + 교정(recovery) ~15ep**: 교정은 사람이 리더암으로 일부러 어긋나게 접근→복구→
-    파지→배치까지 성공 종결 ([06](01_실행기록.md) §4, covariate shift 처방)
+    파지→배치까지 성공 종결 (06 §4, covariate shift 처방)
   - idle 최소화(녹화 즉시 동작 개시)
 - 출력: LeRobot v3.0 데이터셋 → `~/gr00tn16_ws/`(또는 신규 `~/t1_sim_ws/`)에 저장
 
@@ -138,7 +138,7 @@ vials 6종 등록을 참고해 T1 4종 추가:
 
 ## 4. Phase C — GR00T N1.6 학습 (8-bit Adam)
 
-**검증된 파이프라인 그대로 재사용** ([07](02_sim_to_real_gr00t.md) §3, sim SR 80% 달성 구성):
+**검증된 파이프라인 그대로 재사용** (07 §3, sim SR 80% 달성 구성):
 
 1. v3.0 → **v2.1 변환**(`convert_v3_to_v2.py`, ffmpeg 필요) + `_v3.0` 백업
 2. `meta/modality.json`: `front←external_D455`, `wrist←ego` (변환 후 재생성)
@@ -159,7 +159,7 @@ vials 6종 등록을 참고해 T1 4종 추가:
 
 - `setup/sim/sim_eval_gr00t.sh <T1_체크포인트> 10 eval` (real-robot 서버 + teleop-docker 클라이언트)
 - 태스크: `Lerobot-So101-T1-CubeBox-Eval`
-- ⚠️ **원본 클라이언트** 사용(N1.5 어댑터 패치 남으면 N1.6 서버와 충돌 — [07](02_sim_to_real_gr00t.md) §3.4).
+- ⚠️ **원본 클라이언트** 사용(N1.5 어댑터 패치 남으면 N1.6 서버와 충돌 — 07 §3.4).
   N1.6 평가 전 `cp lerobot_interface.py.bak_preadapter …`로 원본 복원 확인
 - 5090 모니터에서 `--headless` 빼고 `--rerun` → Isaac Sim 뷰포트+rerun 육안 확인
 - 지표: sim SR 10회(Eval), DR-Eval 10회(전이 예측력)
@@ -178,7 +178,7 @@ sim 학습 N1.6 체크포인트를 **실기 로봇**에 서빙해 zero-shot 추�
 
 - 서버: real-robot 컨테이너로 `run_gr00t_server.py --model-path <T1_sim_체크포인트>` (실기 로봇은 로컬)
 - 클라이언트: 실기 GR00T 클라이언트(실기 GR00T 작업의 `eval_lerobot.py` 계열 재사용,
-  [report/GR00T_report.md](../../archive/model_md/report/GR00T_report.md) §3.2) — 실기 카메라로 관측→서버→액션
+  report/GR00T_report.md §3.2) — 실기 카메라로 관측→서버→액션
 - ⚠️ **카메라 매핑 (핵심 리스크)**: sim은 `external_D455`(front)/`ego`(wrist),
   실기는 `top`/`wrist`. modality/rename으로 **실기 top→front, 실기 wrist→wrist** 일치시킴.
   단 **카메라 구도(sim vs 실기 pose)가 다른 것이 주된 sim-real 갭** — DR로 완화, 그래도 남으면 Phase F
@@ -270,6 +270,6 @@ sim-only 전이 SR이 낮으면 **실기 시연 데이터를 학습에 추가**.
 
 ---
 
-*관련: [05_SimToReal.md](../../archive/model_md/sim2real/05_SimToReal.md) 계획 · [02_sim_to_real_gr00t.md](02_sim_to_real_gr00t.md) 검증된 학습·평가 ·
-[01_실행기록.md](01_실행기록.md) 함정 · [report/GR00T_report.md](../../archive/model_md/report/GR00T_report.md) 실기 근본원인 ·
-[report/ACT_report.md](../../archive/model_md/report/ACT_report.md) 실기 T1 셋업*
+*관련: 05_SimToReal.md 계획 · 02_sim_to_real_gr00t.md 검증된 학습·평가 ·
+01_실행기록.md 함정 · report/GR00T_report.md 실기 근본원인 ·
+report/ACT_report.md 실기 T1 셋업*

@@ -3,7 +3,7 @@
 > v3@40k가 학습 분포(`full`)에서 **61.4%**(N=57)에 머문 원인을 실측으로 특정하고,
 > 그 구멍을 메우는 데이터를 수집하는 계획.
 >
-> 작성 2026-08-06 · 관련: [README](README.md) · [학습 분기 계획](training_plan.md) · [2주 계획](2week_plan.md)
+> 작성 2026-08-06 · 관련: [README](README.md) · 학습 분기 계획 · [2주 계획](2week_plan.md)
 
 ---
 
@@ -209,7 +209,7 @@ python verify_near_scene.py --episodes 30
 | 항목 | 값 | 근거 |
 |---|---|---|
 | 데이터 | **200ep** (v3 100 + 근접선별 35 + 신규 65) | §4 — 원거리를 덜어내 근접 비율을 59.5%로 |
-| 방식 | **신규 학습** | resume은 LR 바닥·샘플러 상태·forgetting ([training_plan.md §2](training_plan.md)) |
+| 방식 | **신규 학습** | resume은 LR 바닥·샘플러 상태·forgetting (training_plan.md §2) |
 | 스텝 | **86k** (66.1 epoch 정합) | v3 40k=65.8ep, 200ep를 40k로 돌리면 30.8ep로 **절반** |
 | 시간 | 약 65h | v3 실측 1,333 step/h |
 | 하이퍼파라미터 | v3와 동일 | 변수를 데이터 하나로 |

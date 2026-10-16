@@ -43,7 +43,7 @@ cd "$(dirname "$0")"
 # envs/lerobot 에서 찾다 실패했다(2026-10-07). 한 번만 구해 두고 그걸 쓴다.
 HERE="$(pwd)"
 
-PLAN="${PLAN:-$HOME/manipulator_ws/manipulator_md/real/real_lang_plan.csv}"
+PLAN="${PLAN:-$HOME/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv}"
 DSNAME="${DSNAME:-cleanup_real}"
 REPO="heongyu/$DSNAME"
 # 저장 위치. lerobot 기본값(HF 캐시)이 아니라 워크숍 datasets/_train 아래에 둔다.

@@ -1,7 +1,7 @@
 # 언어 조건화 복원 — 실행 기록
 
 > 계획은 [language_conditioning_sim_plan.md](language_conditioning_sim_plan.md)(씬·수집 설계)와
-> [language_conditioning_stage1_run.md](language_conditioning_stage1_run.md)(수집 이후 절차)에 있다.
+> language_conditioning_stage1_run.md(수집 이후 절차)에 있다.
 > 이 문서는 **실제로 무슨 일이 있었고 무슨 숫자가 나왔는지**의 기록이다.
 > 2026-09-16 ~ 09-24.
 

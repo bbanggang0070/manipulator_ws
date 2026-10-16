@@ -188,4 +188,4 @@ headless eval에 front(external_D455) 카메라 프레임 덤프(PyAV, `lerobot_
 ---
 
 *관련: [Phase 상세 A](A_scene_asset.md) · [B](B_data_collection.md) · [C](C_training.md) ·
-계획 [03_custom_T1_sim2real.md](../03_custom_T1_sim2real.md) · 검증 파이프라인 [02_sim_to_real_gr00t.md](../02_sim_to_real_gr00t.md)*
+계획 [03_custom_T1_sim2real.md](../03_custom_T1_sim2real.md) · 검증 파이프라인 02_sim_to_real_gr00t.md*

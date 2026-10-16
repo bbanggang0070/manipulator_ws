@@ -3,9 +3,9 @@
 > **최종 목표**: 학습 분포 내 SR ≥ 80% **+** OOD SR ≥ 70% → sim2real 전이 준비 완료
 >
 > 원 기간: 2026-08-04(월) ~ 08-15(금) · 최종 갱신: **2026-08-06**
-> 근거 문서: [README.md](README.md) · [선행연구 분석](sim_generalization_analysis.md)
+> 근거 문서: [README.md](README.md) · 선행연구 분석
 > 현재 계획: **[collection_plan_v4.md](collection_plan_v4.md)** ← 무엇을 왜 학습할지의 결정 근거
-> <sub>(대체됨: [training_plan.md](training_plan.md) — resume 분석만 유효)</sub>
+> <sub>(대체됨: training_plan.md — resume 분석만 유효)</sub>
 
 > [!IMPORTANT]
 > 이 문서는 **원안 그대로가 아니라, 실측에 따라 두 번 방향을 튼 기록**이다.
@@ -265,7 +265,7 @@ LR 스케줄** 두 가지가 동시에 바뀌어, 결과가 좋든 나쁘든 원
 **진단**에는 유효하다. 예를 들어 "v3가 언더핏이었나? 더 돌리면 오르나?"를 확인할 때는
 같은 데이터로 스텝만 늘려 resume하면 절반 비용으로 방향을 알 수 있다
 (데이터가 같으므로 위험 ②③이 없다). 다만 **최종 비교표에 올릴 수치는 신규 학습으로 재생산**한다.
-상세: [training_plan.md §2](training_plan.md)(대체된 문서이나 이 절은 유효).
+상세: training_plan.md §2(대체된 문서이나 이 절은 유효).
 
 #### 비용
 

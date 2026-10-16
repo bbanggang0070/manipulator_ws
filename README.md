@@ -13,6 +13,33 @@
 > 📘 **파이프라인을 그대로 다른 태스크에 돌리려면**: [PIPELINE.md](PIPELINE.md)
 > — 씬 정의부터 실기 평가까지 7단계를, **태스크에 종속된 부분 / 재사용되는 부분**으로 갈라 정리했다.
 
+## 프로젝트 흐름 (P1 → P6)
+
+sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막힐 때마다 원인을 찾아 고치며 과제를 넓혔다.
+각 단계의 결론이 다음 단계의 출발점이다.
+
+| 단계 | 한 일 | 막힌 것 → 다음 단계로 | 최종 모델 |
+|---|---|---|---|
+| **P1** sim 기본 | Isaac Sim 빨간 큐브 → 검은 상자. teleop 75ep, GR00T N1.6 8-bit 학습 | sim 60% — 큐브 위에서 맴돌며 못 집음 | blocktask75 |
+| **P2** 데이터 개선·실기 전이 | 원인은 모델이 아니라 데이터(mat 높이·교정 시연 부재) → v2 로 sim 80%. 실기 zero-shot 은 배포 루프(청크 앵커 지연·앙상블 과평활) 문제 → W 조정 후 sim+실기 50ep co-training | 실기 10% → **90%**. "남은 gap 은 데이터로 메운다" 확인 | cotrain |
+| **P3** 일반화 | 위치·박스 DR(v3) → 블록-상자 근접 보강(v4_200) → 평가 B 15조건, 실기 박스 다양화 co-training v4 | sim OOD 82.5%·실기 80%. 그러나 **지시문을 바꿔도 행동이 같음** — 학습 데이터 지시문이 1종이었음 | cotrain_v4 |
+| **P4** 언어 조건화 (sim) | 같은 장면·다른 지시문으로 수집, 언어 프로브·대응쌍 평가 | 이어학습은 언어를 못 배움 → **파운데이션에서 새로** 학습해야 함 | blocktask_lang |
+| **P5** 실기 cleanup 단일팔 | 4색 칸 선반·물체 10종, 실기만으로 80 → 250 → 370ep, 앙상블 W 스윕, 칸 위치 교체 검증 | **목적지 96.1% · 물체 90%**. white 를 확신 못 할 때 왼쪽으로 가는 편향 → 칸 배치를 바꿔 가며 수집해야 함 | cleanup_real v3 |
+| **P6** 실기 cleanup 양팔 | 오른팔 집기 → 그리퍼 간 전달 → 왼팔 넣기. 50ep 마다 칸 배치 교체 | 151ep: 전달 92%, 물체·목적지는 우연 수준 → **300ep 학습 중** | bi_cleanup 300ep |
+
+| 단계 | 문서 | 코드 |
+|---|---|---|
+| P1 | [03_custom_T1_sim2real.md](manipulator_md/sim2real/03_custom_T1_sim2real.md) · [08_T1_sim2real/](manipulator_md/sim2real/08_T1_sim2real/README.md) A~D · [deploy.md](manipulator_md/sim2real/08_T1_sim2real/deploy.md)(수집 환경 재현) | [setup/sim/t1_task/](setup/sim/t1_task/README.md) P1·P2 |
+| P2 | [report2.md](manipulator_md/sim2real/08_T1_sim2real/report2.md) · [E_sim2real_transfer.md](manipulator_md/sim2real/08_T1_sim2real/E_sim2real_transfer.md) · [F_realdata_prep.md](manipulator_md/sim2real/08_T1_sim2real/F_realdata_prep.md) | 위 + `setup/gr00t/` 서빙·추론 클라이언트·카메라 정렬 |
+| P3 | [sim/README.md](manipulator_md/sim/README.md) · [2week_plan.md](manipulator_md/sim/2week_plan.md) · [sim2real_generalization_report.md](manipulator_md/sim/sim2real_generalization_report.md) · [datasets.md](manipulator_md/sim/datasets.md) | `setup/sim/t1_task/` P3 + `setup/gr00t/run_eval_real.sh` 등 |
+| P4 | [language_conditioning_sim_plan.md](manipulator_md/sim/language_conditioning_sim_plan.md) · [language_conditioning_execution_log.md](manipulator_md/sim/language_conditioning_execution_log.md) | `setup/sim/t1_task/` P4 + `setup/gr00t/probe_language.py` |
+| P5 | [collection_environment.md](manipulator_md/real/collection_environment.md) · [v3_plan.md](manipulator_md/real/v3_plan.md) · [v4_plan.md](manipulator_md/real/v4_plan.md) · [PRESENTATION.md](PRESENTATION.md) | `setup/data/` |
+| P6 | [bi_manipulator_plan.md](manipulator_md/real/bi_manipulator_plan.md) | `setup/bi/` |
+
+> 음성 입력(STT)·피드백(TTS)은 아직 하지 않았다. 아래 "핵심 시나리오"와 Phase 2 그림은 처음 세운 계획이고,
+> 실제로는 상자 2개 대신 **색 칸 4개 선반**, 음성 대신 **영어 지시문**(`Put the {물체} into the {색} bin`)으로 구현했다.
+> 정리하며 지운 과거 파일(모델 비교, 중간 계획 등)은 태그 `pre-cleanup` 에서 `git checkout pre-cleanup -- <경로>` 로 되살릴 수 있다.
+
 ---
 
 ## 프로젝트 개요
@@ -74,6 +101,7 @@ sim-only → co-training                  음성 양방향 (STT+TTS)
 | **로봇** | SO-ARM101 (6-DOF + 그리퍼) | 매니퓰레이션 실행 (팔로워) |
 | **리더암** | SO-ARM101 (리더) | Teleop 시연 데이터 수집 |
 | **카메라** | USB 카메라 ×2 (top + wrist) | 시각 입력 (640×480, MJPG 필수) |
+| **양팔 구성** | 팔로워 ×2 · 리더 ×2 · 카메라 ×3 (top + 왼손목 + 오른손목) | 양팔 cleanup (`setup/bi/`) — 12관절 |
 | **마이크** | USB 마이크 | STT 음성 입력 (Phase 2 신규) |
 | **스피커** | 3.5mm / USB 스피커 | TTS 음성 출력 (Phase 2 신규) |
 
@@ -374,63 +402,44 @@ flowchart TD
 
 ```
 manipulator_ws/
-├─ PIPELINE.md                 # 📘 파이프라인 해부 (S1~S7, 태스크 교체 체크리스트)
-├─ archive/                    # 지금 파이프라인에서 쓰지 않는 과거 자료 (원래 경로 구조 그대로)
-│  ├─ model_md/                #   Phase 1-0: 4모델 비교 (ACT/SmolVLA/π0/GR00T N1.5)
-│  ├─ setup/                   #   모델별 스크립트(act/smolvla/pi0), GR00T N1.5·진단 스크립트
-│  └─ envs/gr00t/              #   빈 uv 프로젝트 (GR00T는 도커 이미지에서 실행)
-├─ manipulator_md/             # Phase 1~2: GR00T 기반 진행 기록
-│  ├─ sim/
-│  │  ├─ README.md                        # sim 학습 종합 보고서
-│  │  ├─ cleanup_project_plan.md          # 🧹 Phase 2 계획서
-│  │  ├─ 2week_plan.md                    # sim 일반화 2주 계획 (실행 기록)
-│  │  ├─ sim2real_generalization_report.md # sim2real 전이·일반화 보고서 (§9 언어 복원 계획)
-│  │  ├─ collection_plan_v4.md            # v4 근접 보강 수집 계획
-│  │  ├─ cotraining_plan_v4.md            # co-training 계획
-│  │  ├─ datasets.md                      # 데이터셋 카탈로그
-│  │  ├─ generalization_eval_plan.md      # 일반화 평가 계획
-│  │  └─ ...
-│  └─ sim2real/
-│     ├─ 01~03_*.md                       # 실행 기록
-│     └─ 08_T1_sim2real/                  # T1 sim2real 보고서 (deploy.md = sim 수집 환경 재현 가이드)
+├─ README.md · PIPELINE.md · PRESENTATION.md   # 개요 · 파이프라인 해부(S1~S7) · 발표 자료
+├─ docs/
+│  ├─ diagrams/                # 아키텍처 다이어그램 PNG (편집은 Figma)
+│  └─ figures/                 # 결과 그림·영상 (PRESENTATION.md 등에서 사용)
+├─ manipulator_md/             # 진행 기록
+│  ├─ STATUS.md                #   전체 진행 현황
+│  ├─ sim/                     #   sim 학습·일반화·언어 조건화 계획과 실행 기록
+│  ├─ sim2real/                #   sim→real 실행 기록, 08_T1_sim2real/ (deploy.md = sim 수집 환경 재현 가이드)
+│  └─ real/                    #   실기 cleanup: 수집 환경·계획 CSV·평가 결과
+│     ├─ collection_environment.md · v3_plan.md · v4_plan.md   # 단일팔
+│     └─ bi_manipulator_plan.md · bi_*.csv                     # 양팔
 ├─ setup/                      # 재현용 스크립트
-│  ├─ hardware/                # 장치 공통: udev rules, 카메라, teleop
-│  ├─ data/                    # 데이터 수집 스크립트
-│  ├─ sim/                     # 시뮬레이션 환경
-│  │  ├─ record_sim.sh         #   sim teleop 수집
-│  │  ├─ train_gr00t_sim*.sh   #   학습 스크립트
-│  │  └─ t1_task/              #   T1 태스크 전용 도구
-│  │     ├─ configure_scene.py           # 조건 프리셋 씬 설정 (full+X 조합 지원)
-│  │     ├─ blocktask_headless_scenes.sh # 무인 대량 측정 (run.json 기록)
-│  │     ├─ run_evalB.sh                 # 평가 B 드라이버 (고정 패널)
-│  │     ├─ capture_background.py        # 배경·작업면 교체 실험 + GUI 뷰어
-│  │     ├─ view_background.sh           # 배경 후보 Isaac Sim 확인
-│  │     ├─ blocktask_collect_near.sh    # v4 타깃 수집
-│  │     ├─ analyze_dataset_geometry.py  # 배치 미터단위 복원
-│  │     ├─ prepare_blocktask_v4_200.sh  # 전송→변환→병합→검증
-│  │     ├─ train_gr00t_blocktask_*.sh   # 버전별 학습 (realonly 대조군 포함)
-│  │     └─ launch_cotrain.py            # co-training 실행
-│  ├─ gr00t/                   # GR00T 서빙·실기 도구
-│  │  ├─ serve_blocktask_n16_5090.sh     # 5090 원격 서빙
-│  │  ├─ serve_local.sh                  # 로컬(5070 Ti) 서빙 — real-robot 이미지 필요
-│  │  ├─ serve_blocktask_realclient.py   # 서빙 래퍼 (평탄키→중첩 변환, 실기 클라이언트 호환)
-│  │  ├─ client/eval_lerobot.py          # 실기 추론 클라이언트 (앙상블·영상·csv 기록)
-│  │  ├─ run_eval_real.sh                # 실기 평가 래퍼 (시행 자동 번호·run.json)
-│  │  ├─ analyze_real_run.py             # 정지·튐·지연 자동 판정 (교시 데이터 기준선)
-│  │  ├─ goto_home_real.py               # 홈 포지션 이동
-│  │  ├─ real_pose_align.py              # 카메라 정렬
-│  │  ├─ rerun_cam_align.py              # 카메라 정렬 시각화
-│  │  ├─ record_blocktask_real_v2.sh     # 실기 수집 (박스 다양성)
-│  │  └─ gen_real_collect_schedule.py    # 배치표 생성 (층화 추출)
-│  └─ voice/                   # (Phase 2 예정) STT/TTS 파이프라인
+│  ├─ hardware/                # udev rules, 장치 식별, 카메라 점검, teleop
+│  ├─ data/                    # 실기 cleanup(단일팔): 수집·검증·준비·학습·평가
+│  │  ├─ check_setup.sh · view_cams.py · check_joints.py · calib_fingerprint.py   # 수집 전 점검
+│  │  ├─ gen_real_lang_plan.py · record_real_lang.sh · rest_gate.py               # 계획표 → 수집
+│  │  ├─ verify_real_lang_dataset.py · episode_events.py · drop_episode.sh        # 수집 후 검증
+│  │  ├─ prepare_cleanup_real.sh · train_cleanup_real.sh                         # 5090 전송·변환 → 학습
+│  │  └─ cleanup_eval.py                                                          # 평가 계획·기록·분석
+│  ├─ bi/                      # 실기 cleanup(양팔)
+│  │  ├─ data/                 #   gen_bi_plan.py · record_bi.sh · handoff_events.py · prepare_bi_cleanup.sh · cleanup_eval_bi.py
+│  │  └─ gr00t/                #   bi_so100_config.py · train_bi_cleanup.sh · home_then_infer_bi.sh · client/eval_lerobot_bi.py
+│  ├─ gr00t/                   # GR00T 서빙·실기 공용 도구
+│  │  ├─ serve_local.sh · serve_blocktask_n16_5090.sh · serve_blocktask_realclient.py   # 로컬/5090 서빙
+│  │  ├─ client/eval_lerobot.py · run_eval_real.sh · home_then_infer.sh               # 단일팔 추론
+│  │  ├─ goto_home_cleanup.py · goto_home_real.py · goto_home_sim.py                  # 홈 자세
+│  │  ├─ real_pose_align.py · rerun_cam_align.py · pose_ref*/                          # 카메라 정렬
+│  │  └─ probe_language.py · analyze_real_run.py                                      # 언어 프로브 · 시행 분석
+│  └─ sim/                     # Isaac Sim (T1 블록 태스크)
+│     ├─ train_gr00t_sim_n16_8bit.sh · patches/   #   8-bit 학습 레시피, 워크숍 저장소 패치
+│     └─ t1_task/              #   P1~P4 단계별 스크립트 (README 에 단계별 표)
 ├─ envs/
-│  └─ lerobot/                 # uv 프로젝트 (lerobot 0.4.4 + torch 2.10 cu128)
-├─ inf_video/                  # 추론 결과 영상·측정 자료
-│  ├─ 01_sim_inf/ ~ 04_v4_eval/  # sim 추론·평가 영상 (버전별)
-│  ├─ 06_preset_capture/         # 일반화 프리셋 씬 캡처
-│  ├─ 07_real_eval/              # 실기 평가 A·C — 영상·chunks/actions.csv·run.json
-│  └─ 08_evalB_sim/              # 평가 B — 고정 패널 15조건, scenes.csv·run.json
-└─ logs/                       # 학습·실험 로그
+│  └─ lerobot/                 # uv 프로젝트 (lerobot 0.4.4 + torch 2.10 cu128). GR00T 는 도커 이미지에서 실행
+├─ inf_video/                  # (git 제외) 단계별 최종 모델의 추론 영상·chunks/actions.csv·run.json
+│  ├─ 10_eval_lang_*/          #   P4 sim 언어 평가 — B6kfix(새 학습)·fix/v4fix(대조)·B60(최종)·gen·dest*
+│  ├─ 07_real_eval/            #   P5 단일팔 — cleanup(v3 ckpt-30000 평가)·success(성공 영상)
+│  └─ 07_real_eval_bi/         #   P6 양팔 — bi151_ck28000
+└─ logs/                       # (git 제외) evalA(P3 cotrain_v4 실기)·v4_zeroshot(P3 sim 단독 실기 zero-shot)
 ```
 
 ---
@@ -467,15 +476,57 @@ SERVER_HOST=127.0.0.1 ./run_eval_real.sh C <조건>
 #    manipulator_md/sim2real/08_T1_sim2real/deploy.md
 ```
 
-## 데이터·모델 (HF Hub private)
+## 실기 cleanup 실행
 
-| repo | 내용 |
-|---|---|
-| `heongyu/so101_t1_pickplace` | T1 Pick-and-Place 30ep (teleop 시연) |
-| `heongyu/so101_t2_cleanup` | T2 Table Cleanup (예정) |
-| `heongyu/act_so101_t1` | ACT-T1 학습 체크포인트 |
-| `heongyu/sim_so101_cleanup_v1` | (예정) 500ep 다물체 분류 데이터셋 |
-| `heongyu/gr00t_cleanup_v1_n16_8bit` | (예정) 언어 조건부 분류 모델 |
+학습은 5090, 수집·추론은 로컬에서 한다. 5090 쪽 스크립트(`train_*.sh`)는 5090의 작업 폴더에 복사해서 실행한다.
+각 스크립트 머리말에 옵션과 이유가 자세히 적혀 있다.
+
+### 단일팔
+
+```bash
+cd setup/data
+./check_setup.sh cams                         # 선반·카메라 화각 점검 (teleop 모드로 리치 확인)
+python3 gen_real_lang_plan.py                 # 수집 계획표 (물체·지시문·칸)
+./record_real_lang.sh                         # 계획표 순서대로 수집 (중단 후 재실행하면 이어서)
+(cd ../../envs/lerobot && uv run python ../../setup/data/verify_real_lang_dataset.py <데이터셋 경로>)  # 수집본 검증
+./prepare_cleanup_real.sh all                 # 5090 전송 → v2.1 변환 → 지시문 수 게이트
+#  (5090) EPOCHS=8 ./train_cleanup_real.sh    # 파운데이션 N1.6-3B 에서 새로 학습
+
+cd ../gr00t && ./serve_local.sh gr00t_cleanup_real_n16_8bit/checkpoint-30000
+cd ../data && python3 cleanup_eval.py log     # 평가 시행마다 로봇 실행 + 결과 입력
+python3 cleanup_eval.py report                # 물체 축 · 목적지 축 분석
+```
+
+### 양팔
+
+```bash
+cd setup/bi/data
+python3 gen_bi_plan.py --episodes 300 --layout-every 50   # 계획표 (50ep마다 칸 색 배치 교체)
+./record_bi.sh                                # 오른팔 집기 → 전달 → 왼팔 넣기 시연
+(cd ../../../envs/lerobot && uv run python ../../setup/bi/data/handoff_events.py --report <데이터셋 경로>)  # 전달 성공·시점 검사
+./prepare_bi_cleanup.sh all                   # 5090 전송 → 변환 → 검사(지시문 32종·4색·카메라 3대)
+#  (5090) SMOKE=1 ./train_bi_cleanup.sh 로 먼저 확인 → EPOCHS=10 OUT_NAME=<이름> ./train_bi_cleanup.sh
+
+cd ../../gr00t && ./serve_local.sh <모델>/checkpoint-<step>
+cd ../bi/data
+python3 cleanup_eval_bi.py log --eval-name <이름> --out <결과.csv> --rerun
+python3 cleanup_eval_bi.py report --out <결과.csv>
+#  평가 B(학습에 없던 칸 배치 포함 60시행): --plan ~/manipulator_ws/manipulator_md/real/bi_cleanup_eval_plan_B.csv
+```
+
+- 추론 중 `q` 한 번으로 그 시행을 끝내고 결과 입력으로 넘어간다. 어떤 이유로 끝나든 팔은 그 자리에 멈춘 뒤 천천히 rest 로 돌아가고 토크를 유지한다.
+- 원격(5090) 서버를 쓸 때는 `SERVER_HOST=<5090 IP>` 를 앞에 붙인다.
+
+## 데이터·모델
+
+데이터셋과 체크포인트는 용량 때문에 저장소에 넣지 않았다.
+데이터셋은 로컬 `~/blocktask_ws/Sim-to-Real-SO-101-Workshop/datasets/_train/` 에, 체크포인트는 `~/gr00tn16_ws/checkpoints/` (로컬·5090) 에 있다.
+
+| 데이터셋 | 규모 | 모델 (checkpoint) |
+|---|---|---|
+| `cleanup_real` (단일팔) | 370ep · 지시문 40종 | `gr00t_cleanup_real_n16_8bit` (checkpoint-30000, v3) |
+| `bi_cleanup` (양팔) | 300ep · 331,455 frames · 지시문 32종 · 칸 배치 6종 | `gr00t_bi_cleanup151_n16_8bit` (151ep, checkpoint-28000) · `gr00t_bi_cleanup300_n16_8bit` (300ep, 학습 중) |
+| `sim_so101_blocktask_v4_200` + `..._real_v2_57` (T1) | sim 200ep + 실기 57ep | `gr00t_blocktask_cotrain_v4_n16_8bit` (checkpoint-48000) |
 
 ## 주의사항
 

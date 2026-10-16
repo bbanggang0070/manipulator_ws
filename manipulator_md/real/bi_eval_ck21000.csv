@@ -1,3 +1,0 @@
-trial,group,kind,pos,keep_layout,objects,target,slot,slot_color,pose_hint,instruction,picked,handoff,landed,note
-1,1,dest,1/4,NEW,"yellow straw, eraser, screwdriver",yellow straw,3,pink,eraser 세워서,Put the yellow straw into the pink bin,eraser,성공,pink,
-2,1,dest,2/4,KEEP,"yellow straw, eraser, screwdriver",yellow straw,1,black,eraser 세워서,Put the yellow straw into the black bin,yellow straw,성공,cyan,

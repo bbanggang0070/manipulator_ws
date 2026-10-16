@@ -467,7 +467,7 @@ LANG_INSTRUCTION="Pick up the block and place it on the table" ./run_eval_real.s
 
 ## 9. 마무리 계획 — 언어 조건화 복원 (2026-08-13 수립)
 
-> 이 절의 세 접근을 실행 수준까지 파고든 후속 문서: [언어 조건화 복원 계획](language_conditioning_plan.md)
+> 이 절의 세 접근을 실행 수준까지 파고든 후속 문서: 언어 조건화 복원 계획
 > (2026-09-14 — 코드 변경 목록·비용 실측·판정 설계)
 
 ### 9-1. 문제 정의

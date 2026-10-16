@@ -25,7 +25,7 @@
   이 함수는 RL/autonomous rollout에서 재사용 가능성이 있어 남겨둠.
 
 근거: 실기 GR00T 실패의 근본 원인이 covariate shift(교정 시연 부재)였음
-— archive/model_md/report/GR00T_report.md §3.2, archive/model_md/sim2real/05_SimToReal.md §0.1.1.
+— GR00T_report.md(정리로 삭제됨) §3.2, 05_SimToReal.md(정리로 삭제됨) §0.1.1.
 
 ## dockerfile_blackwell_flashattn.patch (2026-07-21)
 
