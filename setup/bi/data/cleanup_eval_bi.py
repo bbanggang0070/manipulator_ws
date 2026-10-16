@@ -56,7 +56,22 @@ def partners_of(x):
 
 
 FIELDS = ["trial", "group", "kind", "pos", "keep_layout",
-          "objects", "target", "slot", "slot_color", "pose_hint", "instruction"]
+          "objects", "target", "slot", "slot_color", "pose_hint", "instruction", "layout"]
+# layout = 그 시행의 칸 배치("1번 black · 2번 cyan · 3번 pink · 4번 white"). 비어 있으면 SLOTS(평가 기본 배치).
+# 평가 B(bi_cleanup_eval_plan_B.csv)처럼 시행 도중 배치가 바뀌는 계획표에서 쓴다 — 배치가 바뀌는
+# 시행에서 log 가 안내를 띄우고, report 는 배치별 정확도와 "위치 기준" 착지 분포를 따로 낸다.
+
+
+def layout_slots(r):
+    """시행의 칸 배치 → [(번호, 색)]. layout 이 비어 있으면 SLOTS."""
+    lay = (r.get("layout") or "").strip()
+    if not lay:
+        return SLOTS
+    out = []
+    for part in lay.split("·"):
+        num, col = part.strip().split("번")
+        out.append((int(num), col.strip()))
+    return sorted(out)
 # picked  = 오른팔이 실제로 집은 물체 (지시와 무관하게 본 대로)
 # handoff = 전달(그리퍼 대 그리퍼)이 성공했는가 — picked가 "(없음)"이면 자동 "(없음)"
 # landed  = 왼팔이 넣은 칸 — handoff가 "성공"이 아니면 자동 "(없음)"
@@ -151,13 +166,31 @@ def cmd_log(a):
     done = {}
     if os.path.exists(a.out):
         done = {r["trial"]: r for r in csv.DictReader(open(a.out))}
+    # 평가 A 결과(layout 열 없음)를 평가 B 결과로 가져와 이어 할 때 — 같은 trial 의 배치를 계획표에서 채운다
+    lay_of = {r["trial"]: r.get("layout", "") for r in plan}
+    for t, r in done.items():
+        if not r.get("layout") and lay_of.get(t):
+            r["layout"] = lay_of[t]
     print(f"\n  계획 {len(plan)}시행 · 기록됨 {len(done)}시행")
-    print("  ⚠️ 물체는 오른팔 집는 영역에 놓으세요 — 선반 4칸(black·cyan·pink·white)은 왼팔 쪽에 고정돼 있습니다.\n")
+    if any(r.get("layout") for r in plan):
+        print("  ⚠️ 물체는 오른팔 집는 영역에 놓으세요 — 칸 배치는 바뀔 때마다 안내가 뜹니다.\n")
+    else:
+        print("  ⚠️ 물체는 오른팔 집는 영역에 놓으세요 — 선반 4칸(black·cyan·pink·white)은 왼팔 쪽에 고정돼 있습니다.\n")
 
     objs_all = sorted(OBJECTS)
+    prev_layout = None
     for r in plan:
         if r["trial"] in done and not a.redo:
+            prev_layout = r.get("layout") or None
             continue
+        lay = r.get("layout") or None
+        if lay and lay != prev_layout:
+            print("\n" + "#" * 64)
+            print("  \033[1;43;30m  ████ 칸 배치를 바꾸세요 ████  \033[0m")
+            print(f"  \033[1m{lay}\033[0m")
+            print("#" * 64)
+            input("  칸 배치를 바꿨으면 Enter ")
+        prev_layout = lay
         print("=" * 64)
         if r["keep_layout"] == "KEEP":
             print("  \033[1;41m  ████ 물체를 건드리지 마세요 — 배치 그대로 ████  \033[0m")
@@ -170,6 +203,8 @@ def cmd_log(a):
         print(f"  지시문    :  \033[1;36m\"{r['instruction']}\"\033[0m")
         if r.get("pose_hint"):
             print(f"  놓는 자세 :  \033[1;35m{r['pose_hint']}\033[0m")
+        if lay:
+            print(f"  칸 배치   :  {lay}")
         print(f"  정답      :  {r['target']} → 전달 → {r['slot']}번({r['slot_color']})")
         print("=" * 64)
 
@@ -195,9 +230,24 @@ def cmd_log(a):
             else:
                 print(f"\n  ▶ 실행: LANG_INSTRUCTION=\"{r['instruction']}\"")
                 _lim = f"{a.max_sec:.0f}s 후 자동 종료" if a.max_sec else "Ctrl+C 로 멈추세요"
-                print(f"     ({_lim} · 먼저 끝내려면 Ctrl+C)\n")
-                subprocess.call(["bash", runner, a.eval_name, cond],
-                                cwd=os.path.dirname(runner), env=env)
+                print(f"     ({_lim} · 가망 없으면 \033[1;33mq\033[0m 한 번 → 결과 입력으로)\n")
+                # Ctrl+C 를 눌러도 배치 전체가 끊기지 않고 이 시행의 결과 입력으로 넘어가게 한다
+                # (SIGINT 는 자식과 이 프로세스에 같이 가므로 여기서 받아 넘긴다)
+                # subprocess.call 은 KeyboardInterrupt 때 자식을 kill(-9)해 영상이 깨지므로 Popen 으로 기다린다
+                proc = subprocess.Popen(["bash", runner, a.eval_name, cond],
+                                        cwd=os.path.dirname(runner), env=env)
+                while True:
+                    try:
+                        proc.wait()
+                        break
+                    except KeyboardInterrupt:
+                        print("\n  (Ctrl+C — 이 시행 중단, 정리 후 결과 입력으로 넘어갑니다)")
+                # eval_lerobot_bi.py 는 끝날 때 스스로 그 자리 정지 → rest 복귀(토크 유지)를 한다.
+                # 종료 코드 3 = 그 복귀가 실패해 팔이 공중에서 버티는 중. 아래 goto_home_bi.py 는 연결할 때
+                # 설정을 쓰느라 토크를 잠깐 끄므로(lerobot SOFollower.configure) 그 전에 사람이 받쳐야 한다.
+                if proc.returncode == 3:
+                    print("\n  \033[1;31m⚠️  rest 자동 복귀 실패 — 팔이 공중에서 토크로 버티는 중\033[0m")
+                    input("  팔을 손으로 받치거나 안전한 자세로 옮긴 뒤 Enter (홈 이동 중 토크가 잠깐 꺼짐) ")
                 home = os.path.join(os.path.dirname(runner), "goto_home_bi.py")
                 lerobot = os.path.join(os.path.dirname(runner), "..", "..", "..", "envs", "lerobot")
                 if os.path.exists(home) and not a.no_home:
@@ -247,10 +297,11 @@ def cmd_log(a):
             landed = "(없음)"
             print("  들어간 칸: (전달 실패로 자동 '없음')")
         else:
-            menu = "   ".join(f"{n}) {c}" for n, c in SLOTS)
+            slots_r = layout_slots(r)
+            menu = "   ".join(f"{n}) {c}" for n, c in slots_r)
             print(f"  들어간 칸(왼팔):  {menu}   0) 어느 칸도 아님")
-            by_num = {str(n): c for n, c in SLOTS}
-            by_name = {c: c for _, c in SLOTS}
+            by_num = {str(n): c for n, c in slots_r}
+            by_name = {c: c for _, c in slots_r}
             while True:
                 s = input("  > ").strip().lower()
                 if s == "0":
@@ -354,6 +405,32 @@ def cmd_report(a):
             print(f"    착지 쏠림: 가장 많이 간 칸이 전체의 {worst * 100:.0f}%"
                   f" (균등이면 {CHANCE * 100:.0f}%)"
                   + ("  ← 특정 칸으로 도망가는 경향" if worst > 0.45 else ""))
+
+    # ── 배치별 (layout 열이 있는 계획표만) ──
+    if any(r.get("layout") for r in rows):
+        print(f"\n  배치별 — 학습에 있던 배치 vs 없던 배치")
+        print(f"    {'배치':<40}{'물체':>9}{'목적지':>10}")
+        lays = []
+        for r in rows:
+            if r.get("layout") not in lays:
+                lays.append(r.get("layout"))
+        for lay in lays:
+            rs = [r for r in rows if r.get("layout") == lay]
+            ho = sum(r["picked"] == r["target"] for r in rs)
+            pl = [r for r in rs if r["handoff"] == "성공" and r["landed"] != "(없음)"]
+            hd = sum(r["landed"] == r["slot_color"] for r in pl)
+            print(f"    {lay or '(기본)':<40}{f'{ho}/{len(rs)}':>9}{f'{hd}/{len(pl)}':>10}")
+        # 색이 아니라 자리로 간다면 "위치 기준" 분포가 한쪽에 쏠린다
+        pos = Counter()
+        for r in placed:
+            m = {c: n for n, c in layout_slots(r)}
+            if r["landed"] in m:
+                pos[m[r["landed"]]] += 1
+        if pos:
+            tot_p = sum(pos.values())
+            print(f"    착지 위치(칸 번호 기준): " + " · ".join(
+                f"{n}번 {pos[n]}" for n in sorted(pos)) +
+                f"   — 가장 많은 자리 {max(pos.values()) / tot_p * 100:.0f}% (균등 {CHANCE * 100:.0f}%)")
 
     # ── 대응쌍 ──
     print(f"\n  대응쌍 — 같은 배치에 지시문만 바꿨을 때")

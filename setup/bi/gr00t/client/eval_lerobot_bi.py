@@ -8,8 +8,8 @@
 #   2) state/action이 12차원 · 4그룹(left_arm·left_gripper·right_arm·right_gripper)으로 쪼개진다
 #   3) _JOINTS·_REST_BACK_JOINT가 12관절(좌우 wrist_roll 둘 다)을 본다
 #
-# STOP_ON_REST 판정 로직 자체(_rest0/_dev/_back_ok)는 손대지 않았다 — robot_state_keys를
-# 12개로 주면 "한쪽이라도 아직 안 돌아왔으면 안 끝난다"가 저절로 성립한다(§4-3 요구사항).
+# STOP_ON_REST 는 robot_state_keys 12개를 보므로 "한쪽이라도 아직 안 돌아왔으면 안 끝난다"가
+# 저절로 성립한다(§4-3 요구사항). 단 판정 기준은 양팔판에서 "근처+정지"로 바꿨다(아래 _REST_STILL).
 #
 # 사용 예:
 #   cd setup/bi/gr00t/client
@@ -25,6 +25,7 @@
 
 import logging
 import os
+import sys
 import threading
 import time
 
@@ -47,16 +48,53 @@ _MAX_SEC = float(os.environ.get("MAX_SEC", "0"))
 # ── 작업이 끝나면 스스로 멈춘다 — eval_lerobot.py와 같은 이유(§원본 주석 참조).
 #    양팔판 차이: _rest0/_dev/_back_ok가 robot_state_keys 12개 전부를 보므로
 #    **두 팔 모두** rest 조건을 만족해야 끝난다(한쪽만 보고 멈추는 위험 없음, bi_manipulator_plan.md §4-3).
+#    양팔판 판정 = "크게 움직인 뒤(REST_LEAVE) 시작 자세 근처(REST_BACK, 느슨)에서 멈춰 있음(REST_STILL)".
+#    단일팔처럼 "시작 자세 6° 이내"만 보면 안 끝난다 — 2026-10-16 ck21000 trial02: 작업을 48s에 끝내고
+#    rest로 돌아왔는데 시작 순간 처져 있던 오른팔 elbow(103°→95°)·pan·왼팔 elbow가 6°를 넘어
+#    150s 타임아웃까지 대기. 300ep 사람 시연도 끝-시작 6° 기준으론 43%만 "복귀"로 판정된다.
+#    그래서 위치 허용치는 넓히고(20°), 대신 "REST_HOLD 동안 모든 관절 움직임 < REST_STILL" 을 요구한다.
 _STOP_ON_REST = os.environ.get("STOP_ON_REST", "0") == "1"
 _REST_LEAVE = float(os.environ.get("REST_LEAVE_DEG", "20"))
-_REST_BACK = float(os.environ.get("REST_BACK_DEG", "6"))
+_REST_BACK = float(os.environ.get("REST_BACK_DEG", "20"))
+_REST_STILL = float(os.environ.get("REST_STILL_DEG", "1.5"))
 _REST_HOLD = float(os.environ.get("REST_HOLD_SEC", "2.0"))
 # wrist_roll 느슨한 허용치 — 단일팔과 같은 이유(그리퍼 성패와 무관한 자유도). 좌우 둘 다 느슨하게.
 _REST_BACK_JOINT = {
-    "left_wrist_roll.pos": float(os.environ.get("REST_BACK_WROLL_DEG", "15")),
-    "right_wrist_roll.pos": float(os.environ.get("REST_BACK_WROLL_DEG", "15")),
+    "left_wrist_roll.pos": float(os.environ.get("REST_BACK_WROLL_DEG", "30")),
+    "right_wrist_roll.pos": float(os.environ.get("REST_BACK_WROLL_DEG", "30")),
 }
 _grip_hist = {}
+
+# ── 'q' 한 번(Enter 불필요)으로 이 시행만 끝낸다 — 가망 없는 시행을 MAX_SEC 까지 기다리지 않기 위함.
+#    Ctrl+C 와 달리 부모(cleanup_eval_bi.py)까지 신호가 가지 않아 배치가 끊기지 않고, 타임아웃과
+#    같은 경로(return → atexit)로 끝나 video.mp4·csv 가 정상 마무리된다. 터미널이 아니면(파이프 등) 꺼진다.
+_USER_STOP = threading.Event()
+
+
+def _key_watch():
+    import select
+    import sys
+    import termios
+    import tty
+
+    if not sys.stdin.isatty():
+        return
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+
+    def _restore():
+        # 시행 중 눌린 다른 키가 다음 결과 입력(input())으로 새지 않게 버린다
+        termios.tcflush(fd, termios.TCIFLUSH)
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+    import atexit
+
+    atexit.register(_restore)
+    tty.setcbreak(fd)
+    print("[key] 'q' = 이 시행 종료하고 결과 입력으로 넘어가기", flush=True)
+    while not _USER_STOP.is_set():
+        if select.select([fd], [], [], 0.2)[0] and os.read(fd, 1) in (b"q", b"Q"):
+            _USER_STOP.set()
 
 
 def _adaptive_w(infer_ms, step_dt):
@@ -301,13 +339,86 @@ class EvalConfig:
     show_images: bool = False
 
 
+# ── 시행이 어떻게 끝나든(q·타임아웃·STOP_ON_REST·Ctrl+C·서버 끊김 등 예외) 팔을 떨어뜨리지 않는다.
+#    예전엔 프로세스 종료 시 Robot.__del__ → disconnect() 가 토크를 꺼서(lerobot 기본
+#    disable_torque_on_disconnect=True) 공중에 있던 팔이 바닥으로 떨어졌다(2026-10-16 타임아웃 시행).
+#    지금은: ① 토크는 끝까지 유지 ② 그 자리에 잠깐 정지 ③ 관절 공간 직선 보간으로 천천히 rest 복귀.
+#    복귀에 실패해도 토크를 끄지 않는다(팔은 그 자리에 버틴다) — 종료 코드 3 으로 알린다.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from home_pose_bi import TARGET as _REST_TARGET  # noqa: E402
+
+_REST_DEG_PER_STEP = float(os.environ.get("REST_DEG_PER_STEP", "1.0"))  # 30Hz → 약 30°/s
+_REST_OK_DEG = float(os.environ.get("REST_OK_DEG", "8.0"))
+
+
+def _return_to_rest(robot) -> bool:
+    import numpy as _np
+
+    keys = list(_REST_TARGET)
+    try:
+        q0 = robot.get_observation()
+        cur = _np.array([float(q0[k]) for k in keys])
+        # ② 그 자리 정지: 현재 위치를 목표로 0.5s 보낸다(남은 청크 목표로 더 가지 않게)
+        hold = {k: float(v) for k, v in zip(keys, cur)}
+        for _ in range(15):
+            robot.send_action(hold)
+            time.sleep(0.033)
+        goal = _np.array([_REST_TARGET[k] for k in keys])
+        n = max(1, int(_np.ceil(_np.abs(goal - cur).max() / _REST_DEG_PER_STEP)))
+        print(f"[rest] 그 자리 정지 → rest 로 복귀 ({n * 0.033:.1f}s)", flush=True)
+        # ③ 직선 보간(전 관절 같은 비율로 동시에 도착) + 마지막 1s 는 목표 유지로 수렴
+        for i in range(1, n + 31):
+            a = min(1.0, i / n)
+            robot.send_action({k: float(v) for k, v in zip(keys, cur + a * (goal - cur))})
+            time.sleep(0.033)
+        q1 = robot.get_observation()
+        worst = max(abs(float(q1[k]) - _REST_TARGET[k]) for k in keys)
+        print(f"[rest] 복귀 완료 (최대 오차 {worst:.1f}°) — 토크 유지", flush=True)
+        return worst < _REST_OK_DEG
+    except BaseException as e:  # 두 번째 Ctrl+C 포함 — 어떤 경우에도 토크는 끄지 않는다
+        print(f"[rest] ⚠️ 복귀 실패({type(e).__name__}: {e}) — 팔은 토크 유지 상태로 그 자리에 있음", flush=True)
+        return False
+
+
 @draccus.wrap()
 def eval(cfg: EvalConfig):
     init_logging()
     logging.info(pformat(asdict(cfg)))
 
+    # Ctrl+C 한 번에 SIGINT 가 두 번 온다(터미널 → 이 프로세스, 그리고 uv run 이 한 번 더 전달 —
+    # uv 0.11 실측). 두 번째가 rest 복귀를 끊지 않게 0.5s 안의 중복은 버린다. 그 뒤에 일부러 다시
+    # 누른 Ctrl+C 는 복귀를 멈추고 그 자리에서 토크 유지(_return_to_rest 의 except).
+    import signal as _signal
+
+    _last_int = [0.0]
+
+    def _on_sigint(signum, frame):
+        now = time.monotonic()
+        dup = now - _last_int[0] < 0.5
+        _last_int[0] = now
+        if not dup:
+            raise KeyboardInterrupt
+
+    _signal.signal(_signal.SIGINT, _on_sigint)
+
+    # ① 종료 시 토크를 끄지 않는다(위 _return_to_rest 주석)
+    cfg.robot.left_arm_config.disable_torque_on_disconnect = False
+    cfg.robot.right_arm_config.disable_torque_on_disconnect = False
     robot = make_robot_from_config(cfg.robot)
     robot.connect()
+    try:
+        _eval_main(cfg, robot)
+    except KeyboardInterrupt:
+        print("\n[stop] Ctrl+C — 시행 종료", flush=True)
+    except Exception:
+        logging.exception("[stop] 추론 중 예외 — 시행 종료")
+    finally:
+        _USER_STOP.set()  # 키 감시 스레드 정리
+        ok = _return_to_rest(robot)
+    sys.exit(0 if ok else 3)
+
+
+def _eval_main(cfg: EvalConfig, robot):
 
     # BiSOFollower.cameras 는 left_/right_ 접두사가 붙은 이름을 쓴다 — 접두사까지 포함해야
     # robot.get_observation() 의 실제 키(left_top 등)와 맞는다.
@@ -364,6 +475,7 @@ def eval(cfg: EvalConfig):
         _sh["obs"] = obs0
         _sh["chunks"].append((0, policy.get_action(obs0, language_instruction)))
         threading.Thread(target=_infer_loop, daemon=True).start()
+        threading.Thread(target=_key_watch, daemon=True).start()
 
         t = 0
         _tl = time.perf_counter()
@@ -371,7 +483,12 @@ def eval(cfg: EvalConfig):
         _rest0 = None
         _left = False
         _back_since = None
+        _still_ref = None
         while True:
+            if _USER_STOP.is_set():
+                print(f"\n[skip] 'q' 입력 — 시행 종료 (step={t}, {time.perf_counter() - _t0:.0f}s)")
+                _sh["stop"] = True
+                return
             if _MAX_SEC and time.perf_counter() - _t0 >= _MAX_SEC:
                 print(f"\n[timeout] {_MAX_SEC:.0f}s 경과 — 시행 종료 (step={t})")
                 _sh["stop"] = True
@@ -385,18 +502,19 @@ def eval(cfg: EvalConfig):
                 _dev = max((abs(_q[k] - _rest0[k]) for k in _rest0 if k in _q), default=0.0)
                 _back_ok = all(abs(_q[k] - _rest0[k]) < _REST_BACK_JOINT.get(k, _REST_BACK)
                                for k in _rest0 if k in _q)
+                # 정지 판정: 기준 자세(_still_ref)에서 어느 관절이든 REST_STILL 이상 벗어나면 다시 잰다
+                _still = _still_ref is not None and all(
+                    abs(_q[k] - _still_ref[k]) < _REST_STILL for k in _still_ref if k in _q)
                 if not _left:
                     _left = _dev > _REST_LEAVE
-                elif _back_ok:
-                    if _back_since is None:
-                        _back_since = time.perf_counter()
-                    elif time.perf_counter() - _back_since >= _REST_HOLD:
-                        print(f"\n[done] rest 복귀 후 {_REST_HOLD:.0f}s 유지 — 시행 종료 "
+                elif _back_ok and _still:
+                    if time.perf_counter() - _back_since >= _REST_HOLD:
+                        print(f"\n[done] rest 복귀 후 {_REST_HOLD:.0f}s 정지 — 시행 종료 "
                               f"(step={t}, {time.perf_counter() - _t0:.0f}s)")
                         _sh["stop"] = True
                         return
                 else:
-                    _back_since = None
+                    _still_ref, _back_since = dict(_q), time.perf_counter()
             with _lk:
                 _sh["obs"] = obs
                 _sh["step"] = t
@@ -453,10 +571,14 @@ def eval(cfg: EvalConfig):
     observation_dict = robot.get_observation()
     _rr_obs(observation_dict, camera_keys, robot_state_keys)
     action_chunk = policy.get_action(observation_dict, language_instruction)
+    threading.Thread(target=_key_watch, daemon=True).start()
 
     _prev_tail = None
     _t0 = time.perf_counter()
     while True:
+        if _USER_STOP.is_set():
+            print("\n[skip] 'q' 입력 — 시행 종료")
+            return
         if _MAX_SEC and time.perf_counter() - _t0 >= _MAX_SEC:
             print(f"\n[timeout] {_MAX_SEC:.0f}s 경과 — 시행 종료")
             return
