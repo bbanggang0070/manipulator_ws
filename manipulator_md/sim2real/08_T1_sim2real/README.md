@@ -16,6 +16,8 @@ Phase가 끝날 때마다 한 파일씩 정리한다. 계획서는 "무엇을 �
 | **재개선** | 데이터 문제 규명 → v2 재수집·재학습 → **sim SR 60%→80%** | ✅ 완료 | [report2.md](report2.md) |
 | **F** | 실기 50ep co-training → **실기 SR 10%→90%** (Δ+80%p) | ✅ 완료 | [report2.md](report2.md) §5 |
 
+**sim 데이터 수집 환경 재현 가이드**: [deploy.md](deploy.md) — 이 문서만 보고 Isaac Sim T1 blocktask 수집 환경(씬·수집·변환)을 다시 꾸릴 수 있다.
+
 ## 계획 대비 실행상의 주요 결정
 
 - **환경 구현체**: 계획서의 `t1_cube_box_env_cfg.py`(메인 repo 신규 태스크) 대신,

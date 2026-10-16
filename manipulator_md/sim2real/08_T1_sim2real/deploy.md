@@ -5,7 +5,7 @@
 > 만으로 씬·수집·변환까지 완결된다.
 >
 > 이 가이드가 재현하는 것 = **Phase A(씬·에셋) + Phase B(리더암 teleop 수집)**.
-> 상세 배경: [A_scene_asset.md](../A_scene_asset.md) · [B_data_collection.md](../B_data_collection.md)
+> 상세 배경: [A_scene_asset.md](A_scene_asset.md) · [B_data_collection.md](B_data_collection.md)
 
 작성: 2026-08-04
 
@@ -147,11 +147,11 @@ GUI(zero_agent, 로봇 0액션)로 씬이 뜬다. **체크리스트**:
 
 정상 씬 예시 (external_D455/front 시점, 실제 sim 렌더):
 
-![sim 씬 — front(external_D455) 시점](deploy_sim_scene_front.jpg)
+![sim 씬 — front(external_D455) 시점](assets/deploy_sim_scene_front.jpg)
 
 수집 시 보게 되는 wrist(ego) 시점:
 
-![sim 씬 — wrist(ego) 시점](deploy_sim_scene_wrist.jpg)
+![sim 씬 — wrist(ego) 시점](assets/deploy_sim_scene_wrist.jpg)
 
 `view` 태스크 ID = `Lerobot-So101-Teleop-Vials-To-Rack` (fork가 이 등록을 블록 씬으로 덮어씀).
 
@@ -201,7 +201,7 @@ docker exec blocktask bash -c \
   좌우는 넓지만 **깊이(앞뒤)가 한 띠로 좁아**, 그 밖 위치에서 파지가 실패했다. **이렇게 좁게
   수집하지 말고**, 도달 범위 전역(특히 깊이)을 고르게 덮어라:
 
-  ![블록 위치 커버리지 (실기 50ep) — 깊이가 좁으면 그 밖에서 실패](deploy_block_coverage.jpg)
+  ![블록 위치 커버리지 (실기 50ep) — 깊이가 좁으면 그 밖에서 실패](assets/deploy_block_coverage.jpg)
 - **녹화 시작 즉시 동작 개시**(idle 최소화) — GR00T의 “시작에서 오래 멈추는” idle 어트랙터 방지.
 - **교정(recovery) 시연 포함**(빗나감→재접근→성공 ~30%) — covariate shift 완화, 재시도 학습.
 
@@ -290,8 +290,8 @@ closed-loop 평가:
 
 - 이 repo 관련 파일: `setup/sim/t1_task/`(blocktask_fork.patch, blocktask_run.sh, blocktask_sim_eval.sh,
   prepare_blocktask_gr00t.sh, blocktask_modality.json), `setup/sim/README.md`, `setup/sim/patches/README.md`
-- Phase 기록: [A_scene_asset.md](../A_scene_asset.md), [B_data_collection.md](../B_data_collection.md),
-  [C_training.md](../C_training.md), [report2.md](../report2.md)
+- Phase 기록: [A_scene_asset.md](A_scene_asset.md), [B_data_collection.md](B_data_collection.md),
+  [C_training.md](C_training.md), [report2.md](report2.md)
 - coworker fork: https://github.com/tjdwlswkd21/Sim-to-Real-SO-101-Workshop (@ `124eb1c`)
 - NVIDIA 워크숍(upstream): https://github.com/isaac-sim/Sim-to-Real-SO-101-Workshop
 - 교육 문서: https://docs.nvidia.com/learning/physical-ai/sim-to-real-so-101/latest/index.html

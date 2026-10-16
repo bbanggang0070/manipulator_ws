@@ -4,7 +4,7 @@
 > ① 사전학습 **N1.6** 체크포인트를 5090에서 추론(sim SR 60%),
 > ② 자체 학습 시 N1.6 단일 GPU 벽 → **N1.5**로 학습(SR 10%)과 성능 저하 분석,
 > ③ **8-bit 양자화(paged_adamw_8bit)**로 N1.6 단일 GPU 학습을 가능케 함(성능 저하 없음).
-> 상세 실행 로그: [01_실행기록.md](01_실행기록.md) | 계획: [05_SimToReal.md](../../model_md/sim2real/05_SimToReal.md)
+> 상세 실행 로그: [01_실행기록.md](01_실행기록.md) | 계획: [05_SimToReal.md](../../archive/model_md/sim2real/05_SimToReal.md)
 
 작성: 2026-07-22
 
@@ -93,7 +93,7 @@ base: GR00T-N1.5-3B | max_steps 20000 | lr 1e-4
 batch_size 4 × gradient_accumulation 16 = 유효 배치 64 | data_config so100_dualcam
 embodiment new_embodiment | video_backend torchvision_av | tune: projector+diffusion(기본)
 ```
-스크립트: `setup/sim/train_gr00t_sim_n1d5.sh`. 최종 loss 0.005(9h17m).
+스크립트: `archive/setup/sim/train_gr00t_sim_n1d5.sh`. 최종 loss 0.005(9h17m).
 
 ### 2.3 N1.6 학습과의 차이점
 
@@ -202,4 +202,4 @@ unexpected keyword argument 'video.wrist'`. **N1.6 평가 전 원본 복원 필�
    사전학습본(60%)과 동등/상회로 **양자화 성능 저하 없음 확증**. N1.5 저조(10%)는 파이프라인이
    아니라 아키텍처·tune 범위 때문임도 입증(같은 데이터에서 N1.6은 80%).
 
-*관련: [01_실행기록.md](01_실행기록.md) · [04_GR00T_sim.md](../../model_md/sim2real/04_GR00T_sim.md) · [setup/sim/patches/](../../setup/sim/patches/)*
+*관련: [01_실행기록.md](01_실행기록.md) · [04_GR00T_sim.md](../../archive/model_md/sim2real/04_GR00T_sim.md) · [setup/sim/patches/](../../setup/sim/patches/)*

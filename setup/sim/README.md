@@ -86,7 +86,7 @@ FileNotFoundError: Unable to open the usd file at path:
 |---|---|---|
 | ACT | 5070Ti | `lerobot-train --policy.type=act` from-scratch (setup/act/ 패턴) |
 | SmolVLA | 5070Ti | `smolvla_base` FT (setup/smolvla/ 패턴, batch16/20k~) |
-| π0 | 5090 | expert-only FT (setup/pi0/remote_5090/pi0-train.sh 패턴) |
+| π0 | 5090 | expert-only FT (archive/setup/pi0/remote_5090/pi0-train.sh 패턴) |
 | GR00T | 5090 | n1d5 FT — v2 변환+modality.json+트리밍 도구 재사용 (setup/gr00t/) |
 
 - sim 데이터도 LeRobot v3로 나오면 GR00T용은 v3→v2 변환 필요 (도구 완비)

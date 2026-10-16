@@ -411,6 +411,6 @@ sim을 빼도 문장은 여전히 상수이기 때문이다. ③은 sim2real 전
 **내부**
 - [보고서 §9](sim2real_generalization_report.md) — 세 접근의 원안
 - [일반화 평가 계획](generalization_eval_plan.md) — 통제 실험 원칙·표본 수 규약
-- `setup/gr00t/probe_swap_images.py` — 오프라인 프로브의 선례(영상 18.9° vs state 1.9°)
+- `archive/setup/gr00t/probe_swap_images.py` — 오프라인 프로브의 선례(영상 18.9° vs state 1.9°)
 - `setup/sim/t1_task/configure_scene.py` — `dist_blue_cube` 프리셋, 거부 표집 배치
 - `setup/sim/t1_task/merge_blocktask_v2.py` — 다중 지시문 병합(이미 지원)

@@ -6,7 +6,7 @@
 > 목표: sim에서 에셋 제작 → 리더암 데이터 수집 → GR00T N1.6 학습 → sim 추론 확인 → **실기 전이** →
 > (성능 부족 시) **실기 시연 데이터 co-training**.
 >
-> 계획: [05_SimToReal.md](../../model_md/sim2real/05_SimToReal.md) | 실행 로그: [01_실행기록.md](01_실행기록.md)
+> 계획: [05_SimToReal.md](../../archive/model_md/sim2real/05_SimToReal.md) | 실행 로그: [01_실행기록.md](01_실행기록.md)
 
 작성: 2026-07-23
 
@@ -60,7 +60,7 @@ fp32 사전학습본 60% 상회). T1은 **태스크·에셋만 교체**하고 �
 | [**LeIsaac**](https://wiki.seeedstudio.com/simulate_soarm101_by_leisaac/) | SO-101 sim teleop→LeRobot 포맷. "everyday manipulation tasks"를 커스텀 에셋으로 만들어 수집하는 워크플로 |
 | **우리 자체 검증** ([07](02_sim_to_real_gr00t.md)) | N1.6 8-bit 학습 **sim SR 80%** — Phase C~D 파이프라인이 이미 작동함을 입증. T1은 태스크만 다름 |
 | sim+real co-training **+38%** ([arXiv:2503.24361](https://arxiv.org/abs/2503.24361)) | Phase F 근거. 실데이터 단독 대비 평균 +38% |
-| 실기 GR00T covariate shift ([report/GR00T_report.md](../../model_md/report/GR00T_report.md) §3.2) | Phase B 수집 규칙: **교정(recovery) 시연 필수**(어긋남→복구→성공 궤적) |
+| 실기 GR00T covariate shift ([report/GR00T_report.md](../../archive/model_md/report/GR00T_report.md) §3.2) | Phase B 수집 규칙: **교정(recovery) 시연 필수**(어긋남→복구→성공 궤적) |
 
 **핵심**: 커스텀 태스크 sim-to-real은 워크숍이 이미 end-to-end로 증명한 경로다. 새로운 리스크는
 "에셋 제작"과 "sim↔실기 카메라 구도 갭"뿐이며, 나머지(학습·평가)는 검증된 자산을 그대로 쓴다.
@@ -178,7 +178,7 @@ sim 학습 N1.6 체크포인트를 **실기 로봇**에 서빙해 zero-shot 추�
 
 - 서버: real-robot 컨테이너로 `run_gr00t_server.py --model-path <T1_sim_체크포인트>` (실기 로봇은 로컬)
 - 클라이언트: 실기 GR00T 클라이언트(실기 GR00T 작업의 `eval_lerobot.py` 계열 재사용,
-  [report/GR00T_report.md](../../model_md/report/GR00T_report.md) §3.2) — 실기 카메라로 관측→서버→액션
+  [report/GR00T_report.md](../../archive/model_md/report/GR00T_report.md) §3.2) — 실기 카메라로 관측→서버→액션
 - ⚠️ **카메라 매핑 (핵심 리스크)**: sim은 `external_D455`(front)/`ego`(wrist),
   실기는 `top`/`wrist`. modality/rename으로 **실기 top→front, 실기 wrist→wrist** 일치시킴.
   단 **카메라 구도(sim vs 실기 pose)가 다른 것이 주된 sim-real 갭** — DR로 완화, 그래도 남으면 Phase F
@@ -270,6 +270,6 @@ sim-only 전이 SR이 낮으면 **실기 시연 데이터를 학습에 추가**.
 
 ---
 
-*관련: [05_SimToReal.md](../../model_md/sim2real/05_SimToReal.md) 계획 · [02_sim_to_real_gr00t.md](02_sim_to_real_gr00t.md) 검증된 학습·평가 ·
-[01_실행기록.md](01_실행기록.md) 함정 · [report/GR00T_report.md](../../model_md/report/GR00T_report.md) 실기 근본원인 ·
-[report/ACT_report.md](../../model_md/report/ACT_report.md) 실기 T1 셋업*
+*관련: [05_SimToReal.md](../../archive/model_md/sim2real/05_SimToReal.md) 계획 · [02_sim_to_real_gr00t.md](02_sim_to_real_gr00t.md) 검증된 학습·평가 ·
+[01_실행기록.md](01_실행기록.md) 함정 · [report/GR00T_report.md](../../archive/model_md/report/GR00T_report.md) 실기 근본원인 ·
+[report/ACT_report.md](../../archive/model_md/report/ACT_report.md) 실기 T1 셋업*

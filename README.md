@@ -375,11 +375,10 @@ flowchart TD
 ```
 manipulator_ws/
 ├─ PIPELINE.md                 # 📘 파이프라인 해부 (S1~S7, 태스크 교체 체크리스트)
-├─ model_md/                   # Phase 1-0: 4모델 비교 (ACT/SmolVLA/π0/GR00T)
-│  ├─ README.md
-│  ├─ 01_ACT.md ~ 04_GR00T_N1.5.md
-│  ├─ report/
-│  └─ sim2real/
+├─ archive/                    # 지금 파이프라인에서 쓰지 않는 과거 자료 (원래 경로 구조 그대로)
+│  ├─ model_md/                #   Phase 1-0: 4모델 비교 (ACT/SmolVLA/π0/GR00T N1.5)
+│  ├─ setup/                   #   모델별 스크립트(act/smolvla/pi0), GR00T N1.5·진단 스크립트
+│  └─ envs/gr00t/              #   빈 uv 프로젝트 (GR00T는 도커 이미지에서 실행)
 ├─ manipulator_md/             # Phase 1~2: GR00T 기반 진행 기록
 │  ├─ sim/
 │  │  ├─ README.md                        # sim 학습 종합 보고서
@@ -393,7 +392,7 @@ manipulator_ws/
 │  │  └─ ...
 │  └─ sim2real/
 │     ├─ 01~03_*.md                       # 실행 기록
-│     └─ 08_T1_sim2real/                  # T1 sim2real 보고서
+│     └─ 08_T1_sim2real/                  # T1 sim2real 보고서 (deploy.md = sim 수집 환경 재현 가이드)
 ├─ setup/                      # 재현용 스크립트
 │  ├─ hardware/                # 장치 공통: udev rules, 카메라, teleop
 │  ├─ data/                    # 데이터 수집 스크립트
@@ -423,11 +422,9 @@ manipulator_ws/
 │  │  ├─ rerun_cam_align.py              # 카메라 정렬 시각화
 │  │  ├─ record_blocktask_real_v2.sh     # 실기 수집 (박스 다양성)
 │  │  └─ gen_real_collect_schedule.py    # 배치표 생성 (층화 추출)
-│  ├─ act/ / smolvla/ / pi0/   # Phase 1-0 모델별 스크립트
 │  └─ voice/                   # (Phase 2 예정) STT/TTS 파이프라인
 ├─ envs/
-│  ├─ lerobot/                 # uv 프로젝트 (lerobot 0.4.4 + torch 2.10 cu128)
-│  └─ gr00t/                   # uv 프로젝트 (Isaac-GR00T)
+│  └─ lerobot/                 # uv 프로젝트 (lerobot 0.4.4 + torch 2.10 cu128)
 ├─ inf_video/                  # 추론 결과 영상·측정 자료
 │  ├─ 01_sim_inf/ ~ 04_v4_eval/  # sim 추론·평가 영상 (버전별)
 │  ├─ 06_preset_capture/         # 일반화 프리셋 씬 캡처
@@ -465,6 +462,9 @@ cd setup/gr00t && ./run_eval_real.sh C <조건>
 cd ~/blocktask_ws/Sim-to-Real-SO-101-Workshop && ./docker/real/build.sh blackwell  # 최초 1회
 cd ~/manipulator_ws/setup/gr00t && ./serve_local.sh <model>/checkpoint-<step>
 SERVER_HOST=127.0.0.1 ./run_eval_real.sh C <조건>
+
+# 7. sim 데이터 수집 환경 (Isaac Sim T1) — 단계별 안내는 문서 참고
+#    manipulator_md/sim2real/08_T1_sim2real/deploy.md
 ```
 
 ## 데이터·모델 (HF Hub private)
