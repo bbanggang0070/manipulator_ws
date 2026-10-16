@@ -15,7 +15,7 @@
   ①②는 최소 사용 우선(greedy), ③④는 후보 점수에 페널티로 넣는다.
 
 사용:
-  ./gen_lang_collect_plan.py --episodes 330 --seed 20260914 --out ../../manipulator_md/sim/lang_collect_plan.csv
+  ./gen_lang_collect_plan.py --episodes 330 --seed 20260914 --out ../../manipulator_md/p4_language_sim/lang_collect_plan.csv
   ./gen_lang_collect_plan.py --episodes 330 --check-only     # 균형만 출력(파일 안 씀)
 """
 import argparse

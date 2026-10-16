@@ -27,7 +27,7 @@ sim 검증(verify_lang_dataset.py)과 같은 목적이지만, 실기에서만 �
       ~/.cache/huggingface/lerobot/heongyu/so101_real_lang
 
   # 1단계(80행 계획표)를 검증할 때는 계획표를 맞춰 준다
-  REAL_LANG_PLAN=~/manipulator_ws/manipulator_md/real/real_lang_plan_s1.csv \\
+  REAL_LANG_PLAN=~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_s1.csv \\
   uv run python ../../setup/data/verify_real_lang_dataset.py
 """
 import csv
@@ -43,7 +43,7 @@ import pandas as pd
 # 대조할 계획표. **1단계는 80행짜리를 쓰므로** 환경변수로 바꿔야 한다 —
 # 250행 계획표로 대조하면 대응쌍 그룹 번호가 어긋나 멀쩡한 쌍이 깨진 것으로 나온다.
 PLAN = os.environ.get("REAL_LANG_PLAN", os.path.expanduser(
-    "~/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv"))
+    "~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_v3.csv"))
 OBJ_NOUNS = ("red cube", "blue cube", "yellow cube", "green cube",
              "purple cube", "orange cube", "marker", "eraser",
              "glue stick", "screwdriver")

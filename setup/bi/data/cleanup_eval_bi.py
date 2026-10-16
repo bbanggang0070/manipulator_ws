@@ -30,8 +30,8 @@ import sys
 from collections import Counter
 from math import comb, sqrt
 
-PLAN = os.path.expanduser("~/manipulator_ws/manipulator_md/real/bi_cleanup_eval_plan.csv")
-RESULT = os.path.expanduser("~/manipulator_ws/manipulator_md/real/bi_cleanup_eval_result.csv")
+PLAN = os.path.expanduser("~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_eval_plan.csv")
+RESULT = os.path.expanduser("~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_eval_result.csv")
 # ⚠️ 계획표와 결과는 **한 쌍**이다 — 칸 구성·물체 목록을 바꾸면 둘 다 새로 만들 것.
 
 # setup/bi/data/gen_bi_plan.py 와 동일(2026-10-14 변경본) — 평가가 수집과 다른

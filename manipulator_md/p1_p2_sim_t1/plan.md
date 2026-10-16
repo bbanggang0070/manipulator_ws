@@ -251,7 +251,7 @@ sim-only 전이 SR이 낮으면 **실기 시연 데이터를 학습에 추가**.
 | T1-DR-Eval | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ | **5/10 (50%)** |
 
 > ⚠️ 첫 평가는 0%였으나 이는 측정 버그(포크 Eval 환경에 성공 판정기 전체 누락). 원본 vials 배선
-> (`contact_grasp`+`success` termination+subtask)을 블록에 이식 후 위 결과. 상세: [08_T1_sim2real/report.md](08_T1_sim2real/report.md) E절
+> (`contact_grasp`+`success` termination+subtask)을 블록에 이식 후 위 결과. 상세: [report.md](report.md) E절
 
 ### Phase E — 실기 전이 (zero-shot, 10회)
 | 시행 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | SR |

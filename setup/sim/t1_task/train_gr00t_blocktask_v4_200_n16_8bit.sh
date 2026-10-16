@@ -29,7 +29,7 @@
 # ※ resume 대신 신규 학습인 이유: cosine LR이 40k에서 0으로 완주해 resume은 warm restart가
 #   되고, GR00T는 ShardedMixtureDataset(IterableDataset)이라 trainer 주석대로
 #   "stateful samplers rely on global_step" — **데이터셋이 바뀌면 샘플러 상태가 어긋난다.**
-#   상세: manipulator_md/sim/training_plan.md §2
+#   상세: training_plan.md(정리로 삭제됨) §2
 #
 # 사용법(5090): ~/train_gr00t_blocktask_v4_200_n16_8bit.sh [DATA_ROOT] [STEPS]
 set -e

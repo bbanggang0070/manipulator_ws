@@ -28,7 +28,7 @@ from collections import Counter
 
 import pandas as pd
 
-PLAN = os.path.expanduser("~/manipulator_ws/manipulator_md/sim/lang_collect_plan.csv")
+PLAN = os.path.expanduser("~/manipulator_ws/manipulator_md/p4_language_sim/lang_collect_plan.csv")
 HELDOUT_WORDS = ("white", "pink")
 BOX_COLORS = ("black", "brown", "gray")
 OBJ_NOUNS = ("red", "blue", "yellow", "green", "cyan", "purple", "eraser", "marker")

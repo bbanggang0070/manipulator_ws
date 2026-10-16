@@ -267,7 +267,7 @@ rest 조건을 만족해야 종료되도록 확장해야 한다(한쪽만 보고
 
 ```bash
 cd ~/manipulator_ws/setup/bi/data
-PLAN=~/manipulator_ws/manipulator_md/real/bi_cleanup_plan.csv ./record_bi.sh
+PLAN=~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_plan.csv ./record_bi.sh
 #   → "51행부터 재개" 가 떠야 정상(collect_progress.txt에 이미 50개 있음)
 ```
 

@@ -10,7 +10,7 @@
 #   또 sim에서 확인된 병목(블록이 박스에 가까우면 SR 39% vs 원거리 83%)이
 #   실기에서 재현되지 않도록, 근접 배치를 **의도적으로 55%** 넣는다.
 #
-# 배치표: manipulator_md/sim/real_collect_schedule.md  (gen_real_collect_schedule.py로 생성)
+# 배치표: manipulator_md/p3_generalization/real_collect_schedule.md  (gen_real_collect_schedule.py로 생성)
 #   → 박스 자세 10개 × 6ep = 60ep. **표를 띄워놓고 그대로 따라 놓을 것.**
 #     사람이 감으로 놓으면 무의식적으로 비슷한 자리에 몰린다(기존 50ep가 그랬다).
 #
@@ -59,7 +59,7 @@ cat <<'INFO'
 
   ┌────────────────────────────────────────────────────────────────┐
   │  배치표를 먼저 띄우세요:                                       │
-  │    manipulator_md/sim/real_collect_schedule.md                 │
+  │    manipulator_md/p3_generalization/real_collect_schedule.md                 │
   │                                                                │
   │  · 박스 자세 1개당 6ep → 다 찍으면 다음 자세로 박스를 옮긴다   │
   │  · 블록은 표의 '근접/보통 XXcm'대로. 방향은 골고루 바꿀 것     │

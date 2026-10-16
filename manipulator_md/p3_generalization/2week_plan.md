@@ -78,7 +78,7 @@ GUI 재측정에서 **70% vs 80%(−10%p)** 로 노이즈 범위였다. **−40%
 - **씬 개조**: 블록 범위 확대(0.16~0.34/−0.7~1.25), 박스 arc 랜덤(0.28~0.34, ±66°, yaw ±180°),
   박스 0.85배, 물리 DR(마찰±30%/질량±50%), top 카메라 오프셋(0.03,0.02) + 지터 0 고정
 - **버그 발견**: 수집 스크립트 셸 따옴표 중첩으로 **언어 지시문이 `"Pick"`으로 절단** 저장.
-  env 전달 방식으로 수정([report2 §4.9](../sim2real/08_T1_sim2real/report2.md))
+  env 전달 방식으로 수정([report2 §4.9](../p1_p2_sim_t1/report2.md))
 
 ### Day 2~3 (08-04~05) — 수집 231ep
 
@@ -297,7 +297,7 @@ for s in 21 22; do ~/blocktask_headless_scenes.sh full 45 $s; done   # ~1h
 ssh 5090 '~/serve_blocktask_n16_5090.sh gr00t_blocktask_v3_*/checkpoint-40000 start'
 # 로컬: goto_home_real.py + ENSEMBLE=1 W=0.3 + real_pose_align 정렬 확인
 ```
-실기는 zero-shot이므로 [report2 §5](../sim2real/08_T1_sim2real/report2.md) 선례대로
+실기는 zero-shot이므로 [report2 §5](../p1_p2_sim_t1/report2.md) 선례대로
 **co-training이 추가로 필요할 가능성이 높다**.
 
 ---

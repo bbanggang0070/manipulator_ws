@@ -200,8 +200,8 @@ G5 판정선 (선택률)             ⬜
 | `setup/sim/t1_task/ckpt_keep.sh` | 초반 체크포인트 보관 |
 | `setup/sim/t1_task/drop_last_episode.py` | 마지막 에피소드 1개 정합성 유지 제거 |
 | `setup/sim/t1_task/probe_object_contact.py` + `run_probe_contact.sh` | 물체 물리 속성 실측(파지 이상 진단) |
-| `manipulator_md/sim/language_conditioning_stage1_run.md` | 수집 이후 실행 계획 |
-| `manipulator_md/sim/probe_language.json` | 프로브 결과 누적 |
+| `language_conditioning_stage1_run.md(정리로 삭제됨)` | 수집 이후 실행 계획 |
+| `manipulator_md/p4_language_sim/probe_language.json` | 프로브 결과 누적 |
 
 **수정**: `configure_scene.py`(마커 캡슐화 + 각감쇠 100→5), `blocktask_collect_lang.sh`(`RERUN` 스위치)
 

@@ -1,7 +1,7 @@
 # Phase E — sim→real zero-shot 전이 (실기 SO-101) 🔄
 
 > 목표: sim 학습 N1.6 체크포인트를 실기 로봇에 서빙해 zero-shot 추론.
-> 계획: [../03_custom_T1_sim2real.md](../03_custom_T1_sim2real.md) §6 · 상위 index: [README.md](README.md)
+> 계획: [plan.md](plan.md) §6 · 상위 index: [README.md](README.md)
 
 **상태**: 배포 파이프라인 완성·부드러운 실기 추론 확인 → **zero-shot 파지는 sim-real gap으로 실패** → 개선 2트랙 진행 중
 

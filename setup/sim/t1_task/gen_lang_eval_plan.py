@@ -17,7 +17,7 @@ CSV의 target/dest는 기록용이다. **실제 성공 판정은 EVAL_TARGET/EVA
 정한다(configure_scene.py ④). 러너가 조건별로 그것을 바꾼다.
 
 사용:
-  python gen_lang_eval_plan.py --out-dir ~/manipulator_ws/manipulator_md/sim --episodes 30
+  python gen_lang_eval_plan.py --out-dir ~/manipulator_ws/manipulator_md/p4_language_sim --episodes 30
 """
 import argparse
 import csv
@@ -88,7 +88,7 @@ CONDITIONS = [
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out-dir", default=os.path.expanduser("~/manipulator_ws/manipulator_md/sim"))
+    ap.add_argument("--out-dir", default=os.path.expanduser("~/manipulator_ws/manipulator_md/p4_language_sim"))
     ap.add_argument("--episodes", type=int, default=30, help="조건당 에피소드 수")
     a = ap.parse_args()
     os.makedirs(a.out_dir, exist_ok=True)

@@ -50,7 +50,7 @@
 사용:
   python3 gen_real_lang_plan.py --episodes 250
   python3 gen_real_lang_plan.py --episodes 80 --slots 1,4 \\
-      --out ~/manipulator_ws/manipulator_md/real/real_lang_plan_s1.csv
+      --out ~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_s1.csv
 """
 import argparse
 import csv
@@ -172,7 +172,7 @@ def main():
     ap.add_argument("--episodes", type=int, default=250)
     ap.add_argument("--seed", type=int, default=20260930)
     ap.add_argument("--out", default=os.path.expanduser(
-        "~/manipulator_ws/manipulator_md/real/real_lang_plan.csv"))
+        "~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan.csv"))
     ap.add_argument("--slots", default="1,2,3,4",
                     help="쓸 칸 번호. 1단계는 '1,4'(양 끝)로 좁혀 우연 50%%·행동차 최대로 본다")
     ap.add_argument("--pair-frac", type=float, default=0.30,

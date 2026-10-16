@@ -8,7 +8,7 @@
 관련: [실행 계획·변경 이력](2week_plan.md) · [v4 수집 계획](collection_plan_v4.md)
 · [**데이터셋 카탈로그**](datasets.md) · [**일반화 평가 계획**](generalization_eval_plan.md)
 · [co-training 계획](cotraining_plan_v4.md) · 선행연구 분석
-· [실기 파이프라인 선례](../sim2real/08_T1_sim2real/report2.md)
+· [실기 파이프라인 선례](../p1_p2_sim_t1/report2.md)
 > <sub>참고(대체됨): 2차 학습 분기 설계 · 학습 전략 4조합 — resume 분석만 유효</sub>
 
 ---
@@ -59,7 +59,7 @@ v4 학습 후에는 아래 세부 지표를 추가로 본다(원인이 근접으
 
 ## 2. 왜 sim에서 먼저 하는가
 
-실기 co-training까지 파이프라인은 이미 검증됐다([report2](../sim2real/08_T1_sim2real/report2.md)).
+실기 co-training까지 파이프라인은 이미 검증됐다([report2](../p1_p2_sim_t1/report2.md)).
 그러나 sim 모델은 *"단순 조건 추론 SR ~80%"* 만 확인했을 뿐 **일반화는 미검증**이었다.
 
 일반화 검증을 실기로 하는 것은 비효율적이다 — 리셋·정렬·카메라와 팔의 드리프트·
@@ -269,7 +269,7 @@ ep, outcome, steps, block_r/theta/x/y, box_r/theta/x/y, box_yaw, block_box_dist
 **이때 발견·수정한 버그**: 수집 스크립트의 셸 따옴표 중첩으로
 **언어 지시문이 `"Pick"`으로 절단** 저장됐다. 원본 75ep·v2·v3 전부 영향(실기 데이터는 무관).
 env 전달 방식으로 수정하고 v3 메타를 전체 문장으로 교정했다.
-([report2 §4.9](../sim2real/08_T1_sim2real/report2.md))
+([report2 §4.9](../p1_p2_sim_t1/report2.md))
 
 ### 5-3. v3 학습 (08-04 14:04 ~ 08-06 05:13, 약 30h)
 
@@ -546,7 +546,7 @@ front 일치 0.41 / wrist 0.43으로 **벗어나 있다**(1.00이 완전 일치)
 
 ### 10-3. 실기 zero-shot → co-training
 
-[report2 §5](../sim2real/08_T1_sim2real/report2.md)의 선례가 명확하다:
+[report2 §5](../p1_p2_sim_t1/report2.md)의 선례가 명확하다:
 
 | 모델 | 실기 SR |
 |---|---|

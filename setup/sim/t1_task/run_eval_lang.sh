@@ -23,7 +23,7 @@ SEED="${SEED:-4242}"
 NUM="${NUM:-30}"
 MODEL="${MODEL:-gr00t_blocktask_lang_n16_8bit/checkpoint-25000}"
 HOST="${HOST:-5090}"
-PLANDIR="${PLANDIR:-$(cd ../../../manipulator_md/sim && pwd)}"
+PLANDIR="${PLANDIR:-$(cd ../../../manipulator_md/p4_language_sim && pwd)}"
 # RUN 라벨 — 모델이 다르면 결과 폴더도 달라야 한다. 안 나누면 러너가 이전 실행의
 #   scenes.csv를 집어 들어 **다른 모델의 숫자를 보고한다**(출력 이름이 모델을 안 담는다).
 RUN="${RUN:-}"

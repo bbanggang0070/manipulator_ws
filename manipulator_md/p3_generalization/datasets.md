@@ -78,7 +78,7 @@ top 카메라 오프셋 **0**.
 - **231ep 전부를 쓰지 않았다** — 오래된 원거리가 분모만 키워 근접 비율을 39%로 희석시킨다
 
 ### `real50` (50ep) — 구형
-실기 SO-ARM101 수집. [report2 §5](../sim2real/08_T1_sim2real/report2.md): sim-only 10% → co-training **90%**.
+실기 SO-ARM101 수집. [report2 §5](../p1_p2_sim_t1/report2.md): sim-only 10% → co-training **90%**.
 
 > ⚠️ **두 가지 이유로 v4 co-training에서 제외한다.**
 > ① **박스가 완전히 고정** — 50ep 전체에서 박스 픽셀 중심 편차가 x 7px, y 4px.

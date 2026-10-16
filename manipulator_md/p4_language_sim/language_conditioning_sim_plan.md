@@ -4,8 +4,8 @@
 > 씬 설계 → 코드 변경 → 수집 → 데이터 준비 → 학습 → 평가까지, 명령과 판정선을 포함한다.
 >
 > 작성 2026-09-14 · **상태: P0 완료 — 수집(P2) 착수 대기**(§10)
-> 관련: 복원 계획 · [sim2real 보고서](sim2real_generalization_report.md)
-> · [일반화 평가 계획](generalization_eval_plan.md) · [v4 수집 계획](collection_plan_v4.md) · [데이터셋](datasets.md)
+> 관련: 복원 계획 · [sim2real 보고서](../p3_generalization/sim2real_generalization_report.md)
+> · [일반화 평가 계획](../p3_generalization/generalization_eval_plan.md) · [v4 수집 계획](../p3_generalization/collection_plan_v4.md) · [데이터셋](../p3_generalization/datasets.md)
 
 ---
 
@@ -426,13 +426,13 @@ scp -q configure_scene.py blocktask_headless_scenes.sh 5090:~/
 ```bash
 # 0) 계획표 생성 (로컬)
 python3 setup/sim/t1_task/gen_lang_collect_plan.py --episodes 330 --seed 20260914 \
-        --out manipulator_md/sim/lang_collect_plan.csv
+        --out manipulator_md/p4_language_sim/lang_collect_plan.csv
 
 # 1) 씬 검증 — 추론 없이 리셋만 30회 (약 2분)
 python verify_lang_scene.py --episodes 30 --aabb
 
 # 2) 수집 (리더암 teleop, 로컬 5070 Ti)
-DSNAME=sim_so101_blocktask_lang TASK_PLAN=manipulator_md/sim/lang_collect_plan.csv \
+DSNAME=sim_so101_blocktask_lang TASK_PLAN=manipulator_md/p4_language_sim/lang_collect_plan.csv \
   ./setup/sim/t1_task/blocktask_run.sh record
 ```
 
@@ -676,7 +676,7 @@ P6 결정: 실기 수집 착수 여부 + 실기 프롭 준비
 | 산출물 | 위치 |
 |---|---|
 | 계획표 생성기 | `setup/sim/t1_task/gen_lang_collect_plan.py` |
-| 계획표 330행 | `manipulator_md/sim/lang_collect_plan.csv` |
+| 계획표 330행 | `manipulator_md/p4_language_sim/lang_collect_plan.csv` |
 | 씬 카탈로그 | `configure_scene.py`의 `lang` 프리셋 (`full+lang`으로 조합) |
 | 리셋 term | `mdp/resets.py::reset_lang_scene` (포크) |
 | 에피소드별 지시문 | `lerobot_agent.py::_sync_lang_instruction` (포크) |

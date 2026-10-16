@@ -15,7 +15,7 @@ v1(30시행, 배치당 5)의 문제: 물체 선택 실패(17%)가 목적지 축 
 --groups-per-layout 5 로 올리면 배치당 20시행(총 120)이 된다.
 
 사용:
-  python3 gen_swap6_dest_plan.py --out ~/manipulator_ws/manipulator_md/real/swap6_dest_plan.csv
+  python3 gen_swap6_dest_plan.py --out ~/manipulator_ws/manipulator_md/p5_real_cleanup/swap6_dest_plan.csv
   python3 gen_swap6_dest_plan.py --groups-per-layout 5 --out ...   # 배치당 20시행
 """
 import argparse
@@ -42,7 +42,7 @@ def main():
                     help="배치당 4연속 그룹 수. 4 → 배치당 16시행(기본), 5 → 20시행")
     ap.add_argument("--seed", type=int, default=909)
     ap.add_argument("--out", default=os.path.expanduser(
-        "~/manipulator_ws/manipulator_md/real/swap6_dest_plan.csv"))
+        "~/manipulator_ws/manipulator_md/p5_real_cleanup/swap6_dest_plan.csv"))
     a = ap.parse_args()
     check_derangements()
     rng = random.Random(a.seed)

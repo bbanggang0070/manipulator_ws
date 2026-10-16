@@ -1,7 +1,7 @@
 # 진행 현황과 다음 단계
 
 > 2026-09-30 기준. 상세 실험 기록은
-> [language_conditioning_execution_log.md](sim/language_conditioning_execution_log.md)에 있다.
+> [language_conditioning_execution_log.md](p4_language_sim/language_conditioning_execution_log.md)에 있다.
 
 ---
 

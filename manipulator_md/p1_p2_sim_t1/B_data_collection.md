@@ -1,7 +1,7 @@
 # Phase B — 리더암 teleop 데이터 수집 ✅
 
 > 목표: 리더암(`/dev/ttyLEADER`)으로 T1 블록 씬을 조종해 학습 데이터 수집.
-> 계획: [../03_custom_T1_sim2real.md](../03_custom_T1_sim2real.md) §3 · 상위 index: [README.md](README.md)
+> 계획: [plan.md](plan.md) §3 · 상위 index: [README.md](README.md)
 
 **상태**: 완료 (2026-07-25) · **실행 위치**: 로컬 5070 Ti (리더암·GUI 로컬 필수)
 

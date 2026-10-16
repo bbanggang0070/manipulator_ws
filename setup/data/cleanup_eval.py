@@ -35,8 +35,8 @@ import sys
 from collections import Counter
 from math import comb, sqrt
 
-PLAN = os.path.expanduser("~/manipulator_ws/manipulator_md/real/cleanup_eval_plan.csv")
-RESULT = os.path.expanduser("~/manipulator_ws/manipulator_md/real/cleanup_eval_result.csv")
+PLAN = os.path.expanduser("~/manipulator_ws/manipulator_md/p5_real_cleanup/cleanup_eval_plan.csv")
+RESULT = os.path.expanduser("~/manipulator_ws/manipulator_md/p5_real_cleanup/cleanup_eval_result.csv")
 # ⚠️ 계획표와 결과는 **한 쌍**이다. 칸 구성이나 문형을 바꾸면 둘 다 새로 만들 것 —
 #    v1(2칸·문형 3종) 결과 파일을 v2(4칸·문형 1종) 계획표로 읽으면 조용히 어긋난다.
 

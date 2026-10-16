@@ -21,7 +21,7 @@ eraser는 **항상 세워서** 배치한다(사용자 지정, 2026-10-14) — PO
 
 사용:
   python3 gen_bi_plan.py --episodes 50
-  python3 gen_bi_plan.py --episodes 50 --out ~/manipulator_ws/manipulator_md/real/bi_pilot_plan.csv
+  python3 gen_bi_plan.py --episodes 50 --out ~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_pilot_plan.csv
 """
 import argparse
 import csv
@@ -112,7 +112,7 @@ def main():
                     help="파일럿 규모 — bi_manipulator_plan.md §3-1 권장 40~60")
     ap.add_argument("--seed", type=int, default=20261014)
     ap.add_argument("--out", default=os.path.expanduser(
-        "~/manipulator_ws/manipulator_md/real/bi_pilot_plan.csv"))
+        "~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_pilot_plan.csv"))
     ap.add_argument("--pair-frac", type=float, default=0.30)
     ap.add_argument("--quad-frac", type=float, default=0.16)
     ap.add_argument("--base", help="이어 짤 기존 계획표 (--keep-head 와 함께)")

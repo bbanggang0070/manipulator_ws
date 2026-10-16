@@ -58,8 +58,8 @@ REFS = {
     "era90":  {"front": os.path.join(HERE, "pose_ref_era90/front.jpg"),
                "wrist": os.path.join(HERE, "pose_ref_era90/wrist.jpg")},
     # 7/27자 sim 프레임 — 오프셋 0 시절이라 **현재 sim과 다르다.** 이력 참고용.
-    "sim_v2": {"front": os.path.join(HERE, "../../manipulator_md/sim2real/08_T1_sim2real/assets/sim_ref_front.jpg"),
-               "wrist": os.path.join(HERE, "../../manipulator_md/sim2real/08_T1_sim2real/assets/sim_ref_wrist.jpg")},
+    "sim_v2": {"front": os.path.join(HERE, "pose_ref_sim_v2/sim_ref_front.jpg"),
+               "wrist": os.path.join(HERE, "pose_ref_sim_v2/sim_ref_wrist.jpg")},
 }
 
 

@@ -1,6 +1,6 @@
 # 08 T1 Sim-to-Real — Phase별 진행 기록
 
-[03_custom_T1_sim2real.md](../03_custom_T1_sim2real.md) 계획(6 Phase)의 **실제 실행 기록**을
+[plan.md](plan.md) 계획(6 Phase)의 **실제 실행 기록**을
 Phase가 끝날 때마다 한 파일씩 정리한다. 계획서는 "무엇을 할지", 이 폴더는 "무엇을 했고 어떤
 함정을 넘겼는지"를 담는다.
 

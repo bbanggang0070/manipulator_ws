@@ -29,12 +29,12 @@ sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막
 
 | 단계 | 문서 | 코드 |
 |---|---|---|
-| P1 | [03_custom_T1_sim2real.md](manipulator_md/sim2real/03_custom_T1_sim2real.md) · [08_T1_sim2real/](manipulator_md/sim2real/08_T1_sim2real/README.md) A~D · [deploy.md](manipulator_md/sim2real/08_T1_sim2real/deploy.md)(수집 환경 재현) | [setup/sim/t1_task/](setup/sim/t1_task/README.md) P1·P2 |
-| P2 | [report2.md](manipulator_md/sim2real/08_T1_sim2real/report2.md) · [E_sim2real_transfer.md](manipulator_md/sim2real/08_T1_sim2real/E_sim2real_transfer.md) · [F_realdata_prep.md](manipulator_md/sim2real/08_T1_sim2real/F_realdata_prep.md) | 위 + `setup/gr00t/` 서빙·추론 클라이언트·카메라 정렬 |
-| P3 | [sim/README.md](manipulator_md/sim/README.md) · [2week_plan.md](manipulator_md/sim/2week_plan.md) · [sim2real_generalization_report.md](manipulator_md/sim/sim2real_generalization_report.md) · [datasets.md](manipulator_md/sim/datasets.md) | `setup/sim/t1_task/` P3 + `setup/gr00t/run_eval_real.sh` 등 |
-| P4 | [language_conditioning_sim_plan.md](manipulator_md/sim/language_conditioning_sim_plan.md) · [language_conditioning_execution_log.md](manipulator_md/sim/language_conditioning_execution_log.md) | `setup/sim/t1_task/` P4 + `setup/gr00t/probe_language.py` |
-| P5 | [collection_environment.md](manipulator_md/real/collection_environment.md) · [v3_plan.md](manipulator_md/real/v3_plan.md) · [v4_plan.md](manipulator_md/real/v4_plan.md) · [PRESENTATION.md](PRESENTATION.md) | `setup/data/` |
-| P6 | [bi_manipulator_plan.md](manipulator_md/real/bi_manipulator_plan.md) | `setup/bi/` |
+| P1 | [plan.md](manipulator_md/p1_p2_sim_t1/plan.md) · [p1_p2_sim_t1/](manipulator_md/p1_p2_sim_t1/README.md) A~D · [deploy.md](manipulator_md/p1_p2_sim_t1/deploy.md)(수집 환경 재현) | [setup/sim/t1_task/](setup/sim/t1_task/README.md) P1·P2 |
+| P2 | [report2.md](manipulator_md/p1_p2_sim_t1/report2.md) · [E_sim2real_transfer.md](manipulator_md/p1_p2_sim_t1/E_sim2real_transfer.md) · [F_realdata_prep.md](manipulator_md/p1_p2_sim_t1/F_realdata_prep.md) | 위 + `setup/gr00t/` 서빙·추론 클라이언트·카메라 정렬 |
+| P3 | [sim/README.md](manipulator_md/p3_generalization/README.md) · [2week_plan.md](manipulator_md/p3_generalization/2week_plan.md) · [sim2real_generalization_report.md](manipulator_md/p3_generalization/sim2real_generalization_report.md) · [datasets.md](manipulator_md/p3_generalization/datasets.md) | `setup/sim/t1_task/` P3 + `setup/gr00t/run_eval_real.sh` 등 |
+| P4 | [language_conditioning_sim_plan.md](manipulator_md/p4_language_sim/language_conditioning_sim_plan.md) · [language_conditioning_execution_log.md](manipulator_md/p4_language_sim/language_conditioning_execution_log.md) | `setup/sim/t1_task/` P4 + `setup/gr00t/probe_language.py` |
+| P5 | [collection_environment.md](manipulator_md/p5_real_cleanup/collection_environment.md) · [v3_plan.md](manipulator_md/p5_real_cleanup/v3_plan.md) · [v4_plan.md](manipulator_md/p5_real_cleanup/v4_plan.md) · [PRESENTATION.md](PRESENTATION.md) | `setup/data/` |
+| P6 | [bi_manipulator_plan.md](manipulator_md/p6_real_bimanual/bi_manipulator_plan.md) | `setup/bi/` |
 
 > 음성 입력(STT)·피드백(TTS)은 아직 하지 않았다. 아래 "핵심 시나리오"와 Phase 2 그림은 처음 세운 계획이고,
 > 실제로는 상자 2개 대신 **색 칸 4개 선반**, 음성 대신 **영어 지시문**(`Put the {물체} into the {색} bin`)으로 구현했다.
@@ -305,7 +305,7 @@ sim-only → co-training                  음성 양방향 (STT+TTS)
 > 원인은 수집 257ep 전체가 **단일 지시문**이라 언어 입력이 상수였던 것.
 > → Phase 2 수집은 **같은 씬에서 문장이 다르면 정답 행동도 달라지는** 구성이어야 하며
 > (LIBERO-Object형), Level 1에서 언어 조건화부터 검증한다.
-> 상세: `manipulator_md/sim/sim2real_generalization_report.md` §9
+> 상세: `manipulator_md/p3_generalization/sim2real_generalization_report.md` §9
 
 ---
 
@@ -360,7 +360,7 @@ flowchart TD
 - **언어 미사용**: 현 정책은 언어를 입력으로 쓰지 않음 → cleanup task에서 재검증 필수
 - **물체 기하 실패**: 28mm 2/10, 지우개 4/10 — 크기·자세에 그리퍼를 못 맞춤
   → Phase 2 대상(펜·매직)이 이 축이므로 크기·형상 다양 수집 필수
-- 상세: `manipulator_md/sim/sim2real_generalization_report.md`
+- 상세: `manipulator_md/p3_generalization/sim2real_generalization_report.md`
 
 ### 데이터셋 계보
 
@@ -406,13 +406,13 @@ manipulator_ws/
 ├─ docs/
 │  ├─ diagrams/                # 아키텍처 다이어그램 PNG (편집은 Figma)
 │  └─ figures/                 # 결과 그림·영상 (PRESENTATION.md 등에서 사용)
-├─ manipulator_md/             # 진행 기록
+├─ manipulator_md/             # 진행 기록 — 프로젝트 흐름 단계별
 │  ├─ STATUS.md                #   전체 진행 현황
-│  ├─ sim/                     #   sim 학습·일반화·언어 조건화 계획과 실행 기록
-│  ├─ sim2real/                #   sim→real 실행 기록, 08_T1_sim2real/ (deploy.md = sim 수집 환경 재현 가이드)
-│  └─ real/                    #   실기 cleanup: 수집 환경·계획 CSV·평가 결과
-│     ├─ collection_environment.md · v3_plan.md · v4_plan.md   # 단일팔
-│     └─ bi_manipulator_plan.md · bi_*.csv                     # 양팔
+│  ├─ p1_p2_sim_t1/            #   P1·P2 sim T1 → 실기 co-training (plan · A~F · report · report2 · deploy.md = sim 수집 환경 재현)
+│  ├─ p3_generalization/       #   P3 sim 일반화·co-training v4 (README = 종합 보고서, 계획·평가·데이터셋 카탈로그)
+│  ├─ p4_language_sim/         #   P4 sim 언어 조건화 (계획·실행 기록, 수집·평가 계획표, 프로브 결과)
+│  ├─ p5_real_cleanup/         #   P5 실기 cleanup 단일팔 (수집 환경, v3·v4 계획, 계획표 v3, 평가·W 스윕·색지 교체 결과)
+│  └─ p6_real_bimanual/        #   P6 실기 cleanup 양팔 (계획, 수집·평가 계획표, 평가 결과)
 ├─ setup/                      # 재현용 스크립트
 │  ├─ hardware/                # udev rules, 장치 식별, 카메라 점검, teleop
 │  ├─ data/                    # 실기 cleanup(단일팔): 수집·검증·준비·학습·평가
@@ -428,7 +428,7 @@ manipulator_ws/
 │  │  ├─ serve_local.sh · serve_blocktask_n16_5090.sh · serve_blocktask_realclient.py   # 로컬/5090 서빙
 │  │  ├─ client/eval_lerobot.py · run_eval_real.sh · home_then_infer.sh               # 단일팔 추론
 │  │  ├─ goto_home_cleanup.py · goto_home_real.py · goto_home_sim.py                  # 홈 자세
-│  │  ├─ real_pose_align.py · rerun_cam_align.py · pose_ref*/                          # 카메라 정렬
+│  │  ├─ real_pose_align.py · rerun_cam_align.py · pose_ref*/                          # 카메라 정렬 (pose_ref_sim_v2 = sim v2 기준 화면)
 │  │  └─ probe_language.py · analyze_real_run.py                                      # 언어 프로브 · 시행 분석
 │  └─ sim/                     # Isaac Sim (T1 블록 태스크)
 │     ├─ train_gr00t_sim_n16_8bit.sh · patches/   #   8-bit 학습 레시피, 워크숍 저장소 패치
@@ -473,7 +473,7 @@ cd ~/manipulator_ws/setup/gr00t && ./serve_local.sh <model>/checkpoint-<step>
 SERVER_HOST=127.0.0.1 ./run_eval_real.sh C <조건>
 
 # 7. sim 데이터 수집 환경 (Isaac Sim T1) — 단계별 안내는 문서 참고
-#    manipulator_md/sim2real/08_T1_sim2real/deploy.md
+#    manipulator_md/p1_p2_sim_t1/deploy.md
 ```
 
 ## 실기 cleanup 실행
@@ -511,7 +511,7 @@ cd ../../gr00t && ./serve_local.sh <모델>/checkpoint-<step>
 cd ../bi/data
 python3 cleanup_eval_bi.py log --eval-name <이름> --out <결과.csv> --rerun
 python3 cleanup_eval_bi.py report --out <결과.csv>
-#  평가 B(학습에 없던 칸 배치 포함 60시행): --plan ~/manipulator_ws/manipulator_md/real/bi_cleanup_eval_plan_B.csv
+#  평가 B(학습에 없던 칸 배치 포함 60시행): --plan ~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_eval_plan_B.csv
 ```
 
 - 추론 중 `q` 한 번으로 그 시행을 끝내고 결과 입력으로 넘어간다. 어떤 이유로 끝나든 팔은 그 자리에 멈춘 뒤 천천히 rest 로 돌아가고 토크를 유지한다.

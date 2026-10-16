@@ -3,7 +3,7 @@
 Isaac Sim(coworker 포크 `~/blocktask_ws`의 블록 씬)에서 SO-101로 물체를 상자에 넣는 태스크를
 만들고, 실기로 옮기고, 일반화와 언어 조건화까지 넓힌 과정의 스크립트다.
 프로젝트 전체 흐름은 루트 [README.md](../../../README.md)의 "프로젝트 흐름", sim 수집 환경을
-처음부터 꾸리는 방법은 [deploy.md](../../../manipulator_md/sim2real/08_T1_sim2real/deploy.md)에 있다.
+처음부터 꾸리는 방법은 [deploy.md](../../../manipulator_md/p1_p2_sim_t1/deploy.md)에 있다.
 
 `train_*.sh`·`*_sim_eval.sh`는 5090에서 실행한다(5090 작업 폴더에 복사).
 

@@ -1,7 +1,7 @@
 # Phase C — GR00T N1.6 8-bit 학습 ✅
 
 > 목표: 75ep 블록 데이터로 GR00T N1.6를 단일 5090에서 8-bit Adam 학습.
-> 계획: [../03_custom_T1_sim2real.md](../03_custom_T1_sim2real.md) §4 · 상위 index: [README.md](README.md)
+> 계획: [plan.md](plan.md) §4 · 상위 index: [README.md](README.md)
 
 **상태**: 완료 (2026-07-25, ~15시간) · **실행 위치**: 원격 5090 (32GB 필요, 로컬 16GB 부족)
 

@@ -43,7 +43,7 @@ cd "$(dirname "$0")"
 # envs/lerobot 에서 찾다 실패했다(2026-10-07). 한 번만 구해 두고 그걸 쓴다.
 HERE="$(pwd)"
 
-PLAN="${PLAN:-$HOME/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv}"
+PLAN="${PLAN:-$HOME/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_v3.csv}"
 DSNAME="${DSNAME:-cleanup_real}"
 REPO="heongyu/$DSNAME"
 # 저장 위치. lerobot 기본값(HF 캐시)이 아니라 워크숍 datasets/_train 아래에 둔다.
@@ -59,7 +59,7 @@ LEROBOT="$(cd ../../envs/lerobot && pwd)"
 if [ ! -f "$PLAN" ]; then
   echo "❌ 계획표 파일이 없습니다: $PLAN"
   # 경로 오타가 가장 흔하다. 있는 것을 보여 주면 바로 알아챈다.
-  _PD="$HOME/manipulator_ws/manipulator_md/real"
+  _PD="$HOME/manipulator_ws/manipulator_md/p5_real_cleanup"
   if ls "$_PD"/*.csv >/dev/null 2>&1; then
     echo
     echo "   이미 만들어 둔 계획표:"

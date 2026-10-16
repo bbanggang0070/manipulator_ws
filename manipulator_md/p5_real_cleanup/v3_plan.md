@@ -113,7 +113,7 @@ green cube   색상 H=158°   채도 75%   (대조)
 
 ```bash
 cd ~/manipulator_ws/setup/data
-PLAN=~/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv ./record_real_lang.sh
+PLAN=~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_v3.csv ./record_real_lang.sh
 #   → "251행부터 재개" 가 떠야 정상. 남은 120행.
 ```
 
@@ -124,8 +124,8 @@ PLAN=~/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv ./record_real_la
 ```bash
 # 다시 만들어야 한다면 (앞 250행은 바이트 단위로 보존된다)
 python3 gen_real_lang_plan.py --episodes 370 --seed 20261008 \
-    --base ~/manipulator_ws/manipulator_md/real/real_lang_plan_v2.csv --keep-head 250 \
-    --out ~/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv
+    --base ~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_v2.csv --keep-head 250 \
+    --out ~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_v3.csv
 ```
 
 | 항목 | 값 |
@@ -140,7 +140,7 @@ python3 gen_real_lang_plan.py --episodes 370 --seed 20261008 \
 
 ```bash
 cd ~/manipulator_ws/envs/lerobot
-REAL_LANG_PLAN=~/manipulator_ws/manipulator_md/real/real_lang_plan_v3.csv \
+REAL_LANG_PLAN=~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_v3.csv \
   uv run python ../../setup/data/verify_real_lang_dataset.py
 ```
 

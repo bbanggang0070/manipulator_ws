@@ -2,7 +2,7 @@
 
 > Isaac Sim에 T1 태스크(빨간 큐브를 검은 오픈박스에 넣기) 씬을 만들고, 리더암 teleop으로
 > 학습 데이터를 수집해 GR00T N1.6를 학습하고 sim에서 추론 평가하기까지의 실행 기록.
-> 계획: [../03_custom_T1_sim2real.md](../03_custom_T1_sim2real.md) · Phase별 상세: [README.md](README.md)
+> 계획: [plan.md](plan.md) · Phase별 상세: [README.md](README.md)
 
 작성: 2026-07-25 · 최종 갱신: 2026-07-27
 
@@ -188,4 +188,4 @@ headless eval에 front(external_D455) 카메라 프레임 덤프(PyAV, `lerobot_
 ---
 
 *관련: [Phase 상세 A](A_scene_asset.md) · [B](B_data_collection.md) · [C](C_training.md) ·
-계획 [03_custom_T1_sim2real.md](../03_custom_T1_sim2real.md) · 검증 파이프라인 02_sim_to_real_gr00t.md*
+계획 [plan.md](plan.md) · 검증 파이프라인 02_sim_to_real_gr00t.md*

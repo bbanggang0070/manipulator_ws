@@ -1,7 +1,7 @@
 # Phase A — T1 씬·에셋 제작 ✅
 
 > 목표: Isaac Sim에 T1 태스크(빨간 큐브 → 오픈박스) 씬을 만들고 육안 검증.
-> 계획: [../03_custom_T1_sim2real.md](../03_custom_T1_sim2real.md) §2 · 상위 index: [README.md](README.md)
+> 계획: [plan.md](plan.md) §2 · 상위 index: [README.md](README.md)
 
 **상태**: 완료 (2026-07-25) · **실행 위치**: 로컬 5070 Ti (GUI 육안 검증)
 
