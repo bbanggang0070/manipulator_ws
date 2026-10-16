@@ -6,8 +6,8 @@
 > 얹는 것이 목적이므로, 각 단계마다 **태스크에 종속된 부분**과 **그대로 재사용되는 부분**을 갈라 둔다.
 >
 > 작성 2026-09-14 · 📐 **다이어그램 보드**: [Figma](https://www.figma.com/board/4iKjT0Ngfm8IKmiFttKaKc) (D1~D8 — [색인](README.md#다이어그램-figma))
-> 관련: [프로젝트 개요](README.md) · [Phase 2 계획](manipulator_md/sim/cleanup_project_plan.md)
-> · [sim2real 보고서](manipulator_md/sim/sim2real_generalization_report.md) · [Phase별 실행 기록](manipulator_md/sim2real/08_T1_sim2real/README.md)
+> 관련: [프로젝트 개요](README.md) · [Phase 2 계획](manipulator_md/p4_language_sim/cleanup_project_plan.md)
+> · [sim2real 보고서](manipulator_md/p3_generalization/sim2real_generalization_report.md) · [Phase별 실행 기록](manipulator_md/p1_p2_sim_t1/README.md)
 
 ---
 
