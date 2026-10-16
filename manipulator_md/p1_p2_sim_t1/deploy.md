@@ -79,7 +79,7 @@ git lfs pull          # ★ USD 에셋 실제 바이너리 수신 (SO-ARM101 23M
 
 # 이 repo의 정제 패치 적용 (경로는 본인 manipulator_ws 위치에 맞게)
 MW=~/manipulator_ws
-git apply "$MW/setup/sim/t1_task/blocktask_fork.patch"
+git apply "$MW/setup/p1_p4_sim/t1_task/blocktask_fork.patch"
 git diff --stat        # 7 files changed, ~190 insertions 확인
 ```
 
@@ -101,10 +101,10 @@ grep -E 'CAM_X", "0.03|CAM_Z", "0.02' source/sim_to_real_so101/tasks/task_env_cf
 ```
 
 ### (선택) 씬 진단 도구
-`setup/sim/t1_task/diag_block.py`를 fork의 `source/sim_to_real_so101/scripts/`에 복사해 두면
+`setup/p1_p4_sim/t1_task/diag_block.py`를 fork의 `source/sim_to_real_so101/scripts/`에 복사해 두면
 headless로 물체 좌표를 찍어볼 수 있다(GUI 없이 mat/block/basket/robot 위치 확인).
 ```bash
-cp <manipulator_ws>/setup/sim/t1_task/diag_block.py source/sim_to_real_so101/scripts/
+cp <manipulator_ws>/setup/p1_p4_sim/t1_task/diag_block.py source/sim_to_real_so101/scripts/
 # 컨테이너 안에서: python3 source/sim_to_real_so101/scripts/diag_block.py
 ```
 씬 재현에는 **불필요**하며(다른 코드가 참조하지 않음), 문제 진단용 보조 도구다.
@@ -137,8 +137,8 @@ mkdir -p ~/docker/isaac-sim/cache/{kit,ov,glcache,computecache}
 ## 5. Step 3 — 씬 육안 확인 (view)
 
 ```bash
-cd ~/manipulator_ws/setup/gr00t   # (blocktask_run.sh 는 setup/sim/t1_task/ 에 있음)
-~/manipulator_ws/setup/sim/t1_task/blocktask_run.sh view
+cd ~/manipulator_ws/setup/gr00t   # (blocktask_run.sh 는 setup/p1_p4_sim/t1_task/ 에 있음)
+~/manipulator_ws/setup/p1_p4_sim/t1_task/blocktask_run.sh view
 ```
 
 GUI(zero_agent, 로봇 0액션)로 씬이 뜬다. **체크리스트**:
@@ -176,7 +176,7 @@ docker exec blocktask bash -c \
 
 ### 6.2 녹화 실행
 ```bash
-~/manipulator_ws/setup/sim/t1_task/blocktask_run.sh record
+~/manipulator_ws/setup/p1_p4_sim/t1_task/blocktask_run.sh record
 ```
 - 태스크: `Lerobot-So101-Teleop-Vials-To-Rack-DR` (+`--rerun` 실시간 가상 카메라 뷰, `/dev/ttyLEADER`)
 - 출력: `datasets/<DSNAME>` (기본 `sim_so101_blocktask_v2`; 이미 있으면 `_2`, `_3`… 새 폴더 자동)
@@ -215,7 +215,7 @@ docker exec blocktask bash -c \
 
 ### 6.6 초기화(재수집)
 ```bash
-DSNAME=sim_so101_blocktask_v2 ~/manipulator_ws/setup/sim/t1_task/blocktask_run.sh clear
+DSNAME=sim_so101_blocktask_v2 ~/manipulator_ws/setup/p1_p4_sim/t1_task/blocktask_run.sh clear
 ```
 ⚠️ 해당 데이터셋 폴더의 **에피소드가 전부 삭제**된다(recorder가 append/resume 불가라 재시작 전 필요).
 
@@ -228,7 +228,7 @@ DSNAME=sim_so101_blocktask_v2 ~/manipulator_ws/setup/sim/t1_task/blocktask_run.s
 
 ```bash
 # (5090 SSH 접속 설정 되어 있어야 함. 로컬 데이터셋 이름이 sim_so101_blocktask 라고 가정)
-~/manipulator_ws/setup/sim/t1_task/prepare_blocktask_gr00t.sh
+~/manipulator_ws/setup/p1_p4_sim/t1_task/prepare_blocktask_gr00t.sh
 ```
 결과: `5090:~/gr00tn16_ws/sim_data/heongyu/sim_so101_blocktask` (v2.1, 학습 바로 가능),
 v3.0 백업은 `…_v3.0`. 카메라 매핑은 `blocktask_modality.json`(top→front, ego→wrist).
@@ -263,8 +263,8 @@ v3.0 백업은 `…_v3.0`. 카메라 매핑은 `blocktask_modality.json`(top→f
 경계 안 + 접촉 릴리스). 박스를 회전해도 **박스 로컬 좌표** 기준이라 유효.
 
 closed-loop 평가:
-- 단일 조건: `setup/sim/t1_task/blocktask_sim_eval.sh <MODEL> <N> [eval|dr]`
-- **조건 스윕(권장)**: `setup/sim/t1_task/blocktask_ood_sweep.sh <MODEL> <N> [조건...]`
+- 단일 조건: `setup/p1_p4_sim/t1_task/blocktask_sim_eval.sh <MODEL> <N> [eval|dr]`
+- **조건 스윕(권장)**: `setup/p1_p4_sim/t1_task/blocktask_ood_sweep.sh <MODEL> <N> [조건...]`
   — train/dr/pos_ood/box_ood/color_* 를 자동 편집·평가·복원하고 조건별 SR + 시행별 mp4를 남긴다.
 
 ---
@@ -288,8 +288,8 @@ closed-loop 평가:
 
 ## 10. 참고
 
-- 이 repo 관련 파일: `setup/sim/t1_task/`(blocktask_fork.patch, blocktask_run.sh, blocktask_sim_eval.sh,
-  prepare_blocktask_gr00t.sh, blocktask_modality.json), `setup/sim/README.md`, `setup/sim/patches/README.md`
+- 이 repo 관련 파일: `setup/p1_p4_sim/t1_task/`(blocktask_fork.patch, blocktask_run.sh, blocktask_sim_eval.sh,
+  prepare_blocktask_gr00t.sh, blocktask_modality.json), `setup/p1_p4_sim/README.md`, `setup/p1_p4_sim/patches/README.md`
 - Phase 기록: [A_scene_asset.md](A_scene_asset.md), [B_data_collection.md](B_data_collection.md),
   [C_training.md](C_training.md), [report2.md](report2.md)
 - coworker fork: https://github.com/tjdwlswkd21/Sim-to-Real-SO-101-Workshop (@ `124eb1c`)

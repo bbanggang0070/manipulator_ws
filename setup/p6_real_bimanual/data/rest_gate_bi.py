@@ -1,16 +1,16 @@
-"""양팔 버전 rest_gate — setup/data/rest_gate.py의 BiSOLeader 판.
+"""양팔 버전 rest_gate — setup/p5_real_cleanup/rest_gate.py의 BiSOLeader 판.
 
-왜 필요한가: setup/data/rest_gate.py 는 SOLeader(단일팔) 하나만 읽는다.
+왜 필요한가: setup/p5_real_cleanup/rest_gate.py 는 SOLeader(단일팔) 하나만 읽는다.
 양팔은 **두 리더가 동시에** rest 기준 안에 들어와야 한다 — 한쪽만 맞고
 다른 쪽이 흔들리면 그 팔의 시작 자세 편차가 그대로 데이터에 남는다
 (단일팔에서 겪은 rest 흔들림 문제, bi_manipulator_plan.md §3-2 참고).
 
-쓰는 법 (setup/bi/data/record_bi.sh 가 자동으로 호출한다):
+쓰는 법 (setup/p6_real_bimanual/data/record_bi.sh 가 자동으로 호출한다):
   python3 rest_gate_bi.py --set   <데이터셋루트>
   python3 rest_gate_bi.py --check <데이터셋루트>
   python3 rest_gate_bi.py --show  <데이터셋루트>
 
-⚠️ setup/data/rest_gate.py 와 같은 이유로 reset_calibration()을 부르지 않는다
+⚠️ setup/p5_real_cleanup/rest_gate.py 와 같은 이유로 reset_calibration()을 부르지 않는다
    (정규화값만 읽으므로 불필요 — 캘리브레이션 레지스터를 건드리지 않는다).
 """
 import argparse

@@ -34,7 +34,7 @@ case "$MODE" in
   cams)
     need_dev /dev/cam_top /dev/cam_wrist
     echo "▶ 카메라 전용 모드 (팔 전원 불필요) · 모델 입력 ${EDGE}×${EDGE}"
-    cd "$LEROBOT" && exec uv run python ../../setup/data/view_cams.py --edge "$EDGE"
+    cd "$LEROBOT" && exec uv run python ../../setup/p5_real_cleanup/view_cams.py --edge "$EDGE"
     ;;
 
   teleop)

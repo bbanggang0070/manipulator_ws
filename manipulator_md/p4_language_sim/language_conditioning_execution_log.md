@@ -67,7 +67,7 @@ nvidia 패키지 5개가 `iU`로 남았다. 커널 모듈은 580.178.04인데 `l
 ## 2. 데이터 준비 (P3) — 완료
 
 ```
-./setup/sim/t1_task/prepare_blocktask_lang.sh all
+./setup/p1_p4_sim/t1_task/prepare_blocktask_lang.sh all
 ```
 
 로컬 v3.0 → 5090 전송 → v2.1 변환 → `modality.json`·`stats.json` 후처리 → 검증.
@@ -195,11 +195,11 @@ G5 판정선 (선택률)             ⬜
 | 파일 | 용도 |
 |---|---|
 | `setup/gr00t/probe_language.py` | 언어 민감도 프로브 (G1·G4b) |
-| `setup/sim/t1_task/prepare_blocktask_lang.sh` | 전송·변환·검증 (P3, G3 게이트 내장) |
-| `setup/sim/t1_task/train_gr00t_blocktask_lang_n16_8bit.sh` | Run A 이어학습 (SMOKE 모드 포함) |
-| `setup/sim/t1_task/ckpt_keep.sh` | 초반 체크포인트 보관 |
-| `setup/sim/t1_task/drop_last_episode.py` | 마지막 에피소드 1개 정합성 유지 제거 |
-| `setup/sim/t1_task/probe_object_contact.py` + `run_probe_contact.sh` | 물체 물리 속성 실측(파지 이상 진단) |
+| `setup/p1_p4_sim/t1_task/prepare_blocktask_lang.sh` | 전송·변환·검증 (P3, G3 게이트 내장) |
+| `setup/p1_p4_sim/t1_task/train_gr00t_blocktask_lang_n16_8bit.sh` | Run A 이어학습 (SMOKE 모드 포함) |
+| `setup/p1_p4_sim/t1_task/ckpt_keep.sh` | 초반 체크포인트 보관 |
+| `setup/p1_p4_sim/t1_task/drop_last_episode.py` | 마지막 에피소드 1개 정합성 유지 제거 |
+| `setup/p1_p4_sim/t1_task/probe_object_contact.py` + `run_probe_contact.sh` | 물체 물리 속성 실측(파지 이상 진단) |
 | `language_conditioning_stage1_run.md(정리로 삭제됨)` | 수집 이후 실행 계획 |
 | `manipulator_md/p4_language_sim/probe_language.json` | 프로브 결과 누적 |
 

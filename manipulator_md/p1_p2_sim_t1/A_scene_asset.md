@@ -16,7 +16,7 @@
 - 근거: 포크의 `MANAGING_MULTIPLE_ENVIRONMENTS.md` **Method 1(독립 클론)** — 기존 vials 환경을
   건드리지 않아 안전. 두 이미지 모두 `teleop-docker:latest`(Isaac Lab 2.3.2) 동일.
 - 태스크 ID: `Lerobot-So101-Teleop-Vials-To-Rack-DR` (coworker가 이 등록을 **블록 씬으로 덮어씀**)
-- 런처: `setup/sim/t1_task/blocktask_run.sh` (`view` / `record` / `clear` 모드)
+- 런처: `setup/p1_p4_sim/t1_task/blocktask_run.sh` (`view` / `record` / `clear` 모드)
 
 ## 2. 씬 커스터마이즈 (`source/sim_to_real_so101/tasks/vials_to_rack_env_cfg.py`)
 

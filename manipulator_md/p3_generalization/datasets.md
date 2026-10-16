@@ -74,7 +74,7 @@ top 카메라 오프셋 **0**.
 
 - v3의 19.2% → **2.8배**, 자연 분포 43.2% 대비 **1.26배 오버샘플**(의도적)
 - 원거리 91ep로 v3의 80ep보다 **많아** 퇴행 위험 통제
-- 선별 목록: `setup/sim/t1_task/selected_35_near.txt`
+- 선별 목록: `setup/p1_p4_sim/t1_task/selected_35_near.txt`
 - **231ep 전부를 쓰지 않았다** — 오래된 원거리가 분모만 키워 근접 비율을 39%로 희석시킨다
 
 ### `real50` (50ep) — 구형
@@ -151,7 +151,7 @@ find <DS>/videos -name '*.mp4' | wc -l          # = total_episodes × 카메라 
 cat <DS>/meta/tasks.jsonl        # "Pick up the block and place it in the box" 전문이어야 함
 
 # 배치 분포 (근접 비율)
-python3 setup/sim/t1_task/analyze_dataset_geometry.py <datasets_root> <tmp> <보정소스...>
+python3 setup/p1_p4_sim/t1_task/analyze_dataset_geometry.py <datasets_root> <tmp> <보정소스...>
 ```
 
 **언어 지시문 절단**은 실제로 발생했던 버그다 — 셸 따옴표 중첩으로 `"Pick"`만 저장돼

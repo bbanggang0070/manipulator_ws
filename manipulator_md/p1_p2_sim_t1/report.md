@@ -25,7 +25,7 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 ### 실행 스크립트
 
 ```bash
-# 런처: setup/sim/t1_task/blocktask_run.sh
+# 런처: setup/p1_p4_sim/t1_task/blocktask_run.sh
 ./blocktask_run.sh view      # zero_agent로 씬 육안 확인 (로봇 0액션)
 ./blocktask_run.sh record    # 리더암 teleop 녹화 (학습 데이터 수집)
 ./blocktask_run.sh clear     # 데이터셋 폴더 초기화 (재녹화 전)
@@ -33,7 +33,7 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 
 - 태스크 ID: `Lerobot-So101-Teleop-Vials-To-Rack-DR` (coworker가 이 등록을 블록 씬으로 덮어씀)
 - 씬 정의: `~/blocktask_ws/.../tasks/vials_to_rack_env_cfg.py`
-- 5090 동기화: `setup/sim/t1_task/deploy_t1.sh 5090`
+- 5090 동기화: `setup/p1_p4_sim/t1_task/deploy_t1.sh 5090`
 
 ### 씬 (external_D455 / front 카메라 시점)
 
@@ -87,7 +87,7 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 **변환이 필요한 이유**: GR00T 데이터 로더는 v2.1 스키마(에피소드별 파일 + 레거시 JSONL + `modality.json`)를
 전제로 작성돼 있어, v3.0을 그대로 넣으면 로드되지 않는다. 그래서 학습 전 반드시 변환한다.
 
-`setup/sim/t1_task/prepare_blocktask_gr00t.sh`가 수행하는 4단계:
+`setup/p1_p4_sim/t1_task/prepare_blocktask_gr00t.sh`가 수행하는 4단계:
 1. **v3.0 → v2.1 변환** (`convert_v3_to_v2.py`): consolidated → 에피소드별 파일 복원, `_v3.0` 백업
 2. **`modality.json` 배치**: 카메라 키 매핑 — **front ← external_D455**, **wrist ← ego**
    (GR00T가 카메라를 논리 이름으로 참조하므로 필수)

@@ -116,4 +116,4 @@ fi
 echo
 echo "  검증:"
 echo "    cd $LEROBOT && REAL_LANG_PLAN=~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_s1.csv \\"
-echo "      uv run python ../../setup/data/verify_real_lang_dataset.py"
+echo "      uv run python ../../setup/p5_real_cleanup/verify_real_lang_dataset.py"

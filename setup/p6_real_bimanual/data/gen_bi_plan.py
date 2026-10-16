@@ -3,7 +3,7 @@
 bi_manipulator_plan.md §3 파일럿(40~60ep)용. 과제는 단일팔 cleanup과 언어
 구조가 같다 — "Put the {obj} into the {dst} bin" 한 문장이 오른팔(파지 대상)과
 왼팔(목적지 칸)을 동시에 정한다. 바뀐 건 그 사이에 **전달**이 끼어드는 것뿐이다.
-그래서 4칸·대응쌍/4연속 구조를 setup/data/gen_real_lang_plan.py에서 그대로
+그래서 4칸·대응쌍/4연속 구조를 setup/p5_real_cleanup/gen_real_lang_plan.py에서 그대로
 가져온다 — 바뀌는 변수(양팔·전달)를 하나만 넣어야 뭐가 문제인지 구분된다.
 
 물체 8종(2026-10-14 변경) — 큐브를 전부 빼고 교체했다. red/blue/black marker·

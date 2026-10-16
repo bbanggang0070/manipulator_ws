@@ -300,12 +300,12 @@ v1 은 칸 2개로 8.57σ 였는데, 칸을 4개로 늘렸는데도 더 벌어�
 - 파지 시도 = 운반 구간 **앞에서** '크게 벌림'에 **들어간** 횟수(연속 구간은 1회)
 - 놓은 위치 = 운반 구간 **바로 다음** 평탄구간이 시작하는 프레임의 pan
 
-`setup/data/gt_events.json` 에 정답 14개를 박아 두었다. 궤적을 손으로 읽고,
+`setup/p5_real_cleanup/gt_events.json` 에 정답 14개를 박아 두었다. 궤적을 손으로 읽고,
 논란이던 ep111·ep114 는 **top 카메라 프레임을 직접 열어** 확인했다(둘 다
 그리퍼가 white 칸 위, ep114 는 초록 큐브가 white 칸 안에 들어가 있다).
 
 ```bash
-python3 setup/data/episode_events.py --selftest   # 14/14 일치
+python3 setup/p5_real_cleanup/episode_events.py --selftest   # 14/14 일치
 ```
 
 지표를 건드리면 이것부터 통과시킨다. 검증기도 이 모듈을 쓰고, **칸 분리도가

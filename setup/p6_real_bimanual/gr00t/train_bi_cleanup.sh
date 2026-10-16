@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 양팔 파일럿 학습 — setup/data/train_cleanup_real.sh 의 bi 판. 5090에서 실행.
+# 양팔 파일럿 학습 — setup/p5_real_cleanup/train_cleanup_real.sh 의 bi 판. 5090에서 실행.
 #
 # 지금 단계(bi_manipulator_plan.md §5 step 6)는 **본 학습이 아니라 스모크
 # 테스트**다 — modality config(bi_so100_config.py)·변환 파이프라인이 양팔
@@ -34,8 +34,8 @@ CKPT_DIR="$HOME/gr00tn16_ws/checkpoints"
 [ -f "$DS/meta/modality.json" ] || { echo "❌ modality.json 없음 — 변환 후처리 누락"; exit 1; }
 [ -f "$HOME/gr00t_remote/Isaac-GR00T/$MODALITY_CONFIG_PATH" ] || {
   echo "❌ $MODALITY_CONFIG_PATH 가 5090의 Isaac-GR00T repo에 없습니다 — 먼저 scp 하세요:"
-  echo "   scp setup/bi/gr00t/bi_so100_config.py 5090:~/gr00t_remote/Isaac-GR00T/examples/BiSO100/"
-  echo "   scp setup/bi/gr00t/modality.json       5090:~/gr00t_remote/Isaac-GR00T/examples/BiSO100/"
+  echo "   scp setup/p6_real_bimanual/gr00t/bi_so100_config.py 5090:~/gr00t_remote/Isaac-GR00T/examples/BiSO100/"
+  echo "   scp setup/p6_real_bimanual/gr00t/modality.json       5090:~/gr00t_remote/Isaac-GR00T/examples/BiSO100/"
   exit 1
 }
 
@@ -72,7 +72,7 @@ if docker ps --format '{{.Names}}' | grep -q "^${NAME}$"; then
 fi
 
 # 색 증강 — 지시문이 색 이름으로 물체·칸을 가리키므로 단일팔과 같은 이유로
-# hue 는 좁게(±5.4°) 유지한다. setup/data/train_cleanup_real.sh §주석 참조.
+# hue 는 좁게(±5.4°) 유지한다. setup/p5_real_cleanup/train_cleanup_real.sh §주석 참조.
 CJ_BRI="${CJ_BRI:-0.3}"
 CJ_CON="${CJ_CON:-0.4}"
 CJ_SAT="${CJ_SAT:-0.25}"

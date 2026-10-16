@@ -295,7 +295,7 @@ ep,objects,boxes,target,dest,instruction
 
 ## 3. 코드 변경
 
-정본은 저장소(`setup/sim/t1_task/`), 실제 코드는 포크(`~/blocktask_ws/.../source/sim_to_real_so101/`)에
+정본은 저장소(`setup/p1_p4_sim/t1_task/`), 실제 코드는 포크(`~/blocktask_ws/.../source/sim_to_real_so101/`)에
 들어가고 `blocktask_fork.patch`를 재생성해 남긴다.
 
 ### 3-1. 씬 — 물체·박스 카탈로그 (`configure_scene.py`)
@@ -411,7 +411,7 @@ env에 `_plan_row`(이번 에피소드에 실제로 적용된 행 번호)를 남
 
 ```bash
 # 포크에 반영 후
-cd ~/blocktask_ws/Sim-to-Real-SO-101-Workshop && git diff > ~/manipulator_ws/setup/sim/t1_task/blocktask_fork.patch
+cd ~/blocktask_ws/Sim-to-Real-SO-101-Workshop && git diff > ~/manipulator_ws/setup/p1_p4_sim/t1_task/blocktask_fork.patch
 # 5090 적용(평가 전) — run_evalB.sh가 하는 것과 같은 방식
 scp -q configure_scene.py blocktask_headless_scenes.sh 5090:~/
 ```
@@ -425,7 +425,7 @@ scp -q configure_scene.py blocktask_headless_scenes.sh 5090:~/
 
 ```bash
 # 0) 계획표 생성 (로컬)
-python3 setup/sim/t1_task/gen_lang_collect_plan.py --episodes 330 --seed 20260914 \
+python3 setup/p1_p4_sim/t1_task/gen_lang_collect_plan.py --episodes 330 --seed 20260914 \
         --out manipulator_md/p4_language_sim/lang_collect_plan.csv
 
 # 1) 씬 검증 — 추론 없이 리셋만 30회 (약 2분)
@@ -433,7 +433,7 @@ python verify_lang_scene.py --episodes 30 --aabb
 
 # 2) 수집 (리더암 teleop, 로컬 5070 Ti)
 DSNAME=sim_so101_blocktask_lang TASK_PLAN=manipulator_md/p4_language_sim/lang_collect_plan.csv \
-  ./setup/sim/t1_task/blocktask_run.sh record
+  ./setup/p1_p4_sim/t1_task/blocktask_run.sh record
 ```
 
 **수집 전 예행 5회(P0 마지막 관문)**
@@ -464,7 +464,7 @@ DSNAME=sim_so101_blocktask_lang TASK_PLAN=manipulator_md/p4_language_sim/lang_co
 
 ```bash
 # 전송 → 변환(v3.0→v2.1) → 병합 → 검증. prepare_blocktask_v4_200.sh와 같은 4단계
-./setup/sim/t1_task/prepare_blocktask_lang.sh all
+./setup/p1_p4_sim/t1_task/prepare_blocktask_lang.sh all
 ```
 
 **반드시 확인할 것 두 가지**
@@ -675,15 +675,15 @@ P6 결정: 실기 수집 착수 여부 + 실기 프롭 준비
 
 | 산출물 | 위치 |
 |---|---|
-| 계획표 생성기 | `setup/sim/t1_task/gen_lang_collect_plan.py` |
+| 계획표 생성기 | `setup/p1_p4_sim/t1_task/gen_lang_collect_plan.py` |
 | 계획표 330행 | `manipulator_md/p4_language_sim/lang_collect_plan.csv` |
 | 씬 카탈로그 | `configure_scene.py`의 `lang` 프리셋 (`full+lang`으로 조합) |
 | 리셋 term | `mdp/resets.py::reset_lang_scene` (포크) |
 | 에피소드별 지시문 | `lerobot_agent.py::_sync_lang_instruction` (포크) |
 | scenes.csv 확장 | `lerobot_eval.py::_lang_pose` (포크) |
-| 씬 검증 | `setup/sim/t1_task/verify_lang_scene.py` |
-| 수집 래퍼 | `setup/sim/t1_task/blocktask_collect_lang.sh` |
-| 포크 정본 | `setup/sim/t1_task/blocktask_fork.patch` (재생성 완료) |
+| 씬 검증 | `setup/p1_p4_sim/t1_task/verify_lang_scene.py` |
+| 수집 래퍼 | `setup/p1_p4_sim/t1_task/blocktask_collect_lang.sh` |
+| 포크 정본 | `setup/p1_p4_sim/t1_task/blocktask_fork.patch` (재생성 완료) |
 
 **검증 결과 — 20회 리셋**
 

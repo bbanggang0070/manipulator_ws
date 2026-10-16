@@ -177,9 +177,9 @@ Fisher 정확검정 p = 0.0097   ·   Mantel-Haenszel 공통 오즈비 4.52
 
 | 파일 | 역할 |
 |---|---|
-| `setup/data/gen_real_lang_plan.py` | 계획표 생성 (250행 / 1단계 80행 완료) |
-| `setup/data/record_real_lang.sh` | 수집 러너 — 놓을 물체·칸·지시문 표시 |
-| `setup/data/verify_real_lang_dataset.py` | 수집 후 검증 |
+| `setup/p5_real_cleanup/gen_real_lang_plan.py` | 계획표 생성 (250행 / 1단계 80행 완료) |
+| `setup/p5_real_cleanup/record_real_lang.sh` | 수집 러너 — 놓을 물체·칸·지시문 표시 |
+| `setup/p5_real_cleanup/verify_real_lang_dataset.py` | 수집 후 검증 |
 
 ### 구성 — 4칸 선반, 색상 단독
 

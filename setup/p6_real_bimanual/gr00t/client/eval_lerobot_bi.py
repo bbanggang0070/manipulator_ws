@@ -12,7 +12,7 @@
 # 저절로 성립한다(§4-3 요구사항). 단 판정 기준은 양팔판에서 "근처+정지"로 바꿨다(아래 _REST_STILL).
 #
 # 사용 예:
-#   cd setup/bi/gr00t/client
+#   cd setup/p6_real_bimanual/gr00t/client
 #   uv run --project ../../../../envs/lerobot python eval_lerobot_bi.py \
 #     --robot.type=bi_so_follower \
 #     --robot.left_arm_config.port=/dev/ttyFOLLOWER_L \

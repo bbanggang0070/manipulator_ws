@@ -1,6 +1,6 @@
 """양팔(bi-manipulator) cleanup 실기 평가 — 계획 생성 · 결과 기록 · 분석.
 
-setup/data/cleanup_eval.py 의 양팔판. 단일팔은 축이 둘(물체·목적지)이었지만
+setup/p5_real_cleanup/cleanup_eval.py 의 양팔판. 단일팔은 축이 둘(물체·목적지)이었지만
 양팔은 **전달(handoff)이 끼어들어 셋**이다 — bi_manipulator_plan.md §2-2:
 
     오른팔 파지 → (그리퍼 대 그리퍼 전달) → 왼팔 배치
@@ -12,7 +12,7 @@ setup/data/cleanup_eval.py 의 양팔판. 단일팔은 축이 둘(물체·목적
 목적지 분모에 넣으면 왼팔 배치 능력이 과소평가된다 — 애초에 왼팔이 받지도
 못했으니까).
 
-물체(8종)·칸(4색)·지시문 형식은 데이터 수집(setup/bi/data/gen_bi_plan.py)과
+물체(8종)·칸(4색)·지시문 형식은 데이터 수집(setup/p6_real_bimanual/data/gen_bi_plan.py)과
 **그대로 맞춘다** — 평가가 수집과 다른 어휘·문형을 쓰면 측정하는 게
 "지시문을 읽는가"가 아니라 "분포 밖 일반화"가 섞인다.
 
@@ -34,7 +34,7 @@ PLAN = os.path.expanduser("~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_c
 RESULT = os.path.expanduser("~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_eval_result.csv")
 # ⚠️ 계획표와 결과는 **한 쌍**이다 — 칸 구성·물체 목록을 바꾸면 둘 다 새로 만들 것.
 
-# setup/bi/data/gen_bi_plan.py 와 동일(2026-10-14 변경본) — 평가가 수집과 다른
+# setup/p6_real_bimanual/data/gen_bi_plan.py 와 동일(2026-10-14 변경본) — 평가가 수집과 다른
 # 물체 목록을 쓰면 분포 밖 일반화가 섞인다.
 OBJECTS = ["red marker", "blue marker", "black marker", "yellow straw",
            "glue stick", "toothbrush", "eraser", "screwdriver"]

@@ -38,7 +38,7 @@
 
 수집 데이터셋에는 물체 좌표가 저장돼 있지 않다. 대신 평가에는 `scenes.csv`로 실제 좌표가
 남으므로, **(픽셀 중심 ↔ 실제 좌표) 59쌍으로 영상→평면 변환을 맞추고** 수집 영상에 적용했다.
-(`setup/sim/t1_task/analyze_dataset_geometry.py`)
+(`setup/p1_p4_sim/t1_task/analyze_dataset_geometry.py`)
 
 **보정 정확도**: 블록 잔차 **0.74cm**(최대 1.59), 박스 1.02cm, **홀드아웃 0.9~2.5cm**.
 
@@ -134,7 +134,7 @@ RESUME=1 DSNAME=sim_so101_blocktask_v4_near ./blocktask_collect_near.sh record  
 | **신규 타깃 수집** `v4_near_3` | 65 | **55** | 실측 §4-d |
 | **합계** | **200** | **109 (54.5%)** | 원거리 91 (v3의 80보다 많음) |
 
-- 선별 목록: `setup/sim/t1_task/selected_35_near.txt` (거리·반경·각도 포함)
+- 선별 목록: `setup/p1_p4_sim/t1_task/selected_35_near.txt` (거리·반경·각도 포함)
 - 선별 35개의 θ<0 비율 **49%** — 자연 36%보다 높아 취약 구역이 자연히 보강된다.
 
 ### 4-c. 자연 분포(43.2%)를 넘겨 54.5%로 잡는 이유

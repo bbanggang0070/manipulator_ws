@@ -112,7 +112,7 @@ green cube   색상 H=158°   채도 75%   (대조)
 ## 3. 수집
 
 ```bash
-cd ~/manipulator_ws/setup/data
+cd ~/manipulator_ws/setup/p5_real_cleanup
 PLAN=~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_v3.csv ./record_real_lang.sh
 #   → "251행부터 재개" 가 떠야 정상. 남은 120행.
 ```
@@ -141,7 +141,7 @@ python3 gen_real_lang_plan.py --episodes 370 --seed 20261008 \
 ```bash
 cd ~/manipulator_ws/envs/lerobot
 REAL_LANG_PLAN=~/manipulator_ws/manipulator_md/p5_real_cleanup/real_lang_plan_v3.csv \
-  uv run python ../../setup/data/verify_real_lang_dataset.py
+  uv run python ../../setup/p5_real_cleanup/verify_real_lang_dataset.py
 ```
 
 v3 계획표가 v2 의 250행을 그대로 품고 있으므로 **검증기 전 항목이 그대로 동작한다**
@@ -181,7 +181,7 @@ v2 는 8 epoch 에서 목적지 96.2% 가 나왔다. 체크포인트가 8개 남
 
 ```bash
 ssh 5090 '~/serve_blocktask_n16_5090.sh gr00t_cleanup_real_n16_8bit/checkpoint-31000 start'
-cd ~/manipulator_ws/setup/data && python3 cleanup_eval.py log
+cd ~/manipulator_ws/setup/p5_real_cleanup && python3 cleanup_eval.py log
 ```
 
 계획표는 이미 새로 뽑혀 있다(60시행 · red↔orange 상호 배제 위반 0건).

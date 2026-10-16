@@ -60,7 +60,7 @@ sim 실패 영상 4개 분석 → **전부 파지 실패**(접근 후 "맴돎", 
   `train_gr00t_blocktask_cotrain_n16_8bit.sh`+`launch_cotrain.py`(sim+실기 다중 데이터셋 학습) → 재배포·측정
 
 ## 5. 재현 자산
-- 포크 전체 변경: `setup/sim/t1_task/blocktask_fork.patch`
-- 배포/평가/co-train 스크립트: `setup/gr00t/`, `setup/sim/t1_task/`
+- 포크 전체 변경: `setup/p1_p4_sim/t1_task/blocktask_fork.patch`
+- 배포/평가/co-train 스크립트: `setup/gr00t/`, `setup/p1_p4_sim/t1_task/`
 
 > **다음**: sim v2 재수집(mat·카메라·교정 반영) 100ep → 재학습 → sim SR 재측정 → 개선 확인 후 실기 재전이.

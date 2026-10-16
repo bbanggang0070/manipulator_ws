@@ -1,6 +1,6 @@
 """양팔 전달(오른팔→왼팔) 성공률 지표 — 그리퍼 궤적에서 **전달 시점**을 읽는다.
 
-⚠️ 그리퍼 궤적 기반 지표는 이 세션에서 **이미 네 번 틀렸다**(setup/data/episode_events.py
+⚠️ 그리퍼 궤적 기반 지표는 이 세션에서 **이미 네 번 틀렸다**(setup/p5_real_cleanup/episode_events.py
    머리말 참고 — 전부 "임계값 하나로 사건을 잡으려다" 생긴 실패다). 그래서 여기서도
    **평탄구간 분해**(episode_events.plateaus, 그대로 재사용 — 다시 만들지 않는다)만 쓰고,
    정답 4개(gt_handoff.json, 영상 프레임을 직접 열어 확인)로 고정해 두었다. 지표를 건드리면
@@ -37,7 +37,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "p5_real_cleanup"))
 from episode_events import plateaus  # 평탄구간 분해 자체는 재사용 — 다시 만들지 않는다
 
 GT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gt_handoff.json")

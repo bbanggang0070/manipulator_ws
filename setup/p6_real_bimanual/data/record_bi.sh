@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# 양팔(bi-manipulator) 파일럿 수집 — setup/data/record_real_lang.sh 의 bi 판.
+# 양팔(bi-manipulator) 파일럿 수집 — setup/p5_real_cleanup/record_real_lang.sh 의 bi 판.
 #
 # 과제: 오른팔이 지시한 물체를 집어 **그리퍼 대 그리퍼로 왼팔에 직접 전달**하고,
 # 왼팔이 지시한 색 칸(4칸)에 넣는다. 문장 하나가 양팔을 동시에 조건화한다
 # (bi_manipulator_plan.md §2). 단일팔과 다른 점은 이 전달 구간뿐이므로,
 # 시연 규칙도 거기 하나만 추가한다 — 나머지(물체 10종·4칸·대응쌍 유지,
-# push_to_hub=false 필수 이유 등)는 setup/data/record_real_lang.sh 와 같다.
+# push_to_hub=false 필수 이유 등)는 setup/p5_real_cleanup/record_real_lang.sh 와 같다.
 #
 # 시연 규칙(전달 구간, 추가분):
 #   · 오른팔은 왼팔 그리퍼가 **확실히 물체를 닫은 뒤에** 놓는다. 서두르면
@@ -21,7 +21,7 @@
 set -uo pipefail
 cd "$(dirname "$0")"
 HERE="$(pwd)"
-DATA="$(cd ../../data && pwd)"   # calib_fingerprint.py 는 setup/data 에 있다(공용)
+DATA="$(cd ../../p5_real_cleanup && pwd)"   # calib_fingerprint.py 는 setup/p5_real_cleanup 에 있다(공용)
 
 PLAN="${PLAN:-$HOME/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_plan.csv}"
 DSNAME="${DSNAME:-bi_cleanup}"

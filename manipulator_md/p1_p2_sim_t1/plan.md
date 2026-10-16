@@ -47,7 +47,7 @@ fp32 사전학습본 60% 상회). T1은 **태스크·에셋만 교체**하고 �
 
 - **이미지 파리티**: 양쪽 `teleop-docker` = Isaac Lab **2.3.2 동일**(2026-07-23 확인). 한쪽만 재빌드
   금지 — 동일 Dockerfile 유지 또는 `docker save|load`로 통일.
-- **동기화**: `setup/sim/t1_task/deploy_t1.sh local|5090` (cfg/tray_black/reset/gym append, idempotent)
+- **동기화**: `setup/p1_p4_sim/t1_task/deploy_t1.sh local|5090` (cfg/tray_black/reset/gym append, idempotent)
   + git. 로컬에서 cfg 수정 → 커밋 → `deploy_t1.sh 5090`로 반영.
 
 ---
@@ -69,7 +69,7 @@ fp32 사전학습본 60% 상회). T1은 **태스크·에셋만 교체**하고 �
 
 ## 2. Phase A — T1 sim 태스크·에셋 제작
 
-워크숍 `source/sim_to_real_so101/`를 개조. 정본은 우리 repo `setup/sim/patches/`에 patch로 보관.
+워크숍 `source/sim_to_real_so101/`를 개조. 정본은 우리 repo `setup/p1_p4_sim/patches/`에 patch로 보관.
 
 ### 2.1 에셋 (커스텀 mesh 스캔 불필요 — 프리미티브 활용)
 
@@ -102,7 +102,7 @@ vials 6종 등록을 참고해 T1 4종 추가:
 
 - `list_envs`로 T1 태스크 4종 등록 확인
 - `zero_agent --task Lerobot-So101-T1-CubeBox`로 씬에 빨간 큐브·검은 박스·SO-101 렌더링 육안 확인
-  (Phase 0에서 vials 씬 검증한 것과 동일 방식, setup/sim/README.md)
+  (Phase 0에서 vials 씬 검증한 것과 동일 방식, setup/p1_p4_sim/README.md)
 
 > **✅ 체크포인트 A (게이트)**
 > - **코드 게이트 (2026-07-23 통과 ✅, headless)**:
@@ -110,7 +110,7 @@ vials 6종 등록을 참고해 T1 4종 추가:
 >   2. ✅ `zero_agent --headless`로 씬 생성 — 빨간 큐브(프리미티브 CuboidCfg)·검은 박스(tray_black)·
 >      로봇·`contact_grasp` 센서·카메라 전부 엔티티 바인딩, import/cfg 에러 없음(내부 로그 `/tmp/isaaclab/logs/`)
 >   3. ✅ 리셋(`reset_cube_box`)·파지(`cube_grasped`)·배치(`cube_placed`, vials 함수 재사용 vertical_threshold=0)·
->      success 판정 배선 정상. 정본: [setup/sim/t1_task/](../../setup/sim/t1_task/)
+>      success 판정 배선 정상. 정본: [setup/p1_p4_sim/t1_task/](../../setup/p1_p4_sim/t1_task/)
 >   - ⚠️ 헤드리스 콘솔 stdout은 버퍼링으로 64줄에서 멈춰 보임 → 실제 진행은 내부 로그로 확인
 > - **육안 게이트 (모니터, 잔여)**: GUI `zero_agent`로 큐브 색/박스 위치 확인 + 큐브를 박스에 옮겨
 >   success=True 확인 → 판정 경계(`BOX_LOCAL_*`)·`cube_pose_range`(도달범위) 튜닝. **이후 Phase B로.**
@@ -119,7 +119,7 @@ vials 6종 등록을 참고해 T1 4종 추가:
 
 ## 3. Phase B — 리더암 teleop 데이터 수집
 
-- 도구: `setup/sim/record_sim.sh` 재사용(태스크명·언어만 T1으로):
+- 도구: `setup/p1_p4_sim/record_sim.sh` 재사용(태스크명·언어만 T1으로):
   `--task Lerobot-So101-T1-CubeBox-DR`, `--task_name "Pick up the red cube and place it in the black box"`
 - 규모: **50ep + DR**(워크숍 프로토콜, 실기 v2/v3와 규모 일치)
 - **수집 규칙** (실기 교훈 반영):
@@ -143,7 +143,7 @@ vials 6종 등록을 참고해 T1 4종 추가:
 1. v3.0 → **v2.1 변환**(`convert_v3_to_v2.py`, ffmpeg 필요) + `_v3.0` 백업
 2. `meta/modality.json`: `front←external_D455`, `wrist←ego` (변환 후 재생성)
 3. `stats.json` count 제거(`fix_stats_for_gr00t.py`)
-4. 학습: `setup/sim/train_gr00t_sim_n16_8bit.sh`(데이터 경로만 T1으로) —
+4. 학습: `setup/p1_p4_sim/train_gr00t_sim_n16_8bit.sh`(데이터 경로만 T1으로) —
    이미지 `real-robot-train8`(bitsandbytes+8bit), NVIDIA 하이퍼파라미터 동일(유효배치 64·lr 1e-4·
    20k·color jitter), **GPU 22.7GB로 단일 5090 학습**
 5. 목표 loss ~0.005 (vials와 동일 수준)
@@ -157,7 +157,7 @@ vials 6종 등록을 참고해 T1 4종 추가:
 
 ## 5. Phase D — sim 추론 확인
 
-- `setup/sim/sim_eval_gr00t.sh <T1_체크포인트> 10 eval` (real-robot 서버 + teleop-docker 클라이언트)
+- `setup/p1_p4_sim/sim_eval_gr00t.sh <T1_체크포인트> 10 eval` (real-robot 서버 + teleop-docker 클라이언트)
 - 태스크: `Lerobot-So101-T1-CubeBox-Eval`
 - ⚠️ **원본 클라이언트** 사용(N1.5 어댑터 패치 남으면 N1.6 서버와 충돌 — 07 §3.4).
   N1.6 평가 전 `cp lerobot_interface.py.bak_preadapter …`로 원본 복원 확인
@@ -216,13 +216,13 @@ sim-only 전이 SR이 낮으면 **실기 시연 데이터를 학습에 추가**.
 | 자산 | 위치 | Phase |
 |---|---|---|
 | 8-bit 학습 이미지 `real-robot-train8` | 5090 (bitsandbytes+torchcodec+ffmpeg) | C |
-| 학습 스크립트 `train_gr00t_sim_n16_8bit.sh` | `setup/sim/` (데이터 경로만 변경) | C |
+| 학습 스크립트 `train_gr00t_sim_n16_8bit.sh` | `setup/p1_p4_sim/` (데이터 경로만 변경) | C |
 | v2 변환·stats·modality 도구 | `setup/gr00t/`, `convert_v3_to_v2.py` | C |
-| 녹화 스크립트 `record_sim.sh` | `setup/sim/` (태스크명만 변경) | B |
-| sim 평가 `sim_eval_gr00t.sh` | `setup/sim/` (태스크명만 변경) | D |
+| 녹화 스크립트 `record_sim.sh` | `setup/p1_p4_sim/` (태스크명만 변경) | B |
+| sim 평가 `sim_eval_gr00t.sh` | `setup/p1_p4_sim/` (태스크명만 변경) | D |
 | 실기 T1 데이터 50ep | `heongyu/so101_t1_pickplace` (v2.1) | F |
 | 실기 GR00T 서빙·측정 도구 | `setup/gr00t/` (goto_home 등) | E |
-| 워크숍 패치 모음 | `setup/sim/patches/` | 전반 |
+| 워크숍 패치 모음 | `setup/p1_p4_sim/patches/` | 전반 |
 
 **새로 만들 것**: T1 태스크 env cfg(`t1_cube_box_env_cfg.py`) + 성공판정(`cube_in_box`) +
 리셋(`reset_cube`) + gym 등록 + 검은 박스 material. (에셋은 프리미티브라 mesh 제작 없음)

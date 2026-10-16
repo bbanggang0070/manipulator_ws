@@ -3,7 +3,7 @@
 # 오차 <= TOL 에 도달하면 바로 infer_gr00t_bi_local.sh 로 추론을 시작한다.
 #
 # 사용법(로컬, 양팔 로봇 연결 상태에서):
-#   cd ~/manipulator_ws/setup/bi/gr00t
+#   cd ~/manipulator_ws/setup/p6_real_bimanual/gr00t
 #   SERVER_HOST=127.0.0.1 ./home_then_infer_bi.sh   (ENSEMBLE_W 기본 0.8)
 #
 # ⚠️ 반복마다 양팔이 홈 자세로 이동한다. 첫 실행은 e-stop(Ctrl+C)에 손 두고 지켜볼 것.

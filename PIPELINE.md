@@ -82,7 +82,7 @@ flowchart LR
     mdp/resets.py                                  # 리셋 이벤트 함수들
     scripts/lerobot_agent.py / lerobot_eval.py     # 수집 / 평가 실행기
 
-manipulator_ws/setup/sim/t1_task/
+manipulator_ws/setup/p1_p4_sim/t1_task/
   blocktask_fork.patch                             # ★ 포크 변경분의 정본(git diff로 재생성)
   configure_scene.py                               # 조건 프리셋으로 cfg를 변형
 ```

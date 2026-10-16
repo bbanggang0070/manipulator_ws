@@ -25,8 +25,8 @@
 
 사용:
   cd ~/manipulator_ws/envs/lerobot
-  uv run python ../../setup/data/check_joints.py           # 한 번 읽고 판정
-  uv run python ../../setup/data/check_joints.py --watch   # 보면서 두 팔 맞추기
+  uv run python ../../setup/p5_real_cleanup/check_joints.py           # 한 번 읽고 판정
+  uv run python ../../setup/p5_real_cleanup/check_joints.py --watch   # 보면서 두 팔 맞추기
 """
 import sys
 

@@ -16,9 +16,9 @@ Rerun 패널:
 
 사용:
   cd ~/manipulator_ws/envs/lerobot
-  uv run python ../../setup/data/view_cams.py              # 기본
-  uv run python ../../setup/data/view_cams.py --no-guide   # 안내선 끄기
-  uv run python ../../setup/data/view_cams.py --edge 448   # 448로 올렸을 때를 보고 싶으면
+  uv run python ../../setup/p5_real_cleanup/view_cams.py              # 기본
+  uv run python ../../setup/p5_real_cleanup/view_cams.py --no-guide   # 안내선 끄기
+  uv run python ../../setup/p5_real_cleanup/view_cams.py --edge 448   # 448로 올렸을 때를 보고 싶으면
 """
 import argparse
 import sys

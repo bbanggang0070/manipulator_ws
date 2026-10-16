@@ -586,7 +586,7 @@ sim에서 일반화를 확보하는 목적은 *"실기에서 바로 되게 하�
 수집 세션 원본(v3.0)은 `datasets/sim_so101_blocktask_*`에 그대로 보존.
 전 항목 **parquet 수 = mp4/2 = 에피소드 수**, `modality.json` 존재 확인 완료.
 
-### 도구 (`setup/sim/t1_task/`)
+### 도구 (`setup/p1_p4_sim/t1_task/`)
 
 | 스크립트 | 용도 |
 |---|---|

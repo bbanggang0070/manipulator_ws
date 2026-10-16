@@ -257,7 +257,7 @@ MODEL=gr00t_blocktask_v4_200_n16_8bit/checkpoint-86000 \
   ~/blocktask_headless_scenes.sh full 45 31
 
 # 분석
-python3 setup/sim/t1_task/analyze_eval_scenes.py --label "L3" \
+python3 setup/p1_p4_sim/t1_task/analyze_eval_scenes.py --label "L3" \
   --exclude "<겹침 ep>" inf_video/05_genA/hl_full_s31
 ```
 
@@ -324,7 +324,7 @@ STEP_DT=0.033 SERVER_HOST=192.168.0.56 ENSEMBLE=1 ENSEMBLE_W=0.3 ./home_then_inf
 
 **프리셋 총 23개**. 목록 확인:
 ```bash
-python3 setup/sim/t1_task/configure_scene.py --list
+python3 setup/p1_p4_sim/t1_task/configure_scene.py --list
 ```
 
 ### 리팩터 안전성

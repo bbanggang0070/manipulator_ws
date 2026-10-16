@@ -266,7 +266,7 @@ rest 조건을 만족해야 종료되도록 확장해야 한다(한쪽만 보고
 바이트 단위로 동일)를 생성했다. 이어서 수집:
 
 ```bash
-cd ~/manipulator_ws/setup/bi/data
+cd ~/manipulator_ws/setup/p6_real_bimanual/data
 PLAN=~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_plan.csv ./record_bi.sh
 #   → "51행부터 재개" 가 떠야 정상(collect_progress.txt에 이미 50개 있음)
 ```
@@ -287,10 +287,10 @@ PLAN=~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_plan.csv ./reco
 
 | 파일 | 역할 | 단일팔 원본과 다른 점 |
 |---|---|---|
-| `setup/bi/gr00t/goto_home_bi.py` | 추론 전 rest 복귀 | TARGET을 bi_cleanup 50ep frame0 평균(12관절)으로 재계산 |
-| `setup/bi/gr00t/client/eval_lerobot_bi.py` | 추론 클라이언트 | 카메라 3대→top/wrist_left/wrist_right 재매핑, state 12차원→4그룹 분리. ensemble·async·rerun·STOP_ON_REST 로직은 **그대로 재사용**(robot_state_keys 12개를 그대로 돌기 때문에 바꿀 필요가 없었다 — 양팔 모두 rest 복귀해야 끝나는 것도 공짜로 보장됨) |
-| `setup/bi/gr00t/infer_gr00t_bi_local.sh` | 추론 실행 | record_bi.sh와 같은 카메라 장치(`/dev/cam_top`·`/dev/cam_wrist`·`/dev/cam_wrist_right`) |
-| `setup/bi/gr00t/home_then_infer_bi.sh` | 홈 복귀 후 추론 자동 시작 | 그대로 패턴만 이식 |
+| `setup/p6_real_bimanual/gr00t/goto_home_bi.py` | 추론 전 rest 복귀 | TARGET을 bi_cleanup 50ep frame0 평균(12관절)으로 재계산 |
+| `setup/p6_real_bimanual/gr00t/client/eval_lerobot_bi.py` | 추론 클라이언트 | 카메라 3대→top/wrist_left/wrist_right 재매핑, state 12차원→4그룹 분리. ensemble·async·rerun·STOP_ON_REST 로직은 **그대로 재사용**(robot_state_keys 12개를 그대로 돌기 때문에 바꿀 필요가 없었다 — 양팔 모두 rest 복귀해야 끝나는 것도 공짜로 보장됨) |
+| `setup/p6_real_bimanual/gr00t/infer_gr00t_bi_local.sh` | 추론 실행 | record_bi.sh와 같은 카메라 장치(`/dev/cam_top`·`/dev/cam_wrist`·`/dev/cam_wrist_right`) |
+| `setup/p6_real_bimanual/gr00t/home_then_infer_bi.sh` | 홈 복귀 후 추론 자동 시작 | 그대로 패턴만 이식 |
 
 **서버(`serve_local.sh`)는 수정 없이 그대로 재사용된다** — `serve_blocktask_realclient.py`가
 체크포인트의 `processor/` 에 저장된 modality config를 읽어 쓰므로(학습 시 등록한
@@ -307,13 +307,13 @@ cd ~/manipulator_ws/setup/gr00t
 ./serve_local.sh gr00t_bi_cleanup_n16_8bit/checkpoint-7500
 
 # 2) 양팔 로봇 연결 상태에서 홈 복귀 + 추론 자동 시작
-cd ~/manipulator_ws/setup/bi/gr00t
+cd ~/manipulator_ws/setup/p6_real_bimanual/gr00t
 SERVER_HOST=127.0.0.1 ./home_then_infer_bi.sh
 #   기본 지시문: "Put the red marker into the black bin" (LANG_INSTRUCTION으로 바꿀 것)
 ```
 
-**3단계 분리 판정기 (2026-10-15 추가)** — `setup/bi/data/cleanup_eval_bi.py`
-(`cleanup_eval.py`의 양팔판) + 시행 러너 `setup/bi/gr00t/run_eval_real_bi.sh`.
+**3단계 분리 판정기 (2026-10-15 추가)** — `setup/p6_real_bimanual/data/cleanup_eval_bi.py`
+(`cleanup_eval.py`의 양팔판) + 시행 러너 `setup/p6_real_bimanual/gr00t/run_eval_real_bi.sh`.
 - `plan`: 계획표 `bi_cleanup_eval_plan.csv` (12그룹=36시행, dest 4연속 6·obj 쌍 6) — 물체 8종·칸 4색·문형은 `gen_bi_plan.py`와 동일
 - `log`: 시행마다 터미널에 **놓을 물체(오른팔 영역)·지시문·정답**을 띄우고 Enter 시 로봇 자동 실행 →
   끝나면 rest 복귀 → `picked`(우완)·`handoff`(성공/실패)·`landed`(좌완) 3칸 입력
@@ -326,7 +326,7 @@ SERVER_HOST=127.0.0.1 ./home_then_infer_bi.sh
 
 ```bash
 cd ~/manipulator_ws/setup/gr00t && ./serve_local.sh gr00t_bi_cleanup_n16_8bit/checkpoint-7500
-cd ~/manipulator_ws/setup/bi/data && python3 cleanup_eval_bi.py log
+cd ~/manipulator_ws/setup/p6_real_bimanual/data && python3 cleanup_eval_bi.py log
 python3 cleanup_eval_bi.py report
 ```
 
@@ -371,7 +371,7 @@ t03·t05는 왼팔도 크게 움직임(전달 시도로 추정, 영상 미확인
 - 5090의 `heongyu/bi_cleanup`은 `prepare_bi_cleanup.sh`가 151ep로 **교체**한다(50ep 학습은 이미 끝났으므로 영향 없음).
 
 ```bash
-cd ~/manipulator_ws/setup/bi/data && ./prepare_bi_cleanup.sh all          # 로컬: 전송·변환·검증
+cd ~/manipulator_ws/setup/p6_real_bimanual/data && ./prepare_bi_cleanup.sh all          # 로컬: 전송·변환·검증
 ssh 5090 'cd ~/gr00t_remote/scripts && EPOCHS=10 OUT_NAME=gr00t_bi_cleanup151_n16_8bit ./train_bi_cleanup.sh'
 ```
 

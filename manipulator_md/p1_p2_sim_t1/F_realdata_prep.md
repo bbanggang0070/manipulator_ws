@@ -51,8 +51,8 @@
 | 단계 | 도구 |
 |---|---|
 | 수집 | `setup/gr00t/record_blocktask_real.sh` (top/wrist, 언어=sim 일치 "Pick up the block and place it in the box", repo_id `heongyu/so101_blocktask_real`) |
-| 변환 | `setup/sim/t1_task/prepare_blocktask_real_gr00t.sh` (v3→v2.1 + modality top→front/wrist→wrist) |
-| co-train | `setup/sim/t1_task/train_gr00t_blocktask_cotrain_n16_8bit.sh` + `launch_cotrain.py` (sim_v2 + 실기 다중 데이터셋) |
+| 변환 | `setup/p1_p4_sim/t1_task/prepare_blocktask_real_gr00t.sh` (v3→v2.1 + modality top→front/wrist→wrist) |
+| co-train | `setup/p1_p4_sim/t1_task/train_gr00t_blocktask_cotrain_n16_8bit.sh` + `launch_cotrain.py` (sim_v2 + 실기 다중 데이터셋) |
 - co-train 스크립트의 sim 데이터는 **`sim_so101_blocktask_v2`**(새 것)를 사용하도록 반영됨.
 
 ## G. 타이밍 주의

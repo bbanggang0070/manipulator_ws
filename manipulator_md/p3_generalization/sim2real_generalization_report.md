@@ -427,7 +427,7 @@ cd ~/manipulator_ws/setup/gr00t
 ./analyze_real_run.py ~/manipulator_ws/inf_video/07_real_eval/A/*
 
 # 평가 B — sim (계산 5090, 결과는 로컬로)
-cd ~/manipulator_ws/setup/sim/t1_task
+cd ~/manipulator_ws/setup/p1_p4_sim/t1_task
 EVAL_PANEL=1 NUM=10 SEED=100 ./run_evalB.sh
 
 # 배경 축
@@ -543,7 +543,7 @@ sim을 섞어 real gap과 언어 무시를 함께 떠안을 이유가 약하다.
 
 48k로 한 번 돌리고 `checkpoint-25000`·`checkpoint-48000`을 각각 평가하면 두 비교를 다 얻는다.
 한쪽만 보면 *"베이스라인을 덜 학습시켰다"* 또는 *"57ep을 80 epoch 돌려 과적합"* 이라는
-반론에 각각 막힌다. 스크립트는 `setup/sim/t1_task/train_gr00t_blocktask_realonly_n16_8bit.sh`
+반론에 각각 막힌다. 스크립트는 `setup/p1_p4_sim/t1_task/train_gr00t_blocktask_realonly_n16_8bit.sh`
 · 소요 약 36시간.
 
 **판정.** 실기 성공률이 co-train과 같거나 높은가. 같다면 **sim 혼합은 값어치가 없다**는

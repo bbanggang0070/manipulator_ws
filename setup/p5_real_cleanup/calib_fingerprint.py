@@ -56,7 +56,7 @@ LIVE = [("팔로워", "robots/so_follower/follower.json"),
 
 # 양팔(bi-manipulator) 버전 — BiSOFollower/BiSOLeader가 내부적으로 서브암을
 # f"{id}_left"/f"{id}_right"로 만들어 **같은 so_follower/so_leader 폴더**에
-# 저장한다(클래스 이름이 폴더를 정하므로). id는 setup/bi/data/record_bi.sh 와
+# 저장한다(클래스 이름이 폴더를 정하므로). id는 setup/p6_real_bimanual/data/record_bi.sh 와
 # 맞춰야 한다. fingerprint()는 CALIB_DIR 전체를 긁으므로 --check/--write는
 # 수정 없이 그대로 이 파일들도 감지한다 — 이 배너는 표시용일 뿐이다.
 LIVE_BI = [("왼팔 팔로워", "robots/so_follower/bi_follower_left.json"),

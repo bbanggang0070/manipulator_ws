@@ -18,7 +18,7 @@
 | 프레임 | 25,549 @ 30fps |
 | 카메라 키 | `observation.images.ego`(wrist) · `observation.images.external_D455`(front) |
 
-- 수집 도구: `setup/sim/t1_task/blocktask_run.sh record`
+- 수집 도구: `setup/p1_p4_sim/t1_task/blocktask_run.sh record`
   (`Lerobot-So101-Teleop-Vials-To-Rack-DR` + `--rerun` + `/dev/ttyLEADER`)
 - 태스크 언어: 블록 pick&place (빨간 큐브 → 오픈박스)
 

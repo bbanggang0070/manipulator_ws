@@ -16,7 +16,7 @@
 
 사용(lerobot venv 필요 — pandas):
   cd ~/manipulator_ws/envs/lerobot
-  uv run python ../../setup/sim/t1_task/verify_lang_dataset.py \\
+  uv run python ../../setup/p1_p4_sim/t1_task/verify_lang_dataset.py \\
       ~/blocktask_ws/Sim-to-Real-SO-101-Workshop/datasets/sim_so101_blocktask_lang
 """
 import glob

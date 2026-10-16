@@ -9,7 +9,7 @@
 
 ## 1. 데이터 준비 — v3.0 → v2.1 변환 ✅
 
-`setup/sim/t1_task/prepare_blocktask_gr00t.sh` (vials 80% 모델과 동일 파이프라인):
+`setup/p1_p4_sim/t1_task/prepare_blocktask_gr00t.sh` (vials 80% 모델과 동일 파이프라인):
 1. 로컬 v3.0 → 5090 전송 (rsync, 임시 `images/` 제외, 녹화 중 vanished code 24 무시)
 2. 컨테이너(`real-robot-train8`) 안에서 `convert_v3_to_v2.py`로 v2.1 변환 (`_v3.0` 백업)
 3. `meta/modality.json` 배치: **front ← external_D455**, **wrist ← ego**
