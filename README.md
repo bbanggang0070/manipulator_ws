@@ -5,6 +5,8 @@
 문장 하나가 두 팔을 동시에 조건화한다 — 오른팔은 **물체 분류**, 왼팔은 **색 분류**를 맡는다.
 모델은 NVIDIA **GR00T N1.6**(3B VLA)을 12관절·카메라 3대에 맞춰 미세조정한다.
 
+> ▶ **수집부터 평가까지 그대로 따라 하려면 [RUNBOOK.md](RUNBOOK.md)** (명령 순서·확인할 것·자주 겪는 문제)
+>
 > 📘 파이프라인을 다른 태스크에 다시 쓰려면 [PIPELINE.md](PIPELINE.md),
 > 발표·일정은 [PRESENTATION.md](PRESENTATION.md), 스크립트 지도는 [setup/README.md](setup/README.md).
 
