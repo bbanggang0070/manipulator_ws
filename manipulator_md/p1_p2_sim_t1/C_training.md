@@ -49,7 +49,7 @@
 | +13분 | ~진행 | 0.15 | ~2.0 | 정상 수렴 |
 | **완주** | **20,000** | **0.0073** | ~0.06 | epoch 1.0, 최저 0.0048 |
 
-- 손실 곡선: [report.md D.1](report.md#d-학습-지표--2026-07-25-완주) (`assets/loss_curve.svg`)
+- 손실 곡선: [report.md D.1](report.md#d-학습-지표--2026-07-25-완주)
 - 최종 모델: `~/gr00tn16_ws/checkpoints/gr00t_blocktask75_n16_8bit/checkpoint-20000`
 
 ## 4. 게이트 (완주 — 전부 통과 ✅)

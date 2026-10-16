@@ -15,8 +15,6 @@
 sim 실패 영상 분석 결과 **실패는 전부 "파지(pickup)"에 집중** — 접근·인식은 되는데 큐브 근처에서
 **맴돌기만 하고 못 집는다**. 아래는 실패 궤적 6프레임(접근→맴돎→못 집음, 큐브가 30초 내내 바닥에):
 
-![이전 데이터 파지 실패 ep01](assets/prev_fail_ep01.jpg)
-![이전 데이터 파지 실패 ep05](assets/prev_fail_ep05.jpg)
 
 이 "맴돎"의 근본 원인 3가지:
 
@@ -28,7 +26,6 @@ sim 실패 영상 분석 결과 **실패는 전부 "파지(pickup)"에 집중** 
 ### 1-B. top(external) 카메라가 너무 멀어 큐브 위치 추정 부정확
 - 위에서 내려다보는 external_D455 시점에서 **큐브가 작게** 잡혀 위치 단서가 흐림.
 
-![씬(top 카메라 시점) — 큐브가 작게 잡힘](assets/scene_front.jpg)
 
 ### 1-C. 교정(recovery) 시연 부재 → 빗나가면 복구 못 하고 "맴돎"
 - 시연은 대부분 **한 번에 깔끔히 성공**만 담김. 파지가 살짝 빗나간 상태는 데이터에 거의 없음.
@@ -40,8 +37,8 @@ sim 실패 영상 분석 결과 **실패는 전부 "파지(pickup)"에 집중** 
 
 ### 2-A. sim 추론 — 파지 실패로 timeout
 정책이 큐브에 접근하지만 집지 못하고 900프레임(30초) timeout. (성공은 조기 종료, 실패는 끝까지)
-- 실패 영상: [ep01_fail.mp4](assets/eval_run10/ep01_fail.mp4) · [ep05_fail.mp4](assets/eval_run10/ep05_fail.mp4) ·
-  [ep06_fail.mp4](assets/eval_run10/ep06_fail.mp4) · [ep10_fail.mp4](assets/eval_run10/ep10_fail.mp4)
+- 실패 영상: ep01_fail.mp4 · ep05_fail.mp4 ·
+  ep06_fail.mp4 · ep10_fail.mp4
 - (위 §1 몽타주가 이 영상들의 프레임 요약)
 
 ### 2-B. 실기 zero-shot 추론 — 파지 전혀 못 함
@@ -83,9 +80,7 @@ sim 실패 영상 분석 결과 **실패는 전부 "파지(pickup)"에 집중** 
 - v2 에피소드별: ✅✅❌❌✅✅✅✅✅✅ (성공 8, 실패 2)
 - **가설 검증**: 모델·하이퍼파라미터 불변, **데이터만 교체**했는데 60%→80%(+20%p). 파지 실패의 근본이
   씬 기하(mat)·시연 구성(교정)이었음이 확인됨.
-- 성공 롤아웃(예): `assets/eval_v2/ep01_success.mp4` (영상 `assets/eval_v2/`)
 
-![v2 성공 롤아웃](assets/eval_v2/v2_ep01_success_strip.jpg)
 
 ### 3.2 잔여 실패 분석 (2/10)
 v1의 "안 내려감·맴돎"은 **사라짐** — v2는 팔이 실제로 큐브까지 내려가 **파지를 시도**한다(mat 수정 효과).
@@ -96,8 +91,6 @@ v1의 "안 내려감·맴돎"은 **사라짐** — v2는 팔이 실제로 큐브
 | ep03 | 큐브를 **건드려 밀어내고** 놓침 | 그리퍼가 살짝 off-center로 닫힘 (파지 정밀도) |
 | ep04 | **far-edge 큐브** 도달·파지 못 함 | 워크스페이스 끝 위치 학습 부족 (커버리지) |
 
-![ep03 파지 정밀도 실패](assets/eval_v2/v2_ep03_fail_strip.jpg)
-![ep04 엣지 커버리지 실패](assets/eval_v2/v2_ep04_fail_strip.jpg)
 
 > 더 올리려면(85~90%): 파지 정밀 시연 + 엣지 위치 데이터 보강. 현재 80%는 실기 전이로 넘어가기 충분.
 
@@ -136,10 +129,9 @@ sim 80% 모델을 실기에 그대로 붙였을 때 처음 나온 결론은 "파
 `ENSEMBLE=0 HORIZON=8`로 실행한 초기 시도. 블록 인식·접근은 정상인데 파지로 넘어가지 못하고
 일정 시점 이후 **완전히 굳었다**(최근 30초 전 관절 변동 < 1.2°). 동시에 궤적이 눈에 띄게 **지그재그**로 떨렸다.
 
-![실기 zero-shot — 지그재그·정지](assets/real_zeroshot/real_zigzag_strip.jpg)
 
-영상: [real_zigzag_ens_off.mp4](assets/real_zeroshot/real_zigzag_ens_off.mp4) *(앙상블 OFF, 60초 발췌)*
-· sim 비교: [ep01_success.mp4](assets/eval_v2/ep01_success.mp4)
+영상: real_zigzag_ens_off.mp4 *(앙상블 OFF, 60초 발췌)*
+· sim 비교: ep01_success.mp4
 
 ### 4.2 지그재그의 정체 — 예측 분산이 아니라 **체계적 앵커 지연**
 
@@ -181,9 +173,8 @@ real 53). 원인은 **과평활**이다 — 추론이 67ms로 빨라 2스텝마�
 **최대 25개 예측이 동시에 평균**된다. "지금 내려가서 집어라"라는 결단이 "아직 접근 중"이라는 옛 예측
 20여 개와 섞여 희석됐다. W를 0.02→0.05로 올려도(실효 10개) 부족했고, 정지는 더 빨리 왔다.
 
-![과평활로 인한 정지 — 12초 만에 고정점 수렴](assets/real_zeroshot/real_stall_w005_strip.jpg)
 
-영상: [real_stall_w005.mp4](assets/real_zeroshot/real_stall_w005.mp4)
+영상: real_stall_w005.mp4
 
 ### 4.5 균형점 W=0.3 — **zero-shot 파지 성공**
 
@@ -198,9 +189,8 @@ real 53). 원인은 **과평활**이다 — 추론이 67ms로 빨라 2스텝마�
 재정렬 효과(경계 점프 억제)는 유지하면서 결단력을 회복하는 지점이다. 이 설정에서
 **실기 zero-shot 파지·이송에 성공**했다.
 
-![실기 zero-shot 성공 (W=0.3)](assets/real_zeroshot/real_success_w03_strip.jpg)
 
-영상: [real_success_w03.mp4](assets/real_zeroshot/real_success_w03.mp4)
+영상: real_success_w03.mp4
 
 ### 4.6 그래서 왜 co-training인가
 

@@ -37,7 +37,6 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 
 ### 씬 (external_D455 / front 카메라 시점)
 
-![T1 씬 — 보라색 SO-101, 빨간 큐브, 검은 오픈박스, 흰 바닥](assets/scene_front.jpg)
 
 > 보라색 SO-101, 빨간 큐브(20mm), 검은 오픈박스(100×200×75mm), 밝은 흰색 평면 바닥.
 > 실기 셋업과 동일한 pick&place 구도.
@@ -64,10 +63,8 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 ### 데이터셋 샘플 (한 에피소드 궤적: 접근 → 파지 → 이송)
 
 **front (external_D455)** — 전역 시점:
-![front 카메라 샘플 3프레임](assets/sample_front.jpg)
 
 **wrist (ego)** — gripper 장착 시점:
-![wrist 카메라 샘플 3프레임](assets/sample_ego.jpg)
 
 > wrist 뷰에서 gripper 집게가 **정면(upright)** 으로 나오는 것은 관절 매핑 수정(§Phase B 상세)의
 > 결과 — 실기 학습 데이터의 wrist 카메라 구도와 일치시킨 것.
@@ -125,7 +122,6 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 
 ### D.1 손실 함수 그래프
 
-![블록 T1 GR00T N1.6 학습 손실 곡선](assets/loss_curve.svg)
 
 > 20k step에 걸쳐 loss가 1.14 → **0.0073**으로 안정적으로 수렴. 발산·정체 구간 없음.
 > (log scale, 이동평균 50. `trainer_state.json`의 log_history 2,000 포인트 기반)
@@ -177,13 +173,9 @@ coworker 포크의 블록 씬을 **별도 클론**(`~/blocktask_ws`)으로 가�
 headless eval에 front(external_D455) 카메라 프레임 덤프(PyAV, `lerobot_eval.py --save_video_dir`)를 추가해
 성공 에피소드를 녹화. 아래는 성공 롤아웃(접근 → 파지 → 이송 → 박스에 배치):
 
-<video src="assets/inference_success.mp4" controls muted width="640">
-  인라인 재생이 안 되면 <a href="assets/inference_success.mp4">assets/inference_success.mp4</a> 를 여세요.
-</video>
 
 > ep04, 231프레임/7.7s — **성공 판정으로 조기 종료**(timeout 450프레임 아님). 정책이 빨간 큐브를
-> 집어 검은 박스에 넣는 것을 closed-loop로 확인. (GitHub 웹은 상대경로 `<video>` 인라인 재생을
-> 지원하지 않으므로 위 링크 또는 로컬/에디터에서 재생. 6프레임 정적 미리보기: `assets/inference_success_strip.jpg`)
+> 집어 검은 박스에 넣는 것을 closed-loop로 확인.
 
 ---
 
