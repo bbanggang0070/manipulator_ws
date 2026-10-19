@@ -24,7 +24,9 @@ log "시작 — $M/$C, 학습 컨테이너 $TRAIN_CONTAINER 종료를 기다린�
 
 # 1) 학습 컨테이너 종료 대기 (ssh 실패는 '종료'로 보지 않고 다시 확인)
 while :; do
-  n=$($S "docker ps --format '{{.Names}}' | grep -cx $TRAIN_CONTAINER" 2>/dev/null) || { sleep 120; continue; }
+  # grep -c 는 0건일 때 종료코드 1 을 내므로 원격에서 '; true' 로 덮고, 빈 출력(ssh 실패)만 재시도
+  n=$($S "docker ps --format '{{.Names}}' | grep -cx $TRAIN_CONTAINER; true" 2>/dev/null)
+  [ -z "$n" ] && { sleep 120; continue; }
   [ "$n" = "0" ] && break
   sleep 600
 done
