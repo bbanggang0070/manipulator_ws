@@ -138,7 +138,10 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL PHINT INSTR LAY
     case "$_L" in q|Q) echo "  종료합니다."; break ;; esac
     PREV_LAYOUT="$LAYOUT"
   fi
-  if [ "$KEEP" = "KEEP" ]; then
+  if [ "$KEEP" = "KEEP" ] && [[ "$KIND" == obj-* ]]; then
+    # 물체 대조(gen_bi_contrast_plan.py) — 직전 타깃은 칸에 들어가 있으니 원래 자리로 되돌린다
+    printf "\033[1;41m%s\033[0m\n" "  ████ 직전에 옮긴 물체만 원래 자리로 — 나머지는 그대로, 집을 물체가 바뀝니다 ████  "
+  elif [ "$KEEP" = "KEEP" ]; then
     printf "\033[1;41m%s\033[0m\n" "  ████ 물체를 건드리지 마세요 — 배치 그대로, 지시문만 바뀝니다 ████  "
   fi
   echo "════════════════════════════════════════════════════════════════"
@@ -151,7 +154,7 @@ while IFS=$'\t' read -r EP KIND POS KEEP NOBJ OBJS TGT SLOT SCOL PHINT INSTR LAY
   fi
   printf "  오른팔이 집을 것 :  \033[1;33m%s\033[0m\n" "$TGT"
   if [ "$PHINT" != "-" ] && [ -n "$PHINT" ]; then
-    printf "  놓는 자세        :  \033[1;35m%s\033[0m\n" "$PHINT"
+    printf "  놓는 자세·위치   :  \033[1;35m%s\033[0m\n" "$PHINT"
   fi
   printf "  왼팔이 넣을 칸   :  \033[1;33m%s번 (%s)\033[0m\n" "$SLOT" "$SCOL"
   [ "$LAYOUT" != "-" ] && printf "  \033[2m칸 배치         :  %s\033[0m\n" "$LAYOUT"

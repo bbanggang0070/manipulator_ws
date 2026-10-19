@@ -15,6 +15,11 @@
 # 사용 (5090에서):
 #   SMOKE=1 ./train_bi_cleanup.sh        # 10 step 확인 — 먼저 이것부터
 #   ./train_bi_cleanup.sh                # 본 학습(파일럿 결과 보고 결정한 뒤에만)
+#   EDGE=448 ./train_bi_cleanup.sh       # 입력 해상도 448 (기본 256, 카메라 원본 640 이 상한)
+#   TUNE_VISUAL=1 ./train_bi_cleanup.sh  # 비전 인코더 미세조정 (기본은 고정)
+#     VIS_LR_MULT=0.1 (비전 학습률 = 1e-4 × 0.1) · VIS_TOP_LAYERS=8 (위쪽 8/27층만, 0=전체)
+#   LLM_TOP_LAYERS=8 ./train_bi_cleanup.sh   # 언어 모델 위쪽 8/16층 학습 (기본 4)
+#   SMOKE=1 SMOKE_STEPS=50 EDGE=448 ./train_bi_cleanup.sh   # 속도·메모리 측정용 짧은 실행
 set -e
 
 EPOCHS="${EPOCHS:-8}"
@@ -24,6 +29,8 @@ DSNAME="${DSNAME:-bi_cleanup}"
 OUT_NAME="${OUT_NAME:-gr00t_bi_cleanup_n16_8bit}"
 BASE="${BASE:-nvidia/GR00T-N1.6-3B}"
 SMOKE="${SMOKE:-0}"
+SMOKE_STEPS="${SMOKE_STEPS:-10}"
+TUNE_VISUAL="${TUNE_VISUAL:-0}"
 NAME="gr00t-train-bi"
 MODALITY_CONFIG_PATH="${MODALITY_CONFIG_PATH:-examples/BiSO100/bi_so100_config.py}"
 
@@ -78,10 +85,46 @@ CJ_CON="${CJ_CON:-0.4}"
 CJ_SAT="${CJ_SAT:-0.25}"
 CJ_HUE="${CJ_HUE:-0.015}"
 
+# ── 입력 해상도 (단일팔 train_cleanup_real.sh 와 같은 방식) ──────────────
+#   모델은 640×480 을 정사각형으로 letterbox 한 뒤 EDGE 로 줄인다 → 256 은 원본의 0.4배.
+#   해상도를 올리면 호스트 RAM 이 병목이라 dataloader worker 를 내린다(단일팔 640·worker 8 에서 OOM).
+EDGE="${EDGE:-}"
+EDGE_ARGS=(); WORKERS="${WORKERS:-8}"; PRE=""
+if [ -n "$EDGE" ] && [ "$EDGE" != "256" ]; then
+  _HERE="$(cd "$(dirname "$0")" && pwd)"
+  PATCHER=""
+  for _c in "${EDGE_PATCH:-}" "$_HERE/edge_patch.py" "$_HERE/../../gr00t/edge_patch.py" \
+            "$HOME/edge_patch.py" "$HOME/manipulator_ws/setup/gr00t/edge_patch.py"; do
+    [ -n "$_c" ] && [ -f "$_c" ] && { PATCHER="$(cd "$(dirname "$_c")" && pwd)/$(basename "$_c")"; break; }
+  done
+  [ -n "$PATCHER" ] || { echo "❌ edge_patch.py 를 못 찾았습니다. scp 로 ~/ 에 두거나 EDGE_PATCH= 로 지정하세요"; exit 1; }
+  EDGE_ARGS=(-e "GR00T_SHORTEST_EDGE=$EDGE" -v "$PATCHER:/tmp/edge_patch.py:ro")
+  PRE="python3 /tmp/edge_patch.py --verify --ckpt $BASE && "
+  [ "$EDGE" -ge 448 ] && WORKERS="${WORKERS_HI:-4}"
+  echo "  ⚠️ 입력 해상도 $EDGE (기본 256) · dataloader worker $WORKERS"
+fi
+# ── 비전 인코더 미세조정 ─────────────────────────────────────────────────
+#   GR00T 기본 --tune-visual 은 비전 인코더도 1e-4 로 움직인다(파라미터 그룹 1개).
+#   vision_lr_patch.py 로 비전만 학습률 × VIS_LR_MULT, 위쪽 VIS_TOP_LAYERS 층만 푼다.
+TV_ARGS=""; TV_MOUNT=(); LAUNCH="python3 gr00t/experiment/launch_finetune.py"
+VIS_LR_MULT="${VIS_LR_MULT:-0.1}"; VIS_TOP_LAYERS="${VIS_TOP_LAYERS:-0}"; LLM_TOP_LAYERS="${LLM_TOP_LAYERS:-}"
+if [ "$TUNE_VISUAL" = "1" ] || [ -n "$LLM_TOP_LAYERS" ]; then
+  VP=""
+  for _c in "${VIS_PATCH:-}" "$(cd "$(dirname "$0")" && pwd)/../../gr00t/vision_lr_patch.py" \
+            "$HOME/vision_lr_patch.py" "$HOME/manipulator_ws/setup/gr00t/vision_lr_patch.py"; do
+    [ -n "$_c" ] && [ -f "$_c" ] && { VP="$(cd "$(dirname "$_c")" && pwd)/$(basename "$_c")"; break; }
+  done
+  [ -n "$VP" ] || { echo "❌ vision_lr_patch.py 를 못 찾았습니다. scp 로 ~/ 에 두거나 VIS_PATCH= 로 지정하세요"; exit 1; }
+  TV_MOUNT=(-v "$VP:/tmp/vision_lr_patch.py:ro" -e "VIS_LR_MULT=$VIS_LR_MULT" -e "VIS_TOP_LAYERS=$VIS_TOP_LAYERS" -e "LLM_TOP_LAYERS=$LLM_TOP_LAYERS")
+  LAUNCH="python3 /tmp/vision_lr_patch.py gr00t/experiment/launch_finetune.py"
+  [ "$TUNE_VISUAL" = "1" ] && { TV_ARGS="--tune-visual"; echo "  ⚠️ 비전 인코더 미세조정 — 학습률 × $VIS_LR_MULT · 위쪽 층 ${VIS_TOP_LAYERS/#0/전체}"; }
+  [ -n "$LLM_TOP_LAYERS" ] && echo "  ⚠️ 언어 모델 위쪽 $LLM_TOP_LAYERS/16층 학습 (기본 4)"
+fi
+
 if [ "$SMOKE" = "1" ]; then
-  STEPS=10; SAVE_STEPS=10; SAVE_LIMIT=1; OUT_NAME="${OUT_NAME}_smoke"
+  STEPS=$SMOKE_STEPS; SAVE_STEPS=100000; SAVE_LIMIT=1; OUT_NAME="${OUT_NAME}_smoke"
   echo
-  echo "▶ 스모크 — 10 step. **출발점(파운데이션)과 파이프라인이 안 깨지는지 확인.**"
+  echo "▶ 스모크 — $STEPS step. **출발점(파운데이션)과 파이프라인이 안 깨지는지 확인.**"
   echo "   파운데이션에서 시작 = 약 1.05~1.13 · 학습된 체크포인트 이어받음 = 약 0.1"
 else
   SAVE_STEPS="${SAVE_STEPS:-$(python3 -c "print(max(round($STEPS/8/500)*500,500))")}"
@@ -108,8 +151,9 @@ run_docker() {
     -v "$CKPT_DIR:/workspace/models" \
     -v "$HOME/gr00tn16_ws/hf_cache_container:/root/.cache/huggingface" \
     -v "$HOME/gr00t_remote/Isaac-GR00T/examples/BiSO100:/Isaac-GR00T/examples/BiSO100:ro" \
+    ${EDGE_ARGS[@]+"${EDGE_ARGS[@]}"} ${TV_MOUNT[@]+"${TV_MOUNT[@]}"} \
     real-robot-train8 \
-    bash -c "cd /Isaac-GR00T && python3 gr00t/experiment/launch_finetune.py \
+    bash -c "$PRE cd /Isaac-GR00T && $LAUNCH \
       --base-model-path $BASE \
       --dataset-path /data/heongyu/$DSNAME \
       --modality-config-path $MODALITY_CONFIG_PATH \
@@ -119,7 +163,7 @@ run_docker() {
       --warmup-ratio 0.05 --weight-decay 1e-5 --learning-rate 1e-4 \
       --global-batch-size 2 --gradient-accumulation-steps 32 \
       --color-jitter-params brightness $CJ_BRI contrast $CJ_CON saturation $CJ_SAT hue $CJ_HUE \
-      --dataloader-num-workers 8"
+      --dataloader-num-workers $WORKERS $TV_ARGS"
 }
 
 if [ "$SMOKE" = "1" ]; then
@@ -128,7 +172,7 @@ if [ "$SMOKE" = "1" ]; then
   echo
   L=$(grep -oE "'loss': [0-9.]+" "$LOG" | tail -1 | grep -oE "[0-9.]+" || true)
   [ -n "$L" ] || { echo "❌ loss 를 못 읽었다 — $LOG 확인"; exit 1; }
-  echo "  ▶ step10 loss = $L"
+  echo "  ▶ step$STEPS loss = $L"
   if awk "BEGIN{exit !($L > 0.5)}"; then
     echo "  ✅ 파이프라인 정상 — 파운데이션에서 시작한 것도 확인됨 (기대 1.05~1.13)"
     echo "     정리: rm -rf $CKPT_DIR/$OUT_NAME"

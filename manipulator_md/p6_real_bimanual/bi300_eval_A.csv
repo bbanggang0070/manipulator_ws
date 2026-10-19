@@ -1,0 +1,37 @@
+trial,group,kind,pos,keep_layout,objects,target,slot,slot_color,pose_hint,instruction,layout,picked,handoff,landed,note
+1,1,dest,1/4,NEW,"yellow straw, eraser, screwdriver",yellow straw,3,pink,eraser 세워서,Put the yellow straw into the pink bin,,yellow straw,성공,pink,
+2,1,dest,2/4,KEEP,"yellow straw, eraser, screwdriver",yellow straw,1,black,eraser 세워서,Put the yellow straw into the black bin,,yellow straw,성공,black,
+3,1,dest,3/4,KEEP,"yellow straw, eraser, screwdriver",yellow straw,4,white,eraser 세워서,Put the yellow straw into the white bin,,screwdriver,성공,white,
+4,1,dest,4/4,KEEP,"yellow straw, eraser, screwdriver",yellow straw,2,cyan,eraser 세워서,Put the yellow straw into the cyan bin,,eraser,성공,cyan,
+5,2,obj,1/2,NEW,"screwdriver, toothbrush",toothbrush,1,black,,Put the toothbrush into the black bin,,screwdriver,성공,black,
+6,2,obj,2/2,KEEP,"screwdriver, toothbrush",screwdriver,1,black,,Put the screwdriver into the black bin,,toothbrush,성공,black,
+7,3,dest,1/4,NEW,"glue stick, eraser",eraser,2,cyan,eraser 세워서,Put the eraser into the cyan bin,,glue stick,성공,cyan,
+8,3,dest,2/4,KEEP,"glue stick, eraser",eraser,1,black,eraser 세워서,Put the eraser into the black bin,,eraser,실패,(없음),지 시에 전달하기 어렵게 집어서 전달 중에 떨어뜨림. 대해 left arm은 물체를 다시 집도록 학습하지 않아. 전달받기 위한 물체를 찾다가 특정 상태로 수렴했고. 물체를 다시 확인하파지를 수행할까 싶어 right arm에 물체를 보여줬지만 다시 전달하지는 않음
+9,3,dest,3/4,KEEP,"glue stick, eraser",eraser,4,white,eraser 세워서,Put the eraser into the white bin,,eraser,성공,white,
+10,3,dest,4/4,KEEP,"glue stick, eraser",eraser,3,pink,eraser 세워서,Put the eraser into the pink bin,,eraser,성공,pink,
+11,4,obj,1/2,NEW,"red marker, black marker, blue marker",red marker,3,pink,,Put the red marker into the pink bin,,black marker,성공,pink,
+12,4,obj,2/2,KEEP,"red marker, black marker, blue marker",black marker,3,pink,,Put the black marker into the pink bin,,(없음),(없음),(없음),
+13,5,dest,1/4,NEW,"glue stick, black marker, red marker, blue marker",glue stick,2,cyan,,Put the glue stick into the cyan bin,,blue marker,성공,cyan,
+14,5,dest,2/4,KEEP,"glue stick, black marker, red marker, blue marker",glue stick,3,pink,,Put the glue stick into the pink bin,,glue stick,성공,white,
+15,5,dest,3/4,KEEP,"glue stick, black marker, red marker, blue marker",glue stick,4,white,,Put the glue stick into the white bin,,glue stick,성공,white,
+16,5,dest,4/4,KEEP,"glue stick, black marker, red marker, blue marker",glue stick,1,black,,Put the glue stick into the black bin,,glue stick,성공,black,
+17,6,obj,1/2,NEW,"blue marker, yellow straw, eraser",blue marker,4,white,eraser 세워서,Put the blue marker into the white bin,,blue marker,성공,white,
+18,6,obj,2/2,KEEP,"blue marker, yellow straw, eraser",yellow straw,4,white,eraser 세워서,Put the yellow straw into the white bin,,yellow straw,성공,white,
+19,7,dest,1/4,NEW,"black marker, red marker, yellow straw",black marker,4,white,,Put the black marker into the white bin,,black marker,성공,white,
+20,7,dest,2/4,KEEP,"black marker, red marker, yellow straw",black marker,1,black,,Put the black marker into the black bin,,black marker,성공,black,
+21,7,dest,3/4,KEEP,"black marker, red marker, yellow straw",black marker,2,cyan,,Put the black marker into the cyan bin,,red marker,성공,cyan,
+22,7,dest,4/4,KEEP,"black marker, red marker, yellow straw",black marker,3,pink,,Put the black marker into the pink bin,,yellow straw,성공,pink,
+23,8,obj,1/2,NEW,"glue stick, toothbrush, screwdriver",screwdriver,2,cyan,,Put the screwdriver into the cyan bin,,glue stick,성공,cyan,처음집고 전달 중 떨어져서 다시 glue stic로 task 수행
+24,8,obj,2/2,KEEP,"glue stick, toothbrush, screwdriver",toothbrush,2,cyan,,Put the toothbrush into the cyan bin,,glue stick,성공,cyan,
+25,9,dest,1/4,NEW,"black marker, red marker, yellow straw",red marker,2,cyan,,Put the red marker into the cyan bin,,red marker,성공,cyan,
+26,9,dest,2/4,KEEP,"black marker, red marker, yellow straw",red marker,4,white,,Put the red marker into the white bin,,red marker,성공,white,
+27,9,dest,3/4,KEEP,"black marker, red marker, yellow straw",red marker,3,pink,,Put the red marker into the pink bin,,(없음),(없음),(없음),red marker 집으려고 했으나 실패 후 시야에서 사라져서 중지함
+28,9,dest,4/4,KEEP,"black marker, red marker, yellow straw",red marker,1,black,,Put the red marker into the black bin,,black marker,실패,(없음),
+29,10,obj,1/2,NEW,"eraser, toothbrush, blue marker, glue stick",blue marker,1,black,eraser 세워서,Put the blue marker into the black bin,,blue marker,성공,black,
+30,10,obj,2/2,KEEP,"eraser, toothbrush, blue marker, glue stick",toothbrush,1,black,eraser 세워서,Put the toothbrush into the black bin,,toothbrush,성공,black,
+31,11,dest,1/4,NEW,"eraser, black marker, blue marker",blue marker,4,white,eraser 세워서,Put the blue marker into the white bin,,blue marker,성공,white,
+32,11,dest,2/4,KEEP,"eraser, black marker, blue marker",blue marker,1,black,eraser 세워서,Put the blue marker into the black bin,,(없음),(없음),(없음),파지 하기에 자세가 어려워 실패
+33,11,dest,3/4,KEEP,"eraser, black marker, blue marker",blue marker,3,pink,eraser 세워서,Put the blue marker into the pink bin,,blue marker,성공,pink,
+34,11,dest,4/4,KEEP,"eraser, black marker, blue marker",blue marker,2,cyan,eraser 세워서,Put the blue marker into the cyan bin,,black marker,성공,cyan,
+35,12,obj,1/2,NEW,"yellow straw, screwdriver, glue stick",screwdriver,3,pink,,Put the screwdriver into the pink bin,,yellow straw,성공,pink,
+36,12,obj,2/2,KEEP,"yellow straw, screwdriver, glue stick",glue stick,3,pink,,Put the glue stick into the pink bin,,(없음),(없음),(없음),glue에 잘 접근했지만 파지 실패 시 교정 시연이 없거나 적어 다시 파지하기 어려움
