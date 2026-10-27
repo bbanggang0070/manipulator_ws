@@ -7,6 +7,11 @@
 
 ## 0. 개요
 
+
+https://billowy-water-a69.notion.site/cleanup-151ep-300ep-3fbd17f852678110a4c5efea15523346?source=copy_link
+
+
+
 ### 무엇을 만드는가
 
 지시문 한 문장 → **VLA(Vision-Language-Action) 모델** → 양팔 동작까지 하나의 정책으로 잇는다.

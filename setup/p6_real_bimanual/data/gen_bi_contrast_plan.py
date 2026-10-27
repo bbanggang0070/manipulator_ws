@@ -53,7 +53,12 @@ def main():
     ap.add_argument("--other", type=int, default=6, help="마커1+기타2 그룹 수 (×3ep)")
     ap.add_argument("--layout-every", type=int, default=50)
     ap.add_argument("--seed", type=int, default=20261019)
+    ap.add_argument("--relayout-from", type=int, default=0,
+                    help="이미 만든 --out 계획표에서 이 행부터 칸 배치만 다시 정한다 (앞 행·물체·목적지 색은 그대로)")
+    ap.add_argument("--relayout-groups", type=int, default=3, help="--relayout-from 이후 몇 그룹마다 칸 배치를 바꿀지")
     a = ap.parse_args()
+    if a.relayout_from:
+        return relayout(a)
     rng = random.Random(a.seed)
 
     base = list(csv.DictReader(open(a.base)))
@@ -137,6 +142,41 @@ def main():
         w.writerows(base)
         w.writerows(rows)
     report(rows, lays, a.out, ep0)
+
+
+def relayout(a):
+    """수집 도중 칸 배치를 더 자주 바꾸기 — relayout_from 행부터 N그룹마다 새 배치.
+
+    그룹 경계에서만 바꾼다(그룹 안에서는 같은 장면에서 물체만 바뀌어야 하므로).
+    목적지 색은 그대로 두고 칸 번호(slot)만 새 배치에 맞춰 다시 계산한다.
+    """
+    rows = list(csv.DictReader(open(a.out)))
+    keep = [r for r in rows if int(r["ep"]) < a.relayout_from]
+    rest = [r for r in rows if int(r["ep"]) >= a.relayout_from]
+    assert rest and rest[0]["keep_layout"] == "NEW", "그룹 첫 행(NEW)부터 다시 정해야 한다"
+    groups = list(dict.fromkeys(r["group"] for r in rest))
+    blocks = [groups[i:i + a.relayout_groups] for i in range(0, len(groups), a.relayout_groups)]
+    if len(blocks) > 1 and len(blocks[-1]) < a.relayout_groups:  # 짧은 꼬리는 앞 블록에 붙인다
+        tail = blocks.pop()
+        blocks[-1] += tail
+    prev = [s.split("번 ")[1] for s in keep[-1]["layout"].split(" · ")]
+    lays = pick_layouts(prev, len(blocks) + 1, random.Random(a.seed + 2))[1:]
+    gi = {g: b for b, gs in enumerate(blocks) for g in gs}
+    for r in rest:
+        lay = lays[gi[r["group"]]]
+        r["slot"] = lay.index(r["slot_color"]) + 1
+        r["layout"] = layout_str(lay)
+    with open(a.out, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=FIELDS)
+        w.writeheader()
+        w.writerows(keep + rest)
+    print(f"\n  {a.out}\n  {a.relayout_from - 1}행까지 그대로, 이후 {a.relayout_groups}그룹마다 칸 배치 변경\n")
+    print(f"    ~{a.relayout_from - 1}행        {keep[-1]['layout']}  (현재)")
+    for lay in lays:
+        e = [int(r["ep"]) for r in rest if r["layout"] == layout_str(lay)]
+        cc = Counter(r["slot_color"] for r in rest if r["layout"] == layout_str(lay))
+        print(f"    {min(e)}~{max(e)}행 ({len(e)}ep)  {layout_str(lay)}   목적지 "
+              + " ".join(f"{c}{cc[c]}" for _, c in SLOTS))
 
 
 def report(rows, lays, out, ep0):
