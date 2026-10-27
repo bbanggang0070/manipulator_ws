@@ -10,6 +10,8 @@
 
 https://billowy-water-a69.notion.site/cleanup-151ep-300ep-3fbd17f852678110a4c5efea15523346?source=copy_link
 
+https://billowy-water-a69.notion.site/cleanup-300ep-3fed17f8526781428a45ddc7bd70ee15?source=copy_link
+
 
 
 ### 무엇을 만드는가
