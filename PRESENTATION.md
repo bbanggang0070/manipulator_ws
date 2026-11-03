@@ -13,6 +13,8 @@ https://billowy-water-a69.notion.site/cleanup-151ep-300ep-3fbd17f852678110a4c5ef
 https://billowy-water-a69.notion.site/cleanup-300ep-3fed17f8526781428a45ddc7bd70ee15?source=copy_link
 
 
+https://www.figma.com/slides/gQJM142w9rv5VVUYAd7Vd4/VLA-%EA%B8%B0%EB%B0%98-%EC%96%91%ED%8C%94-%EB%AC%BC%EC%B2%B4-%EB%B6%84%EB%A5%98-%E2%80%94-%EC%B5%9C%EC%A2%85-%EB%B0%9C%ED%91%9C?node-id=3-14&t=62gP9V5XPLWV2RPy-0
+
 
 ### 무엇을 만드는가
 
