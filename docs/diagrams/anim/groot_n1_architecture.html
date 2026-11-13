@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GR00T N1 Architecture</title>
+<style>
+  html, body { margin: 0; background: #fff; }
+  main { max-width: 1620px; margin: 0 auto; padding: 16px; box-sizing: border-box; }
+  svg { width: 100%; height: auto; display: block; }
+</style></head>
+<body><main><svg viewBox="0 0 1620 844" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GR00T N1 model architecture">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+</defs>
+<rect width="1620" height="844" fill="#fff"/>
+<text text-anchor="start" dominant-baseline="middle" font-family="Menlo, Consolas, Courier New, monospace" font-size="19" fill="#111" ><tspan x="28" y="241.2">“Pick up the apple</tspan><tspan x="28" y="265.0">and place it into</tspan><tspan x="28" y="288.8">the bottom shelf”</tspan></text>
+<line x1="263" y1="110" x2="281" y2="110" stroke="#555" stroke-width="2" />
+<line x1="263" y1="263" x2="281" y2="263" stroke="#555" stroke-width="2" />
+<rect x="281" y="25" width="142" height="175" rx="16" fill="#f2f2f2" stroke="#555" stroke-width="2.2" />
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="352" y="98.2">Vision</tspan><tspan x="352" y="125.8">Encoder</tspan></text>
+<rect x="281" y="228" width="142" height="78" rx="16" fill="#f2f2f2" stroke="#555" stroke-width="2.2" />
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="352" y="253.2">Text</tspan><tspan x="352" y="280.8">Tokenizer</tspan></text>
+<line x1="423" y1="110" x2="451" y2="110" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<line x1="423" y1="263" x2="451" y2="263" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<rect x="456" y="29.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="456" y="53.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="456" y="77.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="456" y="101.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="456" y="125.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="456" y="149.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="456" y="173.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="456" y="218.0" width="19" height="19" fill="#2f6fca" stroke="#1e3f78" stroke-width="1.5"/>
+<rect x="456" y="241.7" width="19" height="19" fill="#2f6fca" stroke="#1e3f78" stroke-width="1.5"/>
+<rect x="456" y="265.4" width="19" height="19" fill="#2f6fca" stroke="#1e3f78" stroke-width="1.5"/>
+<rect x="456" y="289.1" width="19" height="19" fill="#2f6fca" stroke="#1e3f78" stroke-width="1.5"/>
+<rect x="493" y="17" width="156" height="305" rx="22" fill="#f2f2f2" stroke="#555" stroke-width="2.2" />
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="571" y="157.2">Eagle-2</tspan><tspan x="571" y="184.8">VLM</tspan></text>
+<g stroke="#4d8ff0" stroke-width="2.0" stroke-linecap="round">
+<g transform="rotate(0 628 45)">
+<line x1="628" y1="45" x2="628" y2="33"/>
+<line x1="628" y1="38.4" x2="624.4" y2="35.4"/>
+<line x1="628" y1="38.4" x2="631.6" y2="35.4"/>
+</g>
+<g transform="rotate(60 628 45)">
+<line x1="628" y1="45" x2="628" y2="33"/>
+<line x1="628" y1="38.4" x2="624.4" y2="35.4"/>
+<line x1="628" y1="38.4" x2="631.6" y2="35.4"/>
+</g>
+<g transform="rotate(120 628 45)">
+<line x1="628" y1="45" x2="628" y2="33"/>
+<line x1="628" y1="38.4" x2="624.4" y2="35.4"/>
+<line x1="628" y1="38.4" x2="631.6" y2="35.4"/>
+</g>
+<g transform="rotate(180 628 45)">
+<line x1="628" y1="45" x2="628" y2="33"/>
+<line x1="628" y1="38.4" x2="624.4" y2="35.4"/>
+<line x1="628" y1="38.4" x2="631.6" y2="35.4"/>
+</g>
+<g transform="rotate(240 628 45)">
+<line x1="628" y1="45" x2="628" y2="33"/>
+<line x1="628" y1="38.4" x2="624.4" y2="35.4"/>
+<line x1="628" y1="38.4" x2="631.6" y2="35.4"/>
+</g>
+<g transform="rotate(300 628 45)">
+<line x1="628" y1="45" x2="628" y2="33"/>
+<line x1="628" y1="38.4" x2="624.4" y2="35.4"/>
+<line x1="628" y1="38.4" x2="631.6" y2="35.4"/>
+</g>
+</g>
+<rect x="665" y="29.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="665" y="53.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="665" y="77.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="665" y="101.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="665" y="125.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="665" y="149.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="665" y="173.0" width="19" height="19" fill="#c8a3ea" stroke="#6e5a8e" stroke-width="1.5"/>
+<rect x="665" y="218.0" width="19" height="19" fill="#2f6fca" stroke="#1e3f78" stroke-width="1.5"/>
+<rect x="665" y="241.7" width="19" height="19" fill="#2f6fca" stroke="#1e3f78" stroke-width="1.5"/>
+<rect x="665" y="265.4" width="19" height="19" fill="#2f6fca" stroke="#1e3f78" stroke-width="1.5"/>
+<rect x="665" y="289.1" width="19" height="19" fill="#2f6fca" stroke="#1e3f78" stroke-width="1.5"/>
+<line x1="695" y1="167" x2="1003" y2="167" stroke="#555" stroke-width="2" />
+<rect x="1091" y="105" width="45" height="45" rx="8" fill="#dde9d3" stroke="#555" stroke-width="2.2" />
+<text text-anchor="start" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="23" fill="#111" ><tspan x="1159" y="128.0">Embodiment-Specific Module</tspan></text>
+<g stroke="#4d8ff0" stroke-width="3.0" stroke-linecap="round">
+<g transform="rotate(0 1113 199)">
+<line x1="1113" y1="199" x2="1113" y2="181"/>
+<line x1="1113" y1="189.1" x2="1107.6" y2="184.6"/>
+<line x1="1113" y1="189.1" x2="1118.4" y2="184.6"/>
+</g>
+<g transform="rotate(60 1113 199)">
+<line x1="1113" y1="199" x2="1113" y2="181"/>
+<line x1="1113" y1="189.1" x2="1107.6" y2="184.6"/>
+<line x1="1113" y1="189.1" x2="1118.4" y2="184.6"/>
+</g>
+<g transform="rotate(120 1113 199)">
+<line x1="1113" y1="199" x2="1113" y2="181"/>
+<line x1="1113" y1="189.1" x2="1107.6" y2="184.6"/>
+<line x1="1113" y1="189.1" x2="1118.4" y2="184.6"/>
+</g>
+<g transform="rotate(180 1113 199)">
+<line x1="1113" y1="199" x2="1113" y2="181"/>
+<line x1="1113" y1="189.1" x2="1107.6" y2="184.6"/>
+<line x1="1113" y1="189.1" x2="1118.4" y2="184.6"/>
+</g>
+<g transform="rotate(240 1113 199)">
+<line x1="1113" y1="199" x2="1113" y2="181"/>
+<line x1="1113" y1="189.1" x2="1107.6" y2="184.6"/>
+<line x1="1113" y1="189.1" x2="1118.4" y2="184.6"/>
+</g>
+<g transform="rotate(300 1113 199)">
+<line x1="1113" y1="199" x2="1113" y2="181"/>
+<line x1="1113" y1="189.1" x2="1107.6" y2="184.6"/>
+<line x1="1113" y1="189.1" x2="1118.4" y2="184.6"/>
+</g>
+</g>
+<text text-anchor="start" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="23" fill="#111" ><tspan x="1161" y="199.0">Pre-trained and Frozen</tspan></text>
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="132" y="394.0">Robot State</tspan></text>
+<text x="296" y="397" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="#111"><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif">q</tspan><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif" font-size="19" dy="7">t</tspan></text>
+<line x1="356" y1="391" x2="420" y2="391" stroke="#555" stroke-width="2" />
+<rect x="420" y="341" width="163" height="103" rx="16" fill="#dde9d3" stroke="#555" stroke-width="2.2" />
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="501" y="380.2">State</tspan><tspan x="501" y="407.8">Encoder</tspan></text>
+<line x1="583" y1="391" x2="630" y2="391" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<rect x="665" y="367.0" width="19" height="19" fill="#d9646b" stroke="#8a3a3e" stroke-width="1.5"/>
+<rect x="665" y="392.0" width="19" height="19" fill="#d9646b" stroke="#8a3a3e" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="132" y="580.0">Noised Action</tspan></text>
+<rect x="250" y="450" width="93" height="260" rx="12" fill="none" stroke="#555" stroke-width="2.2" stroke-dasharray="8 6"/>
+<text x="296" y="487" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="#111"><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif">a</tspan><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif" font-size="19" dy="7">t</tspan></text>
+<text x="296" y="539" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="#111"><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif">a</tspan><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif" font-size="19" dy="7">t+1</tspan></text>
+<text x="296" y="676" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="#111"><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif">a</tspan><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif" font-size="19" dy="7">t+H−1</tspan></text>
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#111" ><tspan x="296" y="612.0">⋮</tspan></text>
+<line x1="356" y1="579" x2="420" y2="579" stroke="#555" stroke-width="2" />
+<rect x="420" y="464" width="163" height="235" rx="16" fill="#dde9d3" stroke="#555" stroke-width="2.2" />
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="501" y="568.2">Action</tspan><tspan x="501" y="595.8">Encoder</tspan></text>
+<line x1="583" y1="579" x2="630" y2="579" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<rect x="665" y="474.0" width="19" height="19" fill="#fdf0dd" stroke="#9a8a72" stroke-width="1.5"/>
+<rect x="665" y="497.8" width="19" height="19" fill="#fdf0dd" stroke="#9a8a72" stroke-width="1.5"/>
+<rect x="665" y="521.6" width="19" height="19" fill="#fdf0dd" stroke="#9a8a72" stroke-width="1.5"/>
+<rect x="665" y="545.4" width="19" height="19" fill="#fdf0dd" stroke="#9a8a72" stroke-width="1.5"/>
+<rect x="665" y="569.2" width="19" height="19" fill="#fdf0dd" stroke="#9a8a72" stroke-width="1.5"/>
+<rect x="665" y="593.0" width="19" height="19" fill="#fdf0dd" stroke="#9a8a72" stroke-width="1.5"/>
+<rect x="665" y="616.8" width="19" height="19" fill="#fdf0dd" stroke="#9a8a72" stroke-width="1.5"/>
+<rect x="665" y="640.6" width="19" height="19" fill="#fdf0dd" stroke="#9a8a72" stroke-width="1.5"/>
+<rect x="665" y="664.4" width="19" height="19" fill="#fdf0dd" stroke="#9a8a72" stroke-width="1.5"/>
+<line x1="695" y1="525" x2="720" y2="525" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<rect x="721" y="341" width="415" height="369" rx="28" fill="#f2f2f2" stroke="#555" stroke-width="2.2" />
+<rect x="747" y="357" width="58" height="336" rx="10" fill="#d9d9d9" stroke="#555" stroke-width="2.2" />
+<text x="776" y="525" text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" transform="rotate(90 776 525)">Cross-Attention</text>
+<rect x="825" y="357" width="58" height="336" rx="10" fill="#d9d9d9" stroke="#555" stroke-width="2.2" />
+<text x="854" y="525" text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" transform="rotate(90 854 525)">Self-Attention</text>
+<rect x="974" y="357" width="58" height="336" rx="10" fill="#d9d9d9" stroke="#555" stroke-width="2.2" />
+<text x="1003" y="525" text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" transform="rotate(90 1003 525)">Cross-Attention</text>
+<rect x="1053" y="357" width="58" height="336" rx="10" fill="#d9d9d9" stroke="#555" stroke-width="2.2" />
+<text x="1082" y="525" text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" transform="rotate(90 1082 525)">Self-Attention</text>
+<line x1="776" y1="167" x2="776" y2="356" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<line x1="1003" y1="167" x2="1003" y2="356" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<line x1="805" y1="525" x2="825" y2="525" stroke="#555" stroke-width="2" />
+<line x1="883" y1="525" x2="974" y2="525" stroke="#555" stroke-width="2" stroke-dasharray="8 7"/>
+<line x1="1032" y1="525" x2="1053" y2="525" stroke="#555" stroke-width="2" />
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="19" fill="#111" ><tspan x="927" y="723.0">x N</tspan></text>
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="928" y="758.0">DiT Blocks</tspan></text>
+<line x1="1136" y1="525" x2="1164" y2="525" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<rect x="1171" y="367.0" width="19" height="19" fill="#d9646b" stroke="#8a3a3e" stroke-width="1.5"/>
+<rect x="1171" y="392.0" width="19" height="19" fill="#d9646b" stroke="#8a3a3e" stroke-width="1.5"/>
+<rect x="1171" y="474.0" width="19" height="19" fill="#f6a136" stroke="#9a5f12" stroke-width="1.5"/>
+<rect x="1171" y="497.8" width="19" height="19" fill="#f6a136" stroke="#9a5f12" stroke-width="1.5"/>
+<rect x="1171" y="521.6" width="19" height="19" fill="#f6a136" stroke="#9a5f12" stroke-width="1.5"/>
+<rect x="1171" y="545.4" width="19" height="19" fill="#f6a136" stroke="#9a5f12" stroke-width="1.5"/>
+<rect x="1171" y="569.2" width="19" height="19" fill="#f6a136" stroke="#9a5f12" stroke-width="1.5"/>
+<rect x="1171" y="593.0" width="19" height="19" fill="#f6a136" stroke="#9a5f12" stroke-width="1.5"/>
+<rect x="1171" y="616.8" width="19" height="19" fill="#f6a136" stroke="#9a5f12" stroke-width="1.5"/>
+<rect x="1171" y="640.6" width="19" height="19" fill="#f6a136" stroke="#9a5f12" stroke-width="1.5"/>
+<rect x="1171" y="664.4" width="19" height="19" fill="#f6a136" stroke="#9a5f12" stroke-width="1.5"/>
+<rect x="1206" y="347" width="151" height="352" rx="22" fill="#dde9d3" stroke="#555" stroke-width="2.2" />
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="1281" y="510.2">Action</tspan><tspan x="1281" y="537.8">Decoder</tspan></text>
+<line x1="1357" y1="522" x2="1383" y2="522" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<rect x="1386" y="393" width="93" height="259" rx="12" fill="none" stroke="#555" stroke-width="2.2" stroke-dasharray="8 6"/>
+<text x="1433" y="430" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="#111"><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif">a</tspan><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif" font-size="19" dy="7">t</tspan></text>
+<text x="1433" y="484" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="#111"><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif">a</tspan><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif" font-size="19" dy="7">t+1</tspan></text>
+<text x="1433" y="618" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="#111"><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif">a</tspan><tspan font-style="italic" font-family="Cambria Math, STIX Two Math, Times New Roman, serif" font-size="19" dy="7">t+H−1</tspan></text>
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#111" ><tspan x="1431" y="555.0">⋮</tspan></text>
+<line x1="1480" y1="522" x2="1504" y2="522" stroke="#555" stroke-width="2" marker-end="url(#ah)" />
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="1566" y="623.2">Motor</tspan><tspan x="1566" y="650.8">Action</tspan></text>
+<polyline points="1433,654 1433,790 296,790 296,722" fill="none" stroke="#555" stroke-width="2" stroke-dasharray="2 4" marker-end="url(#ah)"/>
+<text text-anchor="middle" dominant-baseline="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#111" ><tspan x="866" y="821.0">K iterations</tspan></text>
+</svg></main></body></html>

@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLA 표지 애니메이션</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>
+  // 렌더(MP4) 모드는 로컬 글꼴(fonts/gf) 사용 → 프레임마다 글꼴이 확실히 같도록
+  document.write('<link rel="stylesheet" href="' + (/render/.test(location.search)
+    ? 'fonts/gf/local.css'
+    : 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&display=block') + '">');
+</script>
+<style>
+  html, body { margin:0; background:#e5e7eb; font-family:'IBM Plex Sans KR', sans-serif; }
+  body { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:16px; box-sizing:border-box; }
+  #stage { width:min(100%, calc((100vh - 110px) * 16 / 9)); height:auto; display:block; background:#f8fafc; box-shadow:0 10px 40px rgba(15,23,42,.18); border-radius:6px; }
+  text { font-family:'IBM Plex Sans KR', sans-serif; }
+  .ctrl { display:flex; align-items:center; gap:12px; width:min(100%, 900px); font-size:15px; color:#334155; }
+  .ctrl button { font:inherit; padding:6px 14px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; }
+  .ctrl input[type=range] { flex:1; }
+  .ctrl .t { font-variant-numeric:tabular-nums; width:92px; text-align:right; }
+  body.render { padding:0; background:#f8fafc; display:block; }
+  body.render #stage { width:1920px; height:1080px; box-shadow:none; border-radius:0; }
+  body.render .ctrl { display:none; }
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0f172a" flood-opacity=".10"/></filter>
+    <filter id="soft2" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0f172a" flood-opacity=".18"/></filter>
+    <filter id="blur30" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="22"/></filter>
+    <linearGradient id="gUpper" x1="0" x2="1"><stop offset="0" stop-color="#6d70f5"/><stop offset="1" stop-color="#5457e6"/></linearGradient>
+    <linearGradient id="gFore" x1="0" x2="1"><stop offset="0" stop-color="#9097fb"/><stop offset="1" stop-color="#7a83f5"/></linearGradient>
+    <linearGradient id="gTurret" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#3730a3"/></linearGradient>
+    <linearGradient id="gBase" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#55657b"/><stop offset="1" stop-color="#3b4859"/></linearGradient>
+    <linearGradient id="gBlock" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#0b1222"/></linearGradient>
+    <linearGradient id="gTable" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#efe6d4"/><stop offset="1" stop-color="#e2d4b9"/></linearGradient>
+    <clipPath id="cardClip"><rect x="1040" y="180" width="780" height="540" rx="24"/></clipPath>
+    <clipPath id="thumbClip"><rect x="0" y="0" width="120" height="83" rx="7"/></clipPath>
+    <clipPath id="blockClip"><rect x="760" y="310" width="170" height="220" rx="22"/></clipPath>
+    <clipPath id="cV"><rect id="cVr" x="392" y="340" width="0" height="70"/></clipPath>
+    <clipPath id="cL"><rect id="cLr" x="392" y="430" width="0" height="70"/></clipPath>
+    <clipPath id="cA"><rect id="cAr" x="934" y="355" width="0" height="60"/></clipPath>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#f8fafc"/>
+  <rect width="1920" height="4" fill="#e2e8f0"/>
+  <rect width="120" height="4" fill="#2563eb"/>
+
+  <!-- 제목 -->
+  <rect x="100" y="250" width="225" height="46" rx="23" fill="#eff6ff"/>
+  <text x="212.5" y="274" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#2563eb">캡스톤 디자인 최종 발표</text>
+  <text x="96" y="467" font-size="128" font-weight="700" fill="#0f172a" letter-spacing="-1"><tspan id="tV">V</tspan><tspan id="tL">L</tspan><tspan id="tA">A</tspan></text>
+  <text x="100" y="591" font-size="64" font-weight="700" fill="#0f172a" letter-spacing="-1">기반 로봇팔 협력 제어</text>
+  <g clip-path="url(#cV)"><text id="fV" x="392" y="375" dominant-baseline="central" font-size="36" font-weight="700" fill="#2563eb">Vision</text></g>
+  <g clip-path="url(#cL)"><text id="fL" x="392" y="465" dominant-baseline="central" font-size="36" font-weight="700" fill="#7c3aed">Language</text></g>
+
+  <rect x="100" y="850" width="1720" height="1" fill="#e2e8f0"/>
+  <g id="meta" font-weight="600"></g>
+
+  <!-- 입력 화살표 -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path id="arV" d="M512 375 H754" stroke="#2563eb" stroke-width="3"/>
+    <path id="arVh" d="M742 363 L754 375 L742 387" stroke="#2563eb" stroke-width="3"/>
+    <path id="flowV" d="M512 375 H754" stroke="#2563eb" stroke-width="6" stroke-dasharray="2 22" opacity="0"/>
+    <path id="arL" d="M571 465 H754" stroke="#7c3aed" stroke-width="3"/>
+    <path id="arLh" d="M742 453 L754 465 L742 477" stroke="#7c3aed" stroke-width="3"/>
+    <path id="flowL" d="M571 465 H754" stroke="#7c3aed" stroke-width="6" stroke-dasharray="2 22" opacity="0"/>
+  </g>
+
+  <!-- 입력: Vision 썸네일 / Language 지시문 -->
+  <g id="visIn" opacity="0"><g id="visInner">
+    <rect x="-5" y="-5" width="130" height="93" rx="11" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5" filter="url(#soft2)"/>
+    <g clip-path="url(#thumbClip)">
+      <rect width="120" height="83" fill="#fff"/>
+      <use href="#workspace" transform="scale(0.15385) translate(-1040,-180)"/>
+    </g>
+    <rect x="5" y="5" width="30" height="18" rx="9" fill="#2563eb"/>
+    <circle cx="15" cy="14" r="4" fill="#fff"/><circle cx="27" cy="14" r="2.6" fill="#fecaca"/>
+  </g></g>
+  <g id="lanIn" opacity="0"><g id="lanInner">
+    <rect id="chip" x="0" y="0" width="150" height="84" rx="13" fill="#fff" stroke="#7c3aed" stroke-width="2.5" filter="url(#soft2)"/>
+    <g font-size="17" font-weight="600" fill="#4c1d95">
+      <text x="14" y="24"><tspan id="ins0"></tspan></text>
+      <text x="14" y="47"><tspan id="ins1"></tspan></text>
+      <text x="14" y="70"><tspan id="ins2"></tspan></text>
+    </g>
+    <rect id="caret" x="0" y="8" width="2" height="21" fill="#7c3aed"/>
+  </g></g>
+
+  <!-- VLA 모델 블록 -->
+  <rect id="glow" x="745" y="295" width="200" height="250" rx="40" fill="#7c3aed" opacity="0" filter="url(#blur30)"/>
+  <g id="block" opacity="0">
+    <rect x="760" y="310" width="170" height="220" rx="22" fill="url(#gBlock)" filter="url(#soft)"/>
+    <rect id="blockRing" x="760" y="310" width="170" height="220" rx="22" fill="none" stroke="#a78bfa" stroke-width="2.5" opacity="0"/>
+    <text x="845" y="357" text-anchor="middle" dominant-baseline="central" font-size="30" font-weight="700" fill="#fff">VLA 모델</text>
+    <text x="845" y="392" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="500" fill="#94a3b8">GR00T N1.6</text>
+    <line x1="780" x2="910" y1="418" y2="418" stroke="#334155" stroke-width="1.5"/>
+    <g clip-path="url(#blockClip)">
+      <g id="tokens"></g>
+      <polyline id="chunkLine" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round" opacity="0"/>
+      <g id="chunk"></g>
+    </g>
+  </g>
+
+  <!-- Action -->
+  <g clip-path="url(#cA)"><text id="fA" x="936" y="384" dominant-baseline="central" font-size="32" font-weight="700" fill="#cbd5e1">Action</text></g>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path id="arA" d="M938 420 H1030" stroke="#ea580c" stroke-width="3"/>
+    <path id="arAh" d="M1018 408 L1030 420 L1018 432" stroke="#ea580c" stroke-width="3"/>
+  </g>
+  <g id="pulses"></g>
+
+  <!-- 작업 공간 -->
+  <rect x="1040" y="180" width="780" height="540" rx="24" fill="#fff" stroke="#e2e8f0" stroke-width="2"/>
+  <g clip-path="url(#cardClip)">
+    <g id="workspace">
+      <rect x="1040" y="180" width="780" height="540" fill="#fff"/>
+      <ellipse cx="1170" cy="611" rx="66" ry="7" fill="#0f172a" opacity=".08"/>
+      <ellipse cx="1750" cy="611" rx="66" ry="7" fill="#0f172a" opacity=".08"/>
+      <g id="objects"></g>
+      <g id="arms"></g>
+      <path id="trail" fill="none" stroke="#ea580c" stroke-width="3" stroke-dasharray="6 8" stroke-linecap="round" opacity="0"/>
+      <g id="marker">
+        <rect x="-30" y="-6.5" width="60" height="13" rx="6.5" fill="#f1f5f9" stroke="#cbd5e1"/>
+        <rect x="-30" y="-7" width="17" height="14" rx="6" fill="#2563eb"/>
+      </g>
+      <g id="bins"></g>
+      <rect x="1062" y="610" width="736" height="90" rx="8" fill="url(#gTable)"/>
+      <rect x="1062" y="610" width="736" height="7" fill="#d6c3a1"/>
+      <text x="1084" y="662" dominant-baseline="central" font-size="20" font-weight="600" fill="#7c6a4f">왼팔 · 색상 분류</text>
+      <text x="1776" y="662" text-anchor="end" dominant-baseline="central" font-size="20" font-weight="600" fill="#7c6a4f">오른팔 · 물체 분류</text>
+    </g>
+    <g id="cam" opacity="0" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round">
+      <path d="M1062 232 V202 H1092"/><path d="M1768 202 H1798 V232"/>
+      <path d="M1062 668 V698 H1092"/><path d="M1768 698 H1798 V668"/>
+    </g>
+    <rect id="flash" x="1040" y="180" width="780" height="540" fill="#dbeafe" opacity="0"/>
+  </g>
+  <g id="camBadge" opacity="0">
+    <rect x="1696" y="216" width="100" height="32" rx="16" fill="#2563eb"/>
+    <circle cx="1716" cy="232" r="6" fill="#fca5a5"/>
+    <text x="1756" y="233" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#fff">CAM</text>
+  </g>
+</svg>
+
+<div class="ctrl">
+  <button id="play">일시정지</button>
+  <button id="replay">처음부터</button>
+  <input id="scrub" type="range" min="0" max="13.8" step="0.01" value="0">
+  <span class="t" id="tl">0.00 s</span>
+</div>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const T_END = 13.8;
+const $ = id => document.getElementById(id);
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+const seg = (t, a, b, f = ease) => f(clamp((t - a) / (b - a)));
+const lerp = (a, b, s) => a + (b - a) * s;
+const mix = (c1, c2, s) => { const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const a = p(c1), b = p(c2); return '#' + a.map((v, i) => Math.round(lerp(v, b[i], s)).toString(16).padStart(2, '0')).join(''); };
+
+/* ---------- 정적 요소 ---------- */
+const meta = [['소속', '군산대학교 임베디드소프트웨어학과'], ['팀명', '매니큐'], ['발표자', '이헌규'], ['팀원', '박태민, 채우진, 문찬경'], ['발표일', '2026. 11. 11'], ['지도교수', '이성렬 교수님']];
+const metaEls = meta.map(([k, v]) => [
+  el('text', { x: 100, y: 892, 'dominant-baseline': 'central', 'font-size': 18, fill: '#2563eb' }, $('meta')),
+  el('text', { x: 100, y: 928, 'dominant-baseline': 'central', 'font-size': 24, fill: '#94a3b8' }, $('meta')),
+].map((e, i) => (e.textContent = i ? v : k, e)));
+// 열 위치는 글꼴이 로드된 뒤 실제 글자 폭으로 정한다 (열 사이 간격 57px)
+function layoutMeta() {
+  let x = 100;
+  for (const pair of metaEls) {
+    pair.forEach(e => e.setAttribute('x', x));
+    x += Math.max(...pair.map(e => e.getComputedTextLength())) + 57;
+  }
+}
+const TY = 610;                                   // 테이블 윗면
+const BIN_X = i => 1222 + i * 66, BIN_W = 62, BIN_TOP = 560;
+[['#1f2937', '#111827'], ['#ffffff', '#94a3b8'], ['#38bdf8', '#0ea5e9'], ['#f9a8d4', '#ec4899']].forEach(([f, s], i) => {
+  el('rect', { x: BIN_X(i), y: BIN_TOP, width: BIN_W, height: TY - BIN_TOP, rx: 4, fill: f, stroke: s, 'stroke-width': 2 }, $('bins'));
+  el('rect', { x: BIN_X(i) + 5, y: BIN_TOP, width: BIN_W - 10, height: 7, rx: 2, fill: '#000', opacity: .13 }, $('bins'));
+});
+// 나머지 물체 (파란 마커는 움직이는 #marker)
+const O = $('objects');
+el('rect', { x: 1572, y: TY - 13, width: 56, height: 13, rx: 6.5, fill: '#f1f5f9', stroke: '#cbd5e1' }, O);
+el('rect', { x: 1572, y: TY - 13.5, width: 16, height: 14, rx: 6, fill: '#dc2626' }, O);
+el('rect', { x: 1640, y: TY - 46, width: 22, height: 46, rx: 4, fill: '#facc15' }, O);
+el('rect', { x: 1640, y: TY - 54, width: 22, height: 14, rx: 3, fill: '#7c3aed' }, O);
+
+/* ---------- 로봇 팔 (도형은 기존 Figma 단위, 1.25배) ---------- */
+const K = 1.25, L1 = 160 * K, L2 = 150 * K, SH = 70 * K, GRIP = 63;
+function buildArm(bx, mirror) {
+  const g = el('g', { transform: `translate(${bx},${TY}) scale(${mirror ? -K : K},${K})` }, $('arms'));
+  el('rect', { x: -36, y: -44, width: 72, height: 44, rx: 8, fill: 'url(#gBase)' }, g);
+  el('rect', { x: -36, y: -44, width: 72, height: 6, rx: 3, fill: '#fff', opacity: .12 }, g);
+  el('rect', { x: -24, y: -86, width: 48, height: 50, rx: 12, fill: 'url(#gTurret)' }, g);
+  const j1 = el('g', {}, g);
+  el('rect', { x: -13, y: -160, width: 26, height: 160, rx: 13, fill: 'url(#gUpper)' }, j1);
+  el('rect', { x: -4, y: -140, width: 5, height: 120, rx: 2.5, fill: '#fff', opacity: .18 }, j1);
+  const j2 = el('g', {}, j1);
+  el('rect', { x: -11, y: -150, width: 22, height: 150, rx: 11, fill: 'url(#gFore)' }, j2);
+  el('rect', { x: -3, y: -130, width: 4, height: 110, rx: 2, fill: '#fff', opacity: .2 }, j2);
+  const j3 = el('g', {}, j2);
+  const grip = el('g', { transform: 'rotate(180)' }, j3);
+  el('rect', { x: -13, y: 2, width: 26, height: 26, rx: 6, fill: '#4338ca' }, grip);
+  el('rect', { x: 5, y: 22, width: 6, height: 40, rx: 3, fill: '#312e81' }, grip);
+  const jaw = el('g', {}, grip);
+  el('rect', { x: -3, y: 0, width: 6, height: 38, rx: 3, fill: '#312e81' }, jaw);
+  el('circle', { r: 10, fill: '#312e81' }, j3); el('circle', { r: 3.5, fill: '#e0e7ff' }, j3);
+  el('circle', { r: 19, fill: '#312e81' }, j2); el('circle', { r: 5.5, fill: '#e0e7ff' }, j2);
+  el('circle', { r: 18, fill: '#312e81' }, j1); el('circle', { r: 5.5, fill: '#e0e7ff' }, j1);
+  return { bx, mirror, j1, j2, j3, jaw };
+}
+const LA = buildArm(1170, false), RA = buildArm(1750, true);
+const D = Math.PI / 180;
+function fk(arm, a1, a2) {           // 관절각 → 손목 위치(화면)
+  const s = arm.mirror ? -1 : 1, sy = TY - SH;
+  const ex = s * L1 * Math.sin(a1 * D), ey = -L1 * Math.cos(a1 * D);
+  return [arm.bx + s * (ex + L2 * Math.sin((a1 + a2) * D)), sy + ey - L2 * Math.cos((a1 + a2) * D)];
+}
+function ik(arm, wx, wy) {           // 손목 위치 → 관절각 (팔꿈치 위)
+  const dx = (arm.mirror ? -1 : 1) * (wx - arm.bx), dy = wy - (TY - SH);
+  const d = Math.min(Math.hypot(dx, dy), L1 + L2 - .01);
+  const a2 = Math.acos(clamp((d * d - L1 * L1 - L2 * L2) / (2 * L1 * L2), -1, 1)) / D;
+  const phi = Math.atan2(dx, -dy) / D;
+  const a1 = phi - Math.atan2(L2 * Math.sin(a2 * D), L1 + L2 * Math.cos(a2 * D)) / D;
+  return [a1, a2];
+}
+function pose(arm, w, jawDeg) {
+  const [a1, a2] = ik(arm, w[0], w[1]);
+  arm.j1.setAttribute('transform', `translate(0,${-70}) rotate(${a1})`);
+  arm.j2.setAttribute('transform', `translate(0,-160) rotate(${a2})`);
+  arm.j3.setAttribute('transform', `translate(0,-150) rotate(${180 - a1 - a2})`);
+  arm.jaw.setAttribute('transform', `translate(-9,24) rotate(${jawDeg})`);
+}
+const REST = [2.35, 104.66];
+const L_REST = fk(LA, ...REST), R_REST = fk(RA, ...REST);
+
+/* ---------- 작업 시나리오: 오른팔 집기 → 건네기 → 왼팔 흰색 칸 ---------- */
+const MK0 = [1518, TY - 6.5];                     // 파란 마커 처음 위치(중심)
+const OFF = 17;                                   // 두 집게가 마커를 잡는 위치(중심에서 ±)
+const HAND = [1440, 440];                         // 건네는 지점(마커 중심)
+const PLACE = [BIN_X(1) + BIN_W / 2, 505];        // 흰색 칸 위(마커 중심)
+const W = (m, side) => [m[0] + side * OFF, m[1] - GRIP]; // 마커 중심 → 손목
+const R_KEYS = [[0, R_REST], [6.3, R_REST], [7.3, [W(MK0, 1)[0], 480]], [7.7, W(MK0, 1)], [8.0, W(MK0, 1)],
+                [8.35, [W(MK0, 1)[0], 470]], [9.25, W(HAND, 1)], [10.25, W(HAND, 1)], [11.3, R_REST]];
+const L_KEYS = [[0, L_REST], [8.3, L_REST], [9.35, [W(HAND, -1)[0], W(HAND, -1)[1] - 45]], [9.7, W(HAND, -1)], [10.3, W(HAND, -1)],
+                [10.55, [W(HAND, -1)[0] - 10, W(HAND, -1)[1] - 22]], [11.35, W(PLACE, -1)], [11.85, W(PLACE, -1)], [12.6, [W(PLACE, -1)[0], W(PLACE, -1)[1] - 24]]];
+function track(keys, t) {
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) {
+    if (t <= keys[i][0]) { const [ta, a] = keys[i - 1], [tb, b] = keys[i]; const s = ease((t - ta) / (tb - ta)); return [lerp(a[0], b[0], s), lerp(a[1], b[1], s)]; }
+  }
+  return keys[keys.length - 1][1];
+}
+const OPEN = 24, CLOSED = 7;
+const T_RGRIP = 8.0, T_LGRIP = 9.95, T_ROPEN = 10.05, T_LREL = 11.55, T_FALL = .3;
+function jawR(t) { return lerp(OPEN, CLOSED, seg(t, 7.75, T_RGRIP)) + (OPEN - CLOSED) * seg(t, T_ROPEN, T_ROPEN + .2); }
+function jawL(t) { return lerp(OPEN, CLOSED, seg(t, 9.75, T_LGRIP)) + (34 - CLOSED) * seg(t, T_LREL - .05, T_LREL + .2); }
+function markerAt(t) {
+  if (t < T_RGRIP) return MK0;
+  if (t < T_LGRIP) { const w = track(R_KEYS, t); return [w[0] - OFF, w[1] + GRIP]; }
+  if (t < T_LREL) { const w = track(L_KEYS, t); return [w[0] + OFF, w[1] + GRIP]; }
+  const w = track(L_KEYS, T_LREL), s = clamp((t - T_LREL) / T_FALL);
+  return [w[0] + OFF, lerp(w[1] + GRIP, TY - 18, s * s)];
+}
+
+/* ---------- 블록 안 ---------- */
+const N = 16, CX0 = 782, CX1 = 908, CY = 470;
+const rnd = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+const noise = Array.from({ length: N }, () => (rnd() * 2 - 1) * 34);
+const goal = Array.from({ length: N }, (_, i) => -26 * Math.sin((i / (N - 1)) * Math.PI * 1.1 - .25) + 6);
+const dots = noise.map(() => el('circle', { r: 4.5, fill: '#94a3b8' }, $('chunk')));
+const toks = Array.from({ length: 10 }, (_, i) => el('rect', { width: 10, height: 10, rx: 2.5, fill: i < 5 ? '#3b82f6' : '#8b5cf6', opacity: 0 }, $('tokens')));
+const pulses = Array.from({ length: 6 }, () => el('circle', { r: 6, fill: '#ea580c', opacity: 0 }, $('pulses')));
+
+/* ---------- 문구 ---------- */
+const INS = ['“Put the blue', 'marker into the', 'white bin”'];
+const INS_N = INS.reduce((a, s) => a + s.length, 0);
+let WD = { V: 104, L: 163, A: 97 };
+function measure() {
+  WD = { V: $('fV').getComputedTextLength() + 6, L: $('fL').getComputedTextLength() + 6, A: $('fA').getComputedTextLength() + 6 };
+  INS.forEach((s, i) => $('ins' + i).textContent = s);
+  const w = Math.max(...INS.map((_, i) => $('ins' + i).getComputedTextLength()));
+  $('chip').setAttribute('width', Math.ceil(w + 30));
+}
+
+/* ---------- 타임라인 ---------- */
+function render(t) {
+  // 1) 풀네임 + 글자색
+  $('cVr').setAttribute('width', WD.V * seg(t, .3, .85, easeOut));
+  $('cLr').setAttribute('width', WD.L * seg(t, .65, 1.2, easeOut));
+  $('cAr').setAttribute('width', (WD.A + 4) * seg(t, 1.0, 1.45, easeOut));
+  $('tV').setAttribute('fill', mix('#0f172a', '#2563eb', seg(t, .3, .75)));
+  $('tL').setAttribute('fill', mix('#0f172a', '#7c3aed', seg(t, .65, 1.1)));
+  const act = seg(t, 5.7, 6.05);
+  $('tA').setAttribute('fill', mix('#0f172a', '#ea580c', act));
+  $('fA').setAttribute('fill', mix('#cbd5e1', '#ea580c', act));
+
+  // 2) 화살표 + 블록
+  const dr = (id, len, a, b) => { const s = seg(t, a, b); $(id).setAttribute('stroke-dasharray', len); $(id).setAttribute('stroke-dashoffset', len * (1 - s)); return s; };
+  $('arVh').setAttribute('opacity', dr('arV', 242, 1.25, 1.75) > .97 ? 1 : 0);
+  $('arLh').setAttribute('opacity', dr('arL', 183, 1.35, 1.8) > .97 ? 1 : 0);
+  $('arAh').setAttribute('opacity', dr('arA', 92, 5.8, 6.1) > .97 ? 1 : 0);
+  const sb = seg(t, 1.6, 2.0, easeOut);
+  $('block').setAttribute('opacity', sb);
+  $('block').setAttribute('transform', `translate(845 420) scale(${lerp(.9, 1, sb)}) translate(-845 -420)`);
+
+  // 3) 카메라 촬영 → Vision 썸네일, 지시문 타이핑
+  const camOn = seg(t, 1.95, 2.15) * (1 - seg(t, 2.8, 3.2));
+  $('cam').setAttribute('opacity', camOn); $('camBadge').setAttribute('opacity', camOn);
+  $('flash').setAttribute('opacity', .75 * seg(t, 2.2, 2.25) * (1 - seg(t, 2.25, 2.6)));
+  const vA = seg(t, 2.3, 2.65, easeOut), lA = seg(t, 2.1, 2.4, easeOut);
+  const move = seg(t, 3.45, 4.35);
+  $('visIn').setAttribute('opacity', vA * (1 - seg(t, 4.15, 4.35)));
+  $('visIn').setAttribute('transform', `translate(${lerp(522, 790, move)} 375)`);
+  $('visInner').setAttribute('transform', `scale(${lerp(1, .55, move) * lerp(.7, 1, vA)}) translate(0 -41.5)`);
+  $('lanIn').setAttribute('opacity', lA * (1 - seg(t, 4.15, 4.35)));
+  $('lanIn').setAttribute('transform', `translate(${lerp(583, 790, move)} 465)`);
+  $('lanInner').setAttribute('transform', `scale(${lerp(1, .55, move) * lerp(.85, 1, lA)}) translate(0 -42)`);
+  let n = Math.floor(clamp((t - 2.35) / .95) * INS_N), line = 0;
+  INS.forEach((s, i) => { const k = clamp(n, 0, s.length); $('ins' + i).textContent = s.slice(0, k); if (n > 0 && k > 0) line = i; n -= s.length; });
+  const typing = t > 2.35 && t < 3.45;
+  $('caret').setAttribute('x', 14 + $('ins' + line).getComputedTextLength() + 3);
+  $('caret').setAttribute('y', 8 + line * 23);
+  $('caret').setAttribute('opacity', typing && (t < 3.3 || Math.floor(t * 5) % 2 === 0) ? 1 : 0);
+  const fl = seg(t, 3.35, 3.5) * (1 - seg(t, 4.3, 4.55));
+  for (const id of ['flowV', 'flowL']) { $(id).setAttribute('opacity', fl * .55); $(id).setAttribute('stroke-dashoffset', -t * 90); }
+
+  // 4) 블록 처리: 토큰 → 노이즈 → action chunk
+  const glow = seg(t, 4.2, 4.55) * (1 - .55 * seg(t, 6.2, 7.2));
+  $('glow').setAttribute('opacity', .55 * glow * (1 + .15 * Math.sin(t * 6)));
+  $('blockRing').setAttribute('opacity', glow);
+  toks.forEach((r, i) => {
+    const ti = 4.3 + i * .04, s = seg(t, ti, ti + .28, easeOut);
+    r.setAttribute('x', 803 + (i % 5) * 18 - 5 - (1 - s) * 40);
+    r.setAttribute('y', 452 + (i < 5 ? 0 : 18));
+    r.setAttribute('opacity', s * (1 - seg(t, 4.95, 5.15)));
+  });
+  const den = seg(t, 5.05, 5.85), dotsOn = seg(t, 4.95, 5.12);
+  let pts = '';
+  dots.forEach((c, i) => {
+    const x = lerp(CX0, CX1, i / (N - 1));
+    const y = CY + lerp(noise[i], goal[i], den) + (1 - den) * 6 * Math.sin(t * 9 + i * 1.7);
+    c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('opacity', dotsOn);
+    c.setAttribute('fill', mix('#94a3b8', '#fb923c', den));
+    pts += `${x.toFixed(1)},${y.toFixed(1)} `;
+  });
+  $('chunkLine').setAttribute('points', pts);
+  $('chunkLine').setAttribute('opacity', seg(t, 5.5, 5.85) * .9);
+
+  // 5) Action → 작업 공간
+  pulses.forEach((p, i) => {
+    const s = clamp((t - 6.0 - i * .08) / .5);
+    p.setAttribute('cx', lerp(925, 1095, ease(s))); p.setAttribute('cy', 420);
+    p.setAttribute('opacity', s > 0 && s < 1 ? Math.sin(s * Math.PI) : 0);
+  });
+
+  // 6) 로봇: 오른팔이 파란 마커 집기 → 건네기 → 왼팔이 흰색 칸에 넣기
+  pose(RA, track(R_KEYS, t), jawR(t));
+  pose(LA, track(L_KEYS, t), jawL(t));
+  const m = markerAt(t);
+  $('marker').setAttribute('transform', `translate(${m[0]} ${m[1]})`);
+  // 물체가 지나간 길 (주황 점선)
+  if (t > T_RGRIP) {
+    let d = ''; const tEnd = Math.min(t, T_LREL + T_FALL);
+    for (let u = T_RGRIP; u <= tEnd + 1e-6; u += .04) { const p = markerAt(u); d += (d ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }
+    const p = markerAt(tEnd); d += 'L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1);
+    $('trail').setAttribute('d', d);
+    $('trail').setAttribute('opacity', .85 - .4 * seg(t, 12.3, 13.0));
+  } else $('trail').setAttribute('opacity', 0);
+}
+
+/* ---------- 재생 ---------- */
+const isRender = /render/.test(location.search);
+let t0 = performance.now(), playing = true, tCur = 0;
+function tick(now) {
+  if (playing) { tCur = (now - t0) / 1000; if (tCur >= T_END) { tCur = T_END; playing = false; $('play').textContent = '재생'; } }
+  render(tCur); $('scrub').value = tCur; $('tl').textContent = tCur.toFixed(2) + ' s';
+  requestAnimationFrame(tick);
+}
+Promise.all(['500','600','700'].map(w => document.fonts.load(w + ' 20px "IBM Plex Sans KR"', '가A'))).then(() => document.fonts.ready).then(() => {
+  measure();
+  layoutMeta();
+  if (isRender) {
+    document.body.classList.add('render');
+    const draw = () => { render(parseFloat(location.hash.slice(1)) || 0); document.title = 'ready'; };
+    draw(); window.addEventListener('hashchange', draw);
+    return;
+  }
+  $('play').onclick = () => { if (playing) { playing = false; $('play').textContent = '재생'; } else { if (tCur >= T_END) tCur = 0; t0 = performance.now() - tCur * 1000; playing = true; $('play').textContent = '일시정지'; } };
+  $('replay').onclick = () => { tCur = 0; t0 = performance.now(); playing = true; $('play').textContent = '일시정지'; };
+  $('scrub').oninput = e => { playing = false; $('play').textContent = '재생'; tCur = parseFloat(e.target.value); };
+  document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); $('play').click(); } });
+  t0 = performance.now(); requestAnimationFrame(tick);
+});
+</script>
+</body>
+</html>
