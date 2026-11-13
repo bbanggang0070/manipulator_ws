@@ -1,0 +1,9 @@
+trial,group,kind,pos,keep_layout,objects,target,slot,slot_color,pose_hint,instruction,layout
+1,1,obj,1/4,NEW,"blue marker, red marker, glue stick, eraser",blue marker,4,white,eraser 세워서,Put the blue marker into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+2,1,obj,2/4,KEEP,"blue marker, red marker, glue stick, eraser",red marker,4,white,eraser 세워서,Put the red marker into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+3,1,obj,3/4,KEEP,"blue marker, red marker, glue stick, eraser",glue stick,4,white,eraser 세워서,Put the glue stick into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+4,1,obj,4/4,KEEP,"blue marker, red marker, glue stick, eraser",eraser,4,white,eraser 세워서,Put the eraser into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+5,2,dest,1/4,NEW,"toothbrush, black marker, yellow straw, screwdriver",black marker,1,black,,Put the black marker into the black bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+6,2,dest,2/4,KEEP,"toothbrush, black marker, yellow straw, screwdriver",black marker,2,cyan,,Put the black marker into the cyan bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+7,2,dest,3/4,KEEP,"toothbrush, black marker, yellow straw, screwdriver",black marker,3,pink,,Put the black marker into the pink bin,1번 black · 2번 cyan · 3번 pink · 4번 white
+8,2,dest,4/4,KEEP,"toothbrush, black marker, yellow straw, screwdriver",black marker,4,white,,Put the black marker into the white bin,1번 black · 2번 cyan · 3번 pink · 4번 white
