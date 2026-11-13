@@ -23,7 +23,7 @@ cd "$(dirname "$0")"
 HERE="$(pwd)"
 DATA="$(cd ../../p5_real_cleanup && pwd)"   # calib_fingerprint.py 는 setup/p5_real_cleanup 에 있다(공용)
 
-PLAN="${PLAN:-$HOME/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_plan.csv}"
+PLAN="${PLAN:-$HOME/manipulator_ws/records/p6_real_bimanual/bi_cleanup_plan.csv}"
 DSNAME="${DSNAME:-bi_cleanup}"
 REPO="heongyu/$DSNAME"
 ROOT="${ROOT:-$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop/datasets/_train/$DSNAME}"

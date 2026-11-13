@@ -24,7 +24,7 @@ KEEP 행: 직전 에피소드에서 칸에 넣은 물체를 **원래 자리로 �
 
 사용:
   python3 gen_bi_contrast_plan.py            # bi_cleanup_plan_400.csv (앞 300행 그대로 + 301~400행)
-  PLAN=~/manipulator_ws/manipulator_md/p6_real_bimanual/bi_cleanup_plan_400.csv ./record_bi.sh
+  PLAN=~/manipulator_ws/records/p6_real_bimanual/bi_cleanup_plan_400.csv ./record_bi.sh
     → collect_progress.txt 가 300행까지라 301행부터 자동 재개
 """
 import argparse
@@ -40,7 +40,7 @@ OTHERS = ["yellow straw", "toothbrush", "eraser", "screwdriver"]
 GLUE = "glue stick"
 ZONES = ["왼", "가운데", "오른"]
 POSE = {"eraser": "세워서"}
-PLAN_DIR = os.path.expanduser("~/manipulator_ws/manipulator_md/p6_real_bimanual")
+PLAN_DIR = os.path.expanduser("~/manipulator_ws/records/p6_real_bimanual")
 
 
 def main():

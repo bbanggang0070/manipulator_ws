@@ -17,7 +17,7 @@ FONT = {"Regular": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
         "Bold": "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"}
 INK, MUTED, BLUE, GREEN, LINE = "0x0f172a", "0x64748b", "0x2563eb", "0x16a34a", "0xe2e8f0"
 
-# 평가표: manipulator_md/p6_real_bimanual/bi392llm8_eval_B.csv (집기 · 전달 · 칸 모두 성공한 시행만)
+# 평가표: records/p6_real_bimanual/bi392llm8_eval_B.csv (집기 · 전달 · 칸 모두 성공한 시행만)
 SINGLE = [
     ("demo01_full_success", "bi392llm8_A/trial01_t01", ["Put the yellow straw", "into the pink bin"], "노란 빨대 → 분홍 칸", "평가 01 · 학습한 칸 배치"),
     ("demo02_marker", "bi392llm8_A/trial19_t01", ["Put the black marker", "into the white bin"], "검은 마커 → 흰 칸", "평가 19 · 마커 두 개 중"),

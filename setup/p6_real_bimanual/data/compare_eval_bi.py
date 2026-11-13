@@ -19,7 +19,7 @@ import unicodedata
 from collections import Counter
 from math import comb
 
-R = os.path.expanduser("~/manipulator_ws/manipulator_md/p6_real_bimanual")
+R = os.path.expanduser("~/manipulator_ws/records/p6_real_bimanual")
 DEFAULT = [("300ep·4층", "bi300"), ("300ep·8층", "bi300llm8"), ("392ep·4층", "bi392"), ("392ep·8층", "bi392llm8")]
 # 데이터 효과는 층을 고정하고, 층 효과는 데이터를 고정하고 본다
 PAIRS = [("300ep·4층", "392ep·4층"), ("300ep·8층", "392ep·8층"),
