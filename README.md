@@ -8,6 +8,7 @@ NVIDIA GR00T N1.6(3B VLA)을 양팔 12관절·카메라 3대에 맞춰 미세조
 [![LeRobot](https://img.shields.io/badge/LeRobot-0.4.4-FFD21E)](https://github.com/huggingface/lerobot)
 [![GR00T](https://img.shields.io/badge/NVIDIA-Isaac%20GR00T%20N1.6-76B900?logo=nvidia&logoColor=white)](https://github.com/NVIDIA/Isaac-GR00T)
 [![Release](https://img.shields.io/github/v/release/bbanggang0070/manipulator_ws?label=release)](https://github.com/bbanggang0070/manipulator_ws/releases/tag/capstone-final)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 <p align="center">
   <img src="docs/figures/bi_demo_full_success.gif" width="760" alt="양팔 분류 시연 — Put the yellow straw into the pink bin">
@@ -27,6 +28,7 @@ NVIDIA GR00T N1.6(3B VLA)을 양팔 12관절·카메라 3대에 맞춰 미세조
 - [문제 해결](#문제-해결)
 - [로드맵](#로드맵)
 - [참고 자료](#참고-자료)
+- [라이선스](#라이선스)
 
 ## 개요
 
@@ -310,6 +312,14 @@ sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막
 - [Hugging Face LeRobot](https://github.com/huggingface/lerobot) — 로봇 제어 · 수집 · 데이터 포맷
 - [TheRobotStudio SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100) — SO-ARM101 하드웨어
 - Wagenmaker et al., *Steering Your Diffusion Policy with Latent Space RL* (DSRL), CoRL 2025 — [arXiv:2506.15799](https://arxiv.org/abs/2506.15799)
+
+## 라이선스
+
+이 저장소의 코드와 문서는 [Apache License 2.0](LICENSE) 을 따른다.
+참고한 [Isaac-GR00T](https://github.com/NVIDIA/Isaac-GR00T) · [LeRobot](https://github.com/huggingface/lerobot) · [SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100) 도 같은 라이선스다.
+
+- GR00T N1.6 가중치는 저장소에 포함하지 않으며 [NVIDIA Open Model License](https://huggingface.co/nvidia/GR00T-N1.6-3B) 를 따른다.
+- `docs/diagrams/anim/fonts/` 의 IBM Plex Sans KR 은 [SIL Open Font License 1.1](https://github.com/IBM/plex/blob/master/LICENSE.txt) 이다.
 
 ---
 
