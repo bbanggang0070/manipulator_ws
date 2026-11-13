@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLA 양팔 물체 분류</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ===== 1. 디자인 토큰 ===== */
+:root {
+  --paper: #f6f7f9;
+  --card: #ffffff;
+  --ink: #111827;
+  --muted: #5b6577;
+  --line: #dde2ea;
+  --accent: #f26b1d;
+  --accent-soft: #fff1e8;
+  --blue: #1f6feb;
+  --blue-soft: #e8f0ff;
+  --green: #12805c;
+  --green-soft: #e7f6ef;
+  --font-display: "Black Han Sans", "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+
+/* ===== 2. 기본 골격 ===== */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--paper); }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.65 var(--font-body); -webkit-font-smoothing: antialiased; }
+::selection { background: var(--accent); color: #fff; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+img { max-width: 100%; display: block; }
+
+.slide { min-height: 100vh; padding: 110px max(24px, 6vw) 80px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+.wrap { max-width: 1180px; width: 100%; margin: 0 auto; }
+.kicker { font: 600 13px var(--font-mono); color: var(--accent); letter-spacing: .14em; display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+.kicker::after { content: ""; height: 2px; width: 48px; background: var(--accent); }
+h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 400; }
+h2 { font-family: var(--font-display); font-size: clamp(36px, 5vw, 62px); line-height: 1.12; margin-bottom: 20px; }
+h2 em { font-style: normal; color: var(--accent); }
+h3 { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
+.lead { font-size: clamp(17px, 1.6vw, 20px); color: var(--muted); max-width: 62ch; margin: 0 0 40px; }
+.lead b { color: var(--ink); font-weight: 500; }
+code { font: 13px var(--font-mono); background: var(--blue-soft); color: var(--blue); padding: 2px 7px; border-radius: 6px; }
+
+/* 공통 카드 · 라벨 */
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.task { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px; transition: transform .25s, box-shadow .25s, border-color .25s; }
+.task:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -30px rgba(17,24,39,.35); border-color: var(--accent); }
+.lbl { font: 600 12px var(--font-mono); color: var(--blue); letter-spacing: .1em; display: block; margin-bottom: 8px; }
+.big { font-family: var(--font-display); font-size: 44px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.big small { font-size: 18px; color: var(--muted); margin-left: 4px; }
+.task p { margin: 0; color: var(--muted); font-size: 15px; }
+.note { display: none; }
+@media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+/* ===== 기능 A. 상단 목차 + 진행바 ===== */
+#progress { position: fixed; top: 0; left: 0; height: 4px; width: 0; z-index: 50; background: linear-gradient(90deg, var(--accent), var(--blue)); }
+#nav { position: fixed; top: 0; left: 0; right: 0; z-index: 40; display: flex; justify-content: center; gap: 4px; flex-wrap: wrap;
+  padding: 12px 16px; background: rgba(246,247,249,.82); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+#nav a { font: 500 13px var(--font-body); color: var(--muted); text-decoration: none; padding: 5px 12px; border-radius: 999px; transition: all .25s; }
+#nav a b { font: 600 11px var(--font-mono); margin-right: 6px; color: inherit; opacity: .7; }
+#nav a.on { background: var(--ink); color: #fff; }
+@media (max-width: 1280px) { #nav a { padding: 5px 9px; } }
+@media (max-width: 760px) { #nav a span { display: none; } #nav a b { margin: 0; } }
+
+/* ===== 기능 F. 표지 ===== */
+.hero { overflow: hidden; min-height: 94vh; }
+#grid { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+.hero .wrap { position: relative; z-index: 1; }
+.hero h1 { font-family: var(--font-display); font-size: clamp(46px, 8.4vw, 116px); line-height: 1.02; letter-spacing: -.02em; margin: 8px 0 26px; }
+.hero h1 .o { color: var(--accent); }
+.hero h1 .s { color: transparent; -webkit-text-stroke: 2px var(--ink); }
+.hero .sub { font-size: clamp(17px, 1.9vw, 23px); color: var(--muted); max-width: 46ch; margin: 0 0 34px; }
+.hero .meta { display: flex; flex-wrap: wrap; gap: 10px; }
+.pill { font: 500 14px var(--font-body); padding: 8px 16px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+.pill.o { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* ===== 02 기존 vs VLA ===== */
+.flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 14px 0 16px; }
+.flow span { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-weight: 500; font-size: 15px; }
+.flow span.rule { background: var(--accent-soft); border-color: #f7c3a2; color: #b2470d; }
+.flow span.vla { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 700; padding: 14px 22px; font-size: 17px; }
+.flow i { font-style: normal; color: #9aa5b6; font-weight: 700; }
+.tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag { font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 999px; }
+.tag.x { background: #fdecec; color: #c4302b; }
+.tag.ok { background: var(--green-soft); color: var(--green); }
+.cmp-h { display: flex; justify-content: space-between; align-items: baseline; }
+.cmp-h b { font-family: var(--font-display); font-weight: 400; font-size: 28px; }
+.cmp.vla { border-color: #b9cff7; background: linear-gradient(180deg, #fff, var(--blue-soft)); }
+.cmp.vla .cmp-h b { color: var(--blue); }
+.cmp + .cmp { margin-top: 16px; }
+
+/* ===== 매핑 표 (03 · 04) ===== */
+.map { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 8px 32px; }
+.map .row { display: grid; grid-template-columns: 1fr 40px 1.1fr; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.map .row:last-child { border-bottom: 0; }
+.map .row.h { font: 600 12px var(--font-mono); letter-spacing: .1em; color: var(--muted); padding: 14px 0 10px; }
+.map .row.h span:last-child { color: var(--blue); }
+.map .row > span:first-child { color: var(--muted); font-size: 17px; }
+.map .row > i { font-style: normal; color: #9aa5b6; font-weight: 700; text-align: center; }
+.map .row > b { font-size: 21px; font-weight: 700; }
+.map .row.hi > b, .map .row.hi > i { color: var(--accent); }
+.src { margin-top: 14px; font: 13px var(--font-mono); color: var(--muted); }
+.mini { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 22px; margin-bottom: 18px; }
+.mini .in { display: grid; gap: 6px; }
+.mini .in span { background: var(--paper); border-radius: 8px; padding: 4px 12px; font-size: 14px; font-weight: 500; }
+.mini .m { flex: 1; text-align: center; border-radius: 12px; padding: 16px; font-weight: 700; font-size: 19px; }
+.mini .m.v { background: var(--blue-soft); color: var(--blue); border: 1px solid #b9cff7; }
+.mini .m.a { background: var(--accent-soft); color: #b2470d; border: 1px solid #f7c3a2; }
+.mini .m.o { background: var(--paper); flex: none; }
+.mini i { font-style: normal; color: #9aa5b6; font-weight: 700; }
+
+/* ===== 05 모델 ===== */
+.model { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; }
+.mcard { background: linear-gradient(180deg, #fff, var(--blue-soft)); border: 1px solid #b9cff7; border-radius: 18px; padding: 28px 30px; }
+.mcard .nm { font-family: var(--font-display); font-size: clamp(34px, 3.6vw, 48px); line-height: 1.05; margin: 2px 0 18px; }
+.mcard dl { margin: 0; }
+.mcard dl div { display: grid; grid-template-columns: 120px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid #c9daf8; }
+.mcard dt { font: 600 13px var(--font-mono); color: var(--blue); padding-top: 3px; }
+.mcard dd { margin: 0; font-weight: 700; font-size: 18px; }
+.photo { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px; }
+.photo img { border-radius: 10px; width: 100%; }
+.photo figcaption { font-size: 15px; font-weight: 500; padding: 10px 6px 2px; }
+@media (max-width: 900px) { .model { grid-template-columns: 1fr; } }
+
+/* ===== 기능 I. KPI ===== */
+.kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.kpis.k4 { grid-template-columns: repeat(4, 1fr); }
+.kpi { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; background: var(--card); }
+.kpi .kv { font-family: var(--font-display); font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+.kpi .kv small { font-size: 16px; color: var(--muted); }
+.kpi .kv .tg { font: 500 12px var(--font-body); color: var(--accent); margin-left: 6px; vertical-align: middle; }
+.kpi > span { display: block; font-size: 13px; color: var(--muted); margin-top: 6px; }
+.kpi.pick { border-color: var(--accent); background: var(--accent-soft); }
+.kpi.pick .kv { color: var(--accent); }
+@media (max-width: 760px) { .kpis.k4 { grid-template-columns: repeat(2, 1fr); } }
+
+/* ===== 기능 B. 블럭도 ===== */
+#diagram { padding-bottom: 0; justify-content: flex-start; min-height: auto; }
+#diagram .wrap { max-width: 1480px; }
+.story { display: grid; grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); gap: 36px; position: relative; }
+.stick { position: sticky; top: 64px; height: calc(100vh - 72px); display: flex; align-items: center; }
+.board { width: 100%; max-height: 100%; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 14px 16px 16px; box-shadow: 0 30px 70px -45px rgba(17,24,39,.4); }
+.board svg { width: 100%; height: auto; max-height: calc(100vh - 150px); display: block; }
+.board .bt { font: 600 13px var(--font-mono); color: var(--muted); letter-spacing: .1em; padding: 2px 6px 10px; display: flex; justify-content: space-between; }
+.board .bt i { font-style: normal; color: var(--ink); letter-spacing: 0; font-family: var(--font-body); font-weight: 700; }
+.board .bt b { color: var(--accent); }
+
+.steps { padding: 30vh 0 18vh; }
+.st { min-height: 62vh; display: flex; flex-direction: column; justify-content: center; opacity: .28; transition: opacity .45s; }
+.st.on { opacity: 1; }
+.st .no { font: 600 13px var(--font-mono); color: var(--accent); margin-bottom: 8px; }
+.st h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.15; margin-bottom: 12px; }
+.st p { margin: 0 0 12px; color: var(--muted); font-size: 15.5px; }
+.st .say { display: inline-block; align-self: flex-start; background: var(--accent); color: #fff; border-radius: 14px 14px 4px 14px; padding: 8px 14px; font-weight: 500; font-size: 15px; margin-top: 4px; }
+.st .say.r { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 14px 14px 14px 4px; }
+@media (max-width: 900px) {
+  .story { grid-template-columns: 1fr; gap: 0; }
+  .stick { top: 58px; height: auto; z-index: 2; padding-top: 8px; background: var(--paper); }
+  .steps { padding: 6vh 0 10vh; }
+  .st { min-height: 55vh; }
+}
+.blk rect { fill: #fff; stroke: #c9d0db; stroke-width: 1.5; transition: fill .4s, stroke .4s, filter .4s; }
+.blk text { font-family: var(--font-body); fill: #8a93a3; transition: fill .4s; }
+.blk .t1 { font-size: 19px; font-weight: 700; }
+.blk .t2 { font-size: 13px; font-family: var(--font-mono); }
+.blk.hw rect { stroke-dasharray: 5 4; }
+.blk.on rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.2; filter: drop-shadow(0 8px 16px rgba(242,107,29,.25)); }
+.blk.on .t1 { fill: var(--ink); } .blk.on .t2 { fill: var(--accent); }
+.blk.all rect { stroke: #9aa5b6; } .blk.all .t1 { fill: var(--ink); } .blk.all .t2 { fill: var(--muted); }
+.edge { fill: none; stroke: #c9d0db; stroke-width: 2; transition: stroke .4s; marker-end: url(#ar); }
+.edge.on { stroke: var(--accent); stroke-width: 2.6; stroke-dasharray: 8 6; animation: flow .7s linear infinite; marker-end: url(#aro); }
+.edge.all { stroke: #9aa5b6; }
+@keyframes flow { to { stroke-dashoffset: -14; } }
+.elab { font: 600 13px var(--font-mono); fill: #a3acba; transition: fill .4s; paint-order: stroke; stroke: #fafbfc; stroke-width: 5px; stroke-linejoin: round; }
+.elab.on { fill: var(--accent); }
+.zone-lbl { font: 600 13px var(--font-mono); fill: var(--muted); letter-spacing: .1em; }
+.zone-sub { font: 600 12px var(--font-mono); fill: #9aa5b6; letter-spacing: .1em; }
+
+/* ===== 기능 H. 블록 툴팁 ===== */
+.blk { cursor: pointer; }
+.blk:hover rect { stroke: var(--blue); }
+.tip { position: fixed; z-index: 60; max-width: 260px; pointer-events: none; background: var(--ink); color: #fff; font-size: 13.5px; line-height: 1.5;
+  padding: 10px 12px; border-radius: 10px; opacity: 0; transform: translateY(4px); transition: opacity .15s, transform .15s; }
+.tip b { display: block; font-size: 14px; margin-bottom: 2px; color: #ffb48a; }
+.tip.show { opacity: 1; transform: none; }
+
+/* ===== 07 · 08 흐름 영상 ===== */
+.clip { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 12px; box-shadow: 0 30px 70px -45px rgba(17,24,39,.4); }
+.clip video { width: 100%; display: block; border-radius: 14px; background: #fff; }
+.clip-bar { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+.clip-bar .cap { color: var(--muted); font-size: 15px; }
+.steps4 { display: flex; gap: 8px; flex-wrap: wrap; }
+.steps4 span { font-size: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+.steps4 span b { font-family: var(--font-mono); color: var(--accent); margin-right: 6px; }
+.one { display: flex; align-items: baseline; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 18px; }
+.one .kv { font-family: var(--font-display); font-size: 40px; line-height: 1; color: var(--blue); font-variant-numeric: tabular-nums; }
+.one > span:not(.kv) { font-size: 15px; font-weight: 500; }
+
+/* ===== 09 학습 설정 ===== */
+.train { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.4fr); gap: 18px; align-items: start; }
+.setlist { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px 26px; margin-top: 10px; }
+.setlist div { display: grid; grid-template-columns: 56px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.setlist div:last-child { border-bottom: 0; }
+.setlist dt { font: 600 13px var(--font-mono); color: var(--muted); padding-top: 3px; }
+.setlist dd { margin: 0; font-weight: 700; font-size: 17px; }
+.pics { display: grid; gap: 14px; }
+.pair { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+.pair h3 { margin-bottom: 10px; }
+.pair .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair figure { margin: 0; }
+.pair figure img { border-radius: 10px; width: 100%; height: clamp(150px, 20vh, 210px); object-fit: cover; }
+.pair figcaption { font: 12.5px var(--font-mono); color: var(--muted); margin-top: 6px; }
+.pair figcaption b { color: var(--accent); font-weight: 600; }
+@media (max-width: 900px) { .train { grid-template-columns: 1fr; } }
+
+/* ===== 기능 P. 전/후 비교 슬라이더 ===== */
+.ba { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+.ba img { display: block; width: 100%; height: clamp(190px, 27vh, 280px); object-fit: cover; }
+.ba .after { position: absolute; inset: 0; height: 100%; object-fit: cover; clip-path: inset(0 0 0 var(--p)); }
+.ba::after { content: ""; position: absolute; top: 0; bottom: 0; left: var(--p); width: 3px; margin-left: -1.5px; background: var(--accent); pointer-events: none; }
+.ba input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; margin: 0; }
+.ba-l, .ba-r { position: absolute; top: 12px; font: 600 12px var(--font-mono); background: rgba(17,24,39,.75); color: #fff; padding: 4px 10px; border-radius: 999px; }
+.ba-l { left: 12px; } .ba-r { right: 12px; }
+
+/* ===== 10 내부 분석 ===== */
+.qs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+.q { display: flex; align-items: center; gap: 16px; border-radius: 18px; padding: 20px 24px; border: 1px solid; }
+.q.good { background: var(--green-soft); border-color: #b5e2cd; }
+.q.weak { background: var(--accent-soft); border-color: #f7c3a2; }
+.q .n { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font: 700 15px var(--font-mono); }
+.q h3 { margin: 0; flex: 1; font-size: 19px; }
+.q .v { font: 600 22px var(--font-mono); text-align: right; }
+.q.good .v { color: var(--green); } .q.weak .v { color: var(--accent); }
+.q .v small { display: block; font: 500 13px var(--font-body); }
+.q .mk { font-size: 26px; font-weight: 700; }
+.q.good .mk { color: var(--green); } .q.weak .mk { color: #c4302b; }
+.attn { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px; }
+.attn img { border-radius: 10px; width: 100%; }
+.attn figcaption { color: var(--muted); font-size: 14px; padding: 8px 4px 0; }
+.then { margin-top: 18px; font-weight: 700; font-size: 22px; color: var(--blue); }
+@media (max-width: 900px) { .qs { grid-template-columns: 1fr; } }
+
+/* ===== 기능 E. 막대그래프 ===== */
+.layers { display: grid; grid-template-columns: minmax(0, .55fr) minmax(0, 1.45fr); gap: 18px; align-items: stretch; }
+.stack16 { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.stack16 .cols { display: flex; align-items: center; gap: 16px; }
+.stack16 .col { display: grid; gap: 3px; justify-items: center; }
+.stack16 .col b { font-size: 16px; margin-bottom: 4px; }
+.stack16 .col i { display: block; width: 72px; height: 8px; border-radius: 2px; background: #d5dbe4; }
+.stack16 .col i.t { background: var(--accent); }
+.stack16 .arr { color: #9aa5b6; font-weight: 700; font-size: 22px; }
+.stack16 p { margin: 0; color: var(--muted); font-size: 14px; text-align: center; }
+.barbox { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px; }
+.barbox .ttl { font: 600 12px var(--font-mono); color: var(--muted); letter-spacing: .1em; margin-bottom: 14px; }
+.bars { display: grid; gap: 12px; }
+.bar { display: grid; grid-template-columns: 190px 1fr 74px; gap: 12px; align-items: center; font-size: 13.5px; }
+.bar small { display: block; color: var(--muted); font: 11px var(--font-mono); }
+.track { height: 12px; background: var(--paper); border-radius: 999px; overflow: hidden; }
+.fill { height: 100%; border-radius: 999px; background: #9fbdf3; width: var(--w); transition: width 1.4s cubic-bezier(.2,.7,.2,1); }
+.bar.pick .fill { background: var(--accent); } .bar.bad .fill { background: #e5484d; }
+.bars.wait .fill { width: 0; }
+.bar .v { font: 600 13.5px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.bars .gap { height: 6px; }
+.pairline { display: flex; gap: 16px; align-items: baseline; margin-top: 18px; background: var(--green-soft); border-radius: 14px; padding: 14px 20px; color: var(--green); }
+.pairline b { font: 600 24px var(--font-mono); }
+@media (max-width: 560px) { .bar { grid-template-columns: 1fr 70px; } .track { grid-column: 1 / -1; grid-row: 2; } }
+@media (max-width: 900px) { .layers { grid-template-columns: 1fr; } }
+
+/* ===== 12 결과 ===== */
+.result { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.6fr); gap: 18px; }
+.metrics { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 10px 24px; }
+.metrics div { display: flex; gap: 14px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.metrics div:last-child { border-bottom: 0; }
+.metrics i { flex: none; width: 30px; height: 30px; border-radius: 50%; background: #9aa5b6; color: #fff; display: grid; place-items: center; font: 700 13px var(--font-mono); font-style: normal; }
+.metrics i.b { background: var(--blue); } .metrics i.o { background: var(--accent); }
+.metrics b { font-size: 19px; }
+.metrics span { color: var(--muted); font-size: 13px; margin-left: auto; }
+.chart { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px 14px; }
+.chart .lg { display: flex; gap: 18px; justify-content: flex-end; font-size: 13.5px; color: var(--muted); }
+.chart .lg span::before { content: ""; display: inline-block; width: 16px; height: 3px; border-radius: 2px; background: var(--c); vertical-align: middle; margin-right: 6px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart .gl { stroke: #e7ebf1; stroke-width: 1; }
+.chart .ax { font: 12px var(--font-mono); fill: #8a93a3; }
+.chart .xl { font: 500 13px var(--font-body); fill: var(--muted); }
+.chart .xl.fin { font-weight: 700; fill: var(--ink); }
+.chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .dot { stroke: #fff; stroke-width: 2; }
+.chart .hit { fill: transparent; cursor: default; }
+.chart .dl { font: 600 15px var(--font-mono); fill: var(--ink); }
+.chart .draw { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); transition: stroke-dashoffset 1.6s cubic-bezier(.2,.7,.2,1); }
+.chart.go .draw { stroke-dashoffset: 0; }
+.chart .foot { font-size: 13px; color: var(--muted); margin-top: 6px; }
+@media (max-width: 900px) { .result { grid-template-columns: 1fr; } }
+
+/* ===== 기능 G. 시연 영상 ===== */
+.video { background: var(--ink); border-radius: 24px; aspect-ratio: 16 / 9; width: 100%; position: relative; overflow: hidden; display: grid; place-items: center; box-shadow: 0 40px 90px -50px rgba(17,24,39,.7); }
+.video video { width: 100%; height: 100%; object-fit: contain; background: #000; display: none; }
+.video.has video { display: block; } .video.has .drop { display: none; }
+.drop { text-align: center; color: #cbd2dd; padding: 24px; display: grid; gap: 14px; justify-items: center; }
+.drop .play { width: 86px; height: 86px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; box-shadow: 0 0 0 12px rgba(242,107,29,.18); animation: ping 2s infinite; }
+.drop .play::after { content: ""; border-left: 26px solid #fff; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 7px; }
+@keyframes ping { 50% { box-shadow: 0 0 0 22px rgba(242,107,29,.06); } }
+.drop b { font-size: 20px; color: #fff; }
+.drop label { cursor: pointer; background: #fff; color: var(--ink); padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+.drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.video.over { outline: 3px dashed var(--accent); outline-offset: -12px; }
+.vbar { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; font-size: 14px; color: var(--muted); }
+.vbar button { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font: 500 13px var(--font-body); color: var(--muted); cursor: pointer; }
+.vbar button:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ===== 14 회고 ===== */
+.retro { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; }
+.lesson { display: flex; gap: 18px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px; margin-bottom: 12px; }
+.lesson b { font-family: var(--font-display); font-weight: 400; font-size: 36px; color: var(--accent); line-height: 1; }
+.lesson span { font-size: 22px; font-weight: 700; }
+.limits { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px 28px; }
+.limits h3 { font-size: 15px; font: 600 13px var(--font-mono); color: var(--muted); letter-spacing: .1em; margin-bottom: 10px; }
+.limits ul { margin: 0; padding-left: 20px; }
+.limits li { font-size: 19px; font-weight: 500; padding: 7px 0; }
+@media (max-width: 900px) { .retro { grid-template-columns: 1fr; } }
+
+/* ===== 16 차후 계획 ===== */
+.pipe { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.pipe > div { flex: 1; min-width: 160px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+.pipe > div b { display: block; font-size: 18px; }
+.pipe > div span { font-size: 14px; color: var(--muted); }
+.pipe > div.learn { border-color: var(--accent); background: var(--accent-soft); }
+.pipe > div.fixed { border-color: #b9cff7; background: var(--blue-soft); }
+.pipe > i { align-self: center; font-style: normal; color: #9aa5b6; font-weight: 700; }
+.loopnote { font-size: 14px; color: var(--accent); font-weight: 500; margin: 0 0 26px; }
+.plan { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 6px 26px; }
+.plan div { display: grid; grid-template-columns: 1fr 40px 1.4fr; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.plan div:last-child { border-bottom: 0; }
+.plan div > span { font-size: 19px; font-weight: 700; }
+.plan div > i { font-style: normal; color: #9aa5b6; font-weight: 700; text-align: center; }
+.plan div > b { font-size: 18px; font-weight: 500; }
+.plan div > b em { font-style: normal; color: var(--green); font-weight: 700; }
+.plan div > b em.w { color: var(--accent); }
+
+/* ===== 기능 M. 클릭 단위 등장 ===== */
+.frag { opacity: 0; transform: translateY(14px); transition: opacity .45s, transform .45s; }
+.frag.in { opacity: 1; transform: none; }
+
+/* ===== 부록 ===== */
+#appendix { min-height: auto; }
+.apx { display: grid; gap: 18px; }
+.apx .task h3 { color: var(--blue); }
+.apx table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.apx th { text-align: left; font: 600 12px var(--font-mono); color: var(--muted); letter-spacing: .06em; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--paper); }
+.apx td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--muted); }
+.apx td:first-child { color: var(--ink); font-weight: 700; white-space: nowrap; }
+.apx tr.ours td { background: var(--accent-soft); color: var(--ink); }
+.scroll-x { overflow-x: auto; }
+.hp { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 24px; margin: 0; }
+.hp div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.hp dt { color: var(--muted); } .hp dd { margin: 0; font-weight: 700; text-align: right; }
+
+/* ===== Q&A · footer ===== */
+.qa { text-align: center; min-height: 70vh; }
+.qa .big { font-family: var(--font-display); font-size: clamp(80px, 16vw, 220px); line-height: 1; }
+.qa .big span { color: var(--accent); }
+.qa .thanks { font-size: 20px; color: var(--muted); margin: 20px 0 24px; }
+.qa .meta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+footer { padding: 26px max(24px, 6vw) 40px; color: var(--muted); font: 12px var(--font-mono); border-top: 1px solid var(--line); text-align: center; }
+
+/* ===== 기능 C. 등장 애니메이션 ===== */
+.rv { transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.rv.pre { opacity: 0; transform: translateY(32px); }
+.d1 { transition-delay: .08s } .d2 { transition-delay: .16s } .d3 { transition-delay: .24s }
+.d4 { transition-delay: .32s } .d5 { transition-delay: .40s } .d6 { transition-delay: .48s }
+
+/* ===== 기능 J. 발표 HUD ===== */
+#hud { position: fixed; right: 16px; bottom: 14px; z-index: 45; font: 600 12px var(--font-mono); color: var(--muted); background: rgba(255,255,255,.85);
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; backdrop-filter: blur(6px); font-variant-numeric: tabular-nums; }
+#hud.over #hudTime { color: #e5484d; }
+body.no-hud #hud { display: none; }
+
+/* ===== 기능 L. 발표자 노트 ===== */
+#notePanel { position: fixed; left: 16px; bottom: 14px; z-index: 45; width: min(420px, 90vw); max-height: 40vh; overflow: auto; display: none;
+  background: #fffbe6; border: 1px solid #f3d36b; border-radius: 14px; padding: 12px 14px; font-size: 14px; line-height: 1.6; box-shadow: 0 20px 40px -24px rgba(0,0,0,.35); }
+#notePanel b { display: block; font: 600 11px var(--font-mono); color: #a07800; letter-spacing: .1em; margin-bottom: 4px; }
+body.notes #notePanel { display: block; }
+
+/* ===== 기능 Q. 인쇄 · PDF ===== */
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  #nav, #progress, #hud, #notePanel, .tip, #grid, .vbar, .drop { display: none !important; }
+  .slide { min-height: auto; padding: 0; page-break-after: always; break-after: page; }
+  .rv.pre, .frag { opacity: 1 !important; transform: none !important; }
+  .bars.wait .fill { width: var(--w) !important; }
+  .chart .draw { stroke-dashoffset: 0 !important; }
+  .stick { position: static; height: auto; }
+  .steps { padding: 0; } .st { min-height: auto; opacity: 1; margin-bottom: 14px; page-break-inside: avoid; }
+  .edge.on { animation: none; }
+  .video { display: none; }
+  body { background: #fff; }
+}
+
+/* ===== 기능 R. 모션 줄이기 ===== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .rv, .fill, .st, .frag, .tl-g, .chart .draw { transition: none !important; }
+  .rv.pre { opacity: 1; transform: none; }
+  .bars.wait .fill { width: var(--w); }
+  .chart .draw { stroke-dashoffset: 0; }
+  .edge.on, .drop .play { animation: none; }
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav" aria-label="발표 순서"></nav>
+
+<!-- 01 표지 -->
+<section class="slide hero" id="topic" data-name="주제">
+  <canvas id="grid" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="kicker rv">CAPSTONE 2026 · SO-ARM101 × GR00T N1.6</div>
+    <h1 class="rv d1">VLA 기반<br><span class="s">언어 지시</span><br><span class="o">양팔 물체 분류</span></h1>
+    <p class="sub rv d2">한 문장으로 두 팔이 물체를 골라 건네고, 지시한 칸에 넣는다</p>
+    <div class="meta rv d3">
+      <span class="pill o">이름 · 이름 · 이름</span>
+      <span class="pill">GR00T N1.6</span>
+      <span class="pill">SO-ARM101 × 2</span>
+      <span class="pill">카메라 3대</span>
+      <span class="pill">2026.11</span>
+    </div>
+  </div>
+  <aside class="note">하드웨어: SO-ARM101 × 2(팔 5관절 + 그리퍼), 리더 팔 2대로 원격조작 392회 시연, 카메라 3대(위 1 · 손목 2, 640×480 30fps), 학습 RTX 5090 · 추론 RTX 5070 Ti.<br>모델: GR00T N1.6(약 3B), VLM + Action head, 양팔 12관절 × 16스텝.<br>역할: 데이터 수집·원격조작 / 모델 학습·서빙 / 평가·모델 내부 분석.</aside>
+</section>
+
+<!-- 02 기존 방식 vs VLA -->
+<section class="slide" id="problem" data-name="문제">
+  <div class="wrap">
+    <div class="kicker rv">01 · 문제 정의</div>
+    <h2 class="rv d1">규칙을 짜는 대신,<br><em>모델 하나가 시연으로</em> 배운다</h2>
+    <div class="task cmp rv d2">
+      <div class="cmp-h"><b>기존 방식</b></div>
+      <div class="flow"><span>카메라</span><i>→</i><span>물체 인식</span><i>→</i><span>좌표 계산</span><i>→</i><span class="rule">규칙</span><i>→</i><span>경로 계획</span><i>→</i><span>관절</span></div>
+      <div class="tags frag"><span class="tag x">✕ 새 물체 · 지시마다 다시 개발</span><span class="tag x">✕ 협업 동작은 직접 프로그래밍</span></div>
+    </div>
+    <div class="task cmp vla frag">
+      <div class="cmp-h"><b>VLA</b></div>
+      <div class="flow"><span>영상 3장 + 지시문</span><i>→</i><span class="vla">VLA 모델 하나</span><i>→</i><span>양팔 관절</span></div>
+      <div class="tags"><span class="tag ok">✓ 시연으로 학습</span><span class="tag ok">✓ 문장으로 지시</span><span class="tag ok">✓ 협업도 시연으로</span></div>
+    </div>
+  </div>
+  <aside class="note">기존 방식: 물체 인식은 미리 정한 종류만, 위치·자세는 좌표 변환, 규칙 프로그램("glue면 pink 칸으로"), 경로 계획은 팔마다 따로.<br>VLA(Vision-Language-Action): 영상과 문장을 보고 관절 동작을 바로 내는 하나의 모델. 출력은 12관절 × 16스텝.<br>↓ 키를 누를 때마다 기존 방식의 한계 → VLA 카드 순서로 나타남.</aside>
+</section>
+
+<!-- 03 선행 연구 -->
+<section class="slide" id="prior" data-name="선행">
+  <div class="wrap">
+    <div class="kicker rv">02 · 데이터 조사</div>
+    <h2 class="rv d1">선행 양팔 VLA의 공통 설계를 따르고,<br><em>지시문을 늘렸다</em></h2>
+    <div class="map rv d2">
+      <div class="row h"><span>선행 연구 공통점</span><i></i><span>우리</span></div>
+      <div class="row"><span>위 + 손목 카메라</span><i>→</i><b>위 1 · 손목 2</b></div>
+      <div class="row"><span>리더-팔로워 원격조작</span><i>→</i><b>리더 팔 2대</b></div>
+      <div class="row"><span>관절 공간 상태 · 동작</span><i>→</i><b>양팔 12관절</b></div>
+      <div class="row hi"><span>과제당 지시문 1종</span><i>→</i><b>32종</b></div>
+    </div>
+    <div class="src rv d3">ALOHA · Mobile ALOHA · RDT-1B · π0 · GR00T · LeRobot — 상세 비교는 부록</div>
+  </div>
+  <aside class="note">공통점: 위 + 손목 카메라, 관절 공간 상태·동작, 원격조작 시연, 과제당 지시문 대부분 1종.<br>우리: 카메라 640×480, 팔 5 + 그리퍼 1 ×2, 392회, LeRobot 데이터셋 30fps. 차별점은 같은 장면·다른 지시와 칸 배치 교체.</aside>
+</section>
+
+<!-- 04 데이터 조건 → 모델 구조 -->
+<section class="slide" id="needs" data-name="조건">
+  <div class="wrap">
+    <div class="kicker rv">03 · 데이터 → 모델 조건</div>
+    <h2 class="rv d1">데이터 조건 6가지가<br><em>모델 구조</em>를 정한다</h2>
+    <div class="mini rv d2">
+      <div class="in"><span>카메라 3대</span><span>지시 문장</span><span>관절 상태</span></div>
+      <i>→</i><div class="m v">VLM</div><i>→</i><div class="m a">Action head</div><i>→</i><div class="m o">12관절 × 16스텝</div>
+    </div>
+    <div class="map rv d3">
+      <div class="row h"><span>우리 데이터</span><i></i><span>모델에 필요한 것</span></div>
+      <div class="row"><span>카메라 3대</span><i>→</i><b>여러 시점 입력</b></div>
+      <div class="row"><span>양팔 12관절</span><i>→</i><b>로봇별 상태 · 동작 인코더</b></div>
+      <div class="row"><span>30fps 연속 동작</span><i>→</i><b>동작 청크</b></div>
+      <div class="row"><span>같은 장면 · 다른 문장</span><i>→</i><b>사전학습 언어 모델</b></div>
+      <div class="row"><span>392회 (약 4시간)</span><i>→</i><b>파운데이션 + 미세조정</b></div>
+      <div class="row"><span>GPU 1대 · 실시간</span><i>→</i><b>일부 층 학습 · 추론 100ms 이내</b></div>
+    </div>
+  </div>
+  <aside class="note">조건 → 구조: 비전 인코더가 카메라 3장을 토큰으로 이어 붙임 / 로봇별 상태·동작 인코더 / Action head가 16스텝 청크 생성 / VLM 언어 모델이 문장 처리 / 파운데이션 가중치에서 출발 / 일부 층만 학습 + 8-bit 옵티마이저.<br>이 6가지를 모두 갖춘 모델로 GR00T N1.6을 선정(다음 장).</aside>
+</section>
+
+<!-- 05 모델 · 하드웨어 -->
+<section class="slide" id="model" data-name="모델">
+  <div class="wrap">
+    <div class="kicker rv">04 · 모델 선정</div>
+    <h2 class="rv d1">GR00T N1.6을<br><em>SO-ARM101 양팔</em>에</h2>
+    <div class="model">
+      <div>
+        <div class="mcard rv d2">
+          <span class="lbl">AI MODEL</span>
+          <div class="nm">GR00T N1.6</div>
+          <dl>
+            <div><dt>VLM</dt><dd>SigLIP2 + 언어 모델 16층</dd></div>
+            <div><dt>Action head</dt><dd>DiT 32층 → 12관절 × 16스텝</dd></div>
+          </dl>
+        </div>
+        <div class="kpis rv d3" style="margin-top:14px">
+          <div class="kpi"><div class="kv"><span class="count" data-to="3">0</span><small>B</small></div><span>모델 크기 (파라미터)</span></div>
+          <div class="kpi pick"><div class="kv"><span class="count" data-to="86">0</span><small>ms</small></div><span>추론 1회 · RTX 5070 Ti (중앙값)</span></div>
+        </div>
+      </div>
+      <figure class="photo rv d3" style="margin:0">
+        <img src="assets/trial37_t02.jpg" alt="위 카메라로 본 작업대 — 양팔, 물체 3개, 2×2 색 칸">
+        <figcaption>SO-ARM101 × 2 · 카메라 3대 · 색 칸 4개 &nbsp;|&nbsp; 학습 RTX 5090 · 추론 RTX 5070 Ti</figcaption>
+      </figure>
+    </div>
+  </div>
+  <aside class="note">GR00T N1.6: NVIDIA Isaac-GR00T 공개 로봇 파운데이션 모델, 약 3B. flow matching 4단계로 동작 생성. 미세조정은 언어 모델 위 8층 + Action head(비전 고정).<br>하드웨어: SO-ARM101 팔 5관절 + 그리퍼, 리더 팔 2대로 원격조작 수집. 카메라 3대 640×480 30fps.<br>학습: RTX 5090 32GB, Docker, paged AdamW 8-bit. 서빙: RTX 5070 Ti 16GB 로컬, ZeroMQ 정책 서버.</aside>
+</section>
+
+<!-- 06 블럭도 (기능 B) -->
+<section class="slide" id="diagram" data-name="구조">
+  <div class="wrap">
+    <div class="kicker rv">05 · 시스템 블럭도</div>
+    <h2 class="rv d1">한 문장이<br><em>두 팔의 동작이 되기까지</em></h2>
+    <p class="lead rv d2" style="margin-bottom:0">스크롤(또는 ↓ 키)할 때마다 데이터가 지나가는 블록에 불이 들어옵니다. 블록에 마우스를 올리면 설명이 나옵니다.</p>
+    <div class="story">
+      <div class="stick">
+        <div class="board">
+          <div class="bt"><span>STEP <b id="stepno">00</b> / <span id="steptotal">00</span></span><i id="steptitle">전체 구조</i></div>
+          <svg viewBox="0 0 1120 800" role="img" aria-label="GR00T N1.6 학습 · 추론 블럭도">
+            <defs>
+              <marker id="ar"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c9d0db"/></marker>
+              <marker id="aro" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f26b1d"/></marker>
+            </defs>
+
+            <!-- ① 구역 -->
+            <rect x="12" y="60" width="236" height="720" rx="22" fill="none" stroke="#dde2ea" stroke-width="1.5" stroke-dasharray="6 5"/>
+            <text class="zone-lbl" x="30" y="88">입력</text>
+            <rect x="262" y="60" width="610" height="720" rx="22" fill="#fafbfc" stroke="#dde2ea" stroke-width="1.5" stroke-dasharray="6 5"/>
+            <text class="zone-lbl" x="282" y="88">GR00T N1.6</text>
+            <rect x="278" y="98" width="580" height="254" rx="16" fill="none" stroke="#e6eaf0" stroke-width="1.2"/>
+            <text class="zone-sub" x="846" y="120" text-anchor="end">VLM</text>
+            <rect x="278" y="420" width="580" height="300" rx="16" fill="none" stroke="#e6eaf0" stroke-width="1.2"/>
+            <text class="zone-sub" x="846" y="442" text-anchor="end">ACTION HEAD</text>
+            <rect x="886" y="60" width="222" height="720" rx="22" fill="none" stroke="#dde2ea" stroke-width="1.5" stroke-dasharray="6 5"/>
+            <text class="zone-lbl" x="904" y="88">로봇 · 학습</text>
+
+            <!-- ② 화살표 -->
+            <path class="edge" id="e-cam"   d="M220,145 H288"/>
+            <path class="edge" id="e-txt"   d="M220,305 H288"/>
+            <path class="edge" id="e-vis"   d="M460,145 H482 V215 H498"/>
+            <path class="edge" id="e-tok"   d="M460,305 H482 V255 H498"/>
+            <path class="edge" id="e-vlm"   d="M560,290 V468"/>
+            <path class="edge" id="e-joint" d="M220,505 H288"/>
+            <path class="edge" id="e-noise" d="M220,665 H288"/>
+            <path class="edge" id="e-se"    d="M460,505 H498"/>
+            <path class="edge" id="e-ae"    d="M460,665 H498"/>
+            <path class="edge" id="e-dit"   d="M670,505 H698"/>
+            <path class="edge" id="e-out"   d="M860,505 H995 V292"/>
+            <path class="edge" id="e-loop"  d="M720,540 V760 H385 V702"/>
+            <path class="edge" id="e-obs"   d="M995,178 V40 H125 V108"/>
+            <path class="edge" id="e-loss"  d="M800,540 V665 H898"/>
+            <path class="edge" id="e-bp1"   d="M900,690 H672"/>
+            <path class="edge" id="e-bp2"   d="M1090,650 H1104 V330 H630 V292"/>
+
+            <!-- ③ 화살표 라벨 -->
+            <text class="elab" id="l-cam"   x="254" y="133" text-anchor="middle">영상 3장</text>
+            <text class="elab" id="l-txt"   x="254" y="293" text-anchor="middle">지시문</text>
+            <text class="elab" id="l-vlm"   x="572" y="385">VLM 출력</text>
+            <text class="elab" id="l-joint" x="254" y="493" text-anchor="middle">각도</text>
+            <text class="elab" id="l-noise" x="254" y="653" text-anchor="middle">노이즈</text>
+            <text class="elab" id="l-out"   x="985" y="420" text-anchor="end">16스텝 중 앞 8스텝</text>
+            <text class="elab" id="l-loop"  x="552" y="748" text-anchor="middle">4번 반복해 다듬기</text>
+            <text class="elab" id="l-obs"   x="560" y="28" text-anchor="middle">약 0.27초마다 다시 보기</text>
+            <text class="elab" id="l-loss"  x="850" y="653" text-anchor="middle">예측</text>
+            <text class="elab" id="l-bp1"   x="786" y="712" text-anchor="middle">오차만큼 고치기</text>
+            <text class="elab" id="l-bp2"   x="830" y="318" text-anchor="middle">위 8층 고치기</text>
+
+            <!-- ④ 블록 -->
+            <g class="blk hw" id="b-cam" data-desc="위 1대(전체 배치) + 손목 2대(가까운 물체). 640×480, 30fps.">
+              <rect x="30" y="110" width="190" height="70" rx="12"/>
+              <text class="t1" x="48" y="140">카메라 3대</text><text class="t2" x="48" y="163">위 · 왼손목 · 오른손목</text>
+            </g>
+            <g class="blk" id="b-txt" data-desc="물체 8종 × 칸 4색 = 지시문 32종. 예: Put the screwdriver into the black bin">
+              <rect x="30" y="270" width="190" height="70" rx="12"/>
+              <text class="t1" x="48" y="300">지시 문장</text><text class="t2" x="48" y="323">32종</text>
+            </g>
+            <g class="blk hw" id="b-joint" data-desc="양팔 각 5관절 + 그리퍼 1 = 12개 값.">
+              <rect x="30" y="470" width="190" height="70" rx="12"/>
+              <text class="t1" x="48" y="500">관절 상태</text><text class="t2" x="48" y="523">양팔 12관절</text>
+            </g>
+            <g class="blk" id="b-noise" data-desc="추론: 완전 무작위 동작에서 출발. 학습: 정답 동작에 노이즈를 섞어 넣음.">
+              <rect x="30" y="630" width="190" height="70" rx="12"/>
+              <text class="t1" x="48" y="660">무작위 동작</text><text class="t2" x="48" y="683">노이즈 · 16스텝</text>
+            </g>
+            <g class="blk" id="b-vis" data-desc="SigLIP2. 사전학습 그대로 고정 — 물체는 이미 잘 구분한다(AUC 0.98~1.00).">
+              <rect x="290" y="110" width="170" height="70" rx="12"/>
+              <text class="t1" x="308" y="140">Vision Encoder</text><text class="t2" x="308" y="163">SigLIP2 · 고정</text>
+            </g>
+            <g class="blk" id="b-tok" data-desc="문장을 단어 조각(토큰)으로 나눈다. 별도 언어 인코더 없이 언어 모델이 직접 읽는다.">
+              <rect x="290" y="270" width="170" height="70" rx="12"/>
+              <text class="t1" x="308" y="300">Text Tokenizer</text><text class="t2" x="308" y="323">문장 → 토큰</text>
+            </g>
+            <g class="blk" id="b-vlm" data-desc="언어 모델 16층. 아래 8층은 고정, 위 8층을 우리 데이터로 학습 — 단어와 화면이 만나는 곳.">
+              <rect x="500" y="180" width="170" height="110" rx="12"/>
+              <text class="t1" x="518" y="212">VLM</text><text class="t2" x="518" y="236">언어 모델 16층</text><text class="t2" x="518" y="258">위 8층 학습</text>
+            </g>
+            <g class="blk" id="b-se" data-desc="관절 각도 12개를 모델이 쓰는 특징으로 바꾼다. 우리 양팔에 맞춰 새로 학습.">
+              <rect x="290" y="470" width="170" height="70" rx="12"/>
+              <text class="t1" x="308" y="500">State Encoder</text><text class="t2" x="308" y="523">관절 → 특징</text>
+            </g>
+            <g class="blk" id="b-ae" data-desc="지금까지 다듬은 16스텝 동작을 특징으로 바꾼다.">
+              <rect x="290" y="630" width="170" height="70" rx="12"/>
+              <text class="t1" x="308" y="660">Action Encoder</text><text class="t2" x="308" y="683">동작 → 특징</text>
+            </g>
+            <g class="blk" id="b-dit" data-desc="Cross-Attention으로 VLM 출력을 참고하고, Self-Attention으로 16스텝을 함께 다듬는다.">
+              <rect x="500" y="470" width="170" height="230" rx="12"/>
+              <text class="t1" x="518" y="502">DiT × 32층</text><text class="t2" x="518" y="526">Cross-Attention</text><text class="t2" x="518" y="548">Self-Attention</text><text class="t2" x="518" y="572">학습</text>
+            </g>
+            <g class="blk" id="b-dec" data-desc="특징을 다시 양팔 12관절 × 16스텝 동작으로 바꾼다. 출력 = 현재 각도 + 움직일 양.">
+              <rect x="700" y="470" width="160" height="70" rx="12"/>
+              <text class="t1" x="718" y="500">Action Decoder</text><text class="t2" x="718" y="523">12관절 × 16스텝</text>
+            </g>
+            <g class="blk hw" id="b-robot" data-desc="16스텝 중 앞 8스텝(약 0.27초)만 실행하고 다시 관측한다.">
+              <rect x="900" y="180" width="190" height="110" rx="12"/>
+              <text class="t1" x="918" y="212">로봇 양팔</text><text class="t2" x="918" y="236">SO-ARM101 × 2</text><text class="t2" x="918" y="258">RTX 5070 Ti · 86 ms</text>
+            </g>
+            <g class="blk" id="b-loss" data-desc="학습할 때만. 사람이 시연한 동작과 예측의 차이(오차)를 계산한다.">
+              <rect x="900" y="630" width="190" height="70" rx="12"/>
+              <text class="t1" x="918" y="660">정답과 비교</text><text class="t2" x="918" y="683">시연 동작 · 학습 때만</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="st" data-on="b-cam b-txt b-joint b-noise b-vis b-tok b-vlm b-se b-ae b-dit b-dec b-robot b-loss" data-all="1">
+          <div class="no">STEP 00 · 전체 구조</div><h3>보고 · 읽고 · 움직이기를 모델 하나가</h3>
+          <p>왼쪽이 입력, 가운데가 GR00T N1.6(VLM + Action head), 오른쪽이 로봇입니다. 오른쪽 아래 「정답과 비교」는 학습할 때만 쓰입니다.</p></div>
+        <div class="st" data-on="b-cam b-vis" data-e="e-cam" data-l="l-cam">
+          <div class="no">STEP 01 · 영상 입력</div><h3>카메라 3대가 장면을 본다</h3>
+          <p>위 카메라는 전체 배치를, 손목 카메라 2대는 가까운 물체를 봅니다. 세 장을 Vision Encoder가 이미지 토큰으로 바꿉니다.</p>
+          <p><code>640×480</code> <code>30fps</code> <code>SigLIP2 · 고정</code></p></div>
+        <div class="st" data-on="b-txt b-tok b-vis b-vlm" data-e="e-txt e-vis e-tok" data-l="l-txt">
+          <div class="no">STEP 02 · VLM 판단</div><h3>화면과 문장이 VLM 안에서 만난다</h3>
+          <p>지시문은 토큰으로 나뉘어 이미지 토큰과 함께 언어 모델 16층을 지납니다. 우리는 위 8층만 학습했습니다.</p>
+          <span class="say">Put the screwdriver into the black bin</span></div>
+        <div class="st" data-on="b-vlm b-dit" data-e="e-vlm" data-l="l-vlm">
+          <div class="no">STEP 03 · VLM 출력</div><h3>「무엇을 · 어디에」가 Action head로</h3>
+          <p>VLM 출력에는 어떤 물체를 집고 어느 칸에 넣을지가 담깁니다. DiT가 Cross-Attention으로 이것을 참고합니다.</p></div>
+        <div class="st" data-on="b-joint b-se b-dit" data-e="e-joint e-se" data-l="l-joint">
+          <div class="no">STEP 04 · 관절 상태</div><h3>지금 팔이 어디 있는지 더한다</h3>
+          <p>양팔 12관절 각도를 State Encoder가 특징으로 바꿉니다. 우리 로봇에 맞춰 새로 학습한 부분입니다.</p>
+          <p><code>12관절</code></p></div>
+        <div class="st" data-on="b-noise b-ae b-dit b-dec" data-e="e-noise e-ae e-dit e-loop" data-l="l-noise l-loop">
+          <div class="no">STEP 05 · 동작 생성</div><h3>무작위 동작에서 출발해 4번 다듬는다</h3>
+          <p>16스텝을 노이즈로 채운 뒤, Action Encoder → DiT 32층 → Action Decoder를 4번 돌며 조금씩 정확한 동작으로 고칩니다.</p>
+          <p><code>flow matching</code> <code>4단계</code></p></div>
+        <div class="st" data-on="b-dec b-robot b-cam" data-e="e-out e-obs" data-l="l-out l-obs">
+          <div class="no">STEP 06 · 실행</div><h3>앞 8스텝만 움직이고 다시 본다</h3>
+          <p>출력은 「현재 각도 + 움직일 양」입니다. 16스텝 중 앞 8스텝(약 0.27초)을 실행한 뒤 다시 찍고 다시 계획합니다.</p>
+          <span class="say r">추론 1회 86 ms · RTX 5070 Ti</span></div>
+        <div class="st" data-on="b-loss b-dec b-dit b-vlm" data-e="e-loss e-bp1 e-bp2" data-l="l-loss l-bp1 l-bp2">
+          <div class="no">STEP 07 · 학습</div><h3>학습 때는 정답과 비교해 고친다</h3>
+          <p>시연 동작에 노이즈를 섞어 넣고, 예측이 정답과 다른 만큼 Action head와 VLM 위 8층을 고칩니다. 비전과 아래 8층은 그대로입니다.</p>
+          <p><code>한 번에 64장면</code> <code>69,000번 ≈ 10바퀴</code></p></div>
+      </div>
+    </div>
+  </div>
+  <aside class="note">학습: 언어 모델 위 8층(단어와 화면을 잇는 곳), Action head(DiT 32층), 상태·동작 인코더(양팔 12관절에 맞춰 새로 학습).<br>고정: 비전 인코더 SigLIP2, 언어 모델 아래 8층.<br>지시문은 별도 인코더 없이 같은 언어 모델이 이미지와 함께 처리.</aside>
+</section>
+
+<!-- 07 학습 과정 -->
+<section class="slide" id="training" data-name="학습">
+  <div class="wrap">
+    <div class="kicker rv">06 · 학습 과정</div>
+    <h2 class="rv d1">틀린 만큼 조금씩 고치기를,<br><em>69,000번</em> 반복한다</h2>
+    <div class="clip rv d2">
+      <video class="auto" src="../diagrams/anim/train_flow_n16.mp4" poster="assets/train_poster.jpg" muted loop playsinline preload="metadata" aria-label="학습 흐름 애니메이션"></video>
+    </div>
+    <div class="clip-bar rv d3">
+      <div class="steps4"><span><b>①</b>장면 + 지시문 입력</span><span><b>②</b>동작 예측</span><span><b>③</b>정답과 비교</span><span><b>④</b>위 8층 + Action head 수정</span></div>
+      <span class="cap">매번 다른 장면 64개 · 전체 데이터 약 10바퀴</span>
+    </div>
+  </div>
+  <aside class="note">69,000 step × 배치 64 ≈ 441만 장면 = 439,524 프레임의 약 10 epoch. 영상은 학습 데이터의 5개 장면을 돌아가며 보여줌.</aside>
+</section>
+
+<!-- 08 추론 과정 -->
+<section class="slide" id="inference" data-name="추론">
+  <div class="wrap">
+    <div class="kicker rv">07 · 추론 과정</div>
+    <h2 class="rv d1">카메라 3대를 보고<br><em>0.27초마다</em> 다시 계획한다</h2>
+    <div class="clip rv d2">
+      <video class="auto" src="../diagrams/anim/infer_flow_n16.mp4" poster="assets/infer_poster.jpg" muted loop playsinline preload="metadata" aria-label="추론 흐름 애니메이션 — 실기 평가 영상 동기화"></video>
+    </div>
+    <div class="clip-bar rv d3">
+      <span class="cap">카메라 칸과 로봇 칸은 실기 평가 영상 (screwdriver → black 칸), 같은 순간으로 맞춤</span>
+      <div class="one"><span class="kv"><span class="count" data-to="86">0</span> ms</span><span>추론 1회 (중앙값)</span></div>
+    </div>
+  </div>
+  <aside class="note">추론 86ms는 중앙값(10~90% 범위 81~96ms), 실기 평가 4,512회 측정. 8스텝(0.27초) 실행마다 새 동작 청크를 다시 추론. RTX 5070 Ti 16GB 로컬 서빙, ZeroMQ 정책 서버 ↔ 로봇 PC.</aside>
+</section>
+
+<!-- 09 학습 설정 -->
+<section class="slide" id="setup" data-name="설정">
+  <div class="wrap">
+    <div class="kicker rv">08 · 학습 설정</div>
+    <h2 class="rv d1">392회 시연으로<br><em>위 8층 + Action head</em>를 학습</h2>
+    <div class="train">
+      <div class="rv d2">
+        <div class="kpis">
+          <div class="kpi"><div class="kv"><span class="count" data-to="392">0</span><small>회</small></div><span>시연 · 약 4시간</span></div>
+          <div class="kpi"><div class="kv"><span class="count" data-to="32">0</span><small>종</small></div><span>지시문 = 물체 8 × 칸 4색</span></div>
+        </div>
+        <dl class="setlist">
+          <div><dt>출발</dt><dd>GR00T 사전학습 가중치</dd></div>
+          <div><dt>학습</dt><dd>언어 모델 위 8층 + Action head</dd></div>
+          <div><dt>분량</dt><dd>10 epoch · RTX 5090 1대</dd></div>
+        </dl>
+      </div>
+      <div class="pics">
+        <div class="pair rv d3">
+          <h3>장면은 같고 지시만 다르게</h3>
+          <div class="two">
+            <figure><img src="assets/trial37_t02.jpg" alt="같은 장면 1"><figcaption>“…screwdriver into the <b>white</b> bin”</figcaption></figure>
+            <figure><img src="assets/trial38_t01.jpg" alt="같은 장면 2"><figcaption>“…screwdriver into the <b>cyan</b> bin”</figcaption></figure>
+          </div>
+        </div>
+        <div class="pair rv d4">
+          <h3>위치가 아니라 색을 배우게 — 칸 배치 교체</h3>
+          <div class="ba" style="--p:50%">
+            <img src="assets/trial37_t02.jpg" alt="칸 배치 A">
+            <img class="after" src="assets/trial43_t01.jpg" alt="칸 배치 B">
+            <span class="ba-l">배치 A</span><span class="ba-r">배치 B</span>
+            <input type="range" min="0" max="100" value="50" aria-label="칸 배치 비교">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <aside class="note">데이터: 392 에피소드, 439,524 프레임, 30fps, 평균 37초(28~56초). 구성: 같은 장면·다른 지시, 칸 색 배치 6~7종 교체, 대조 시연 92회(같은 배치에서 지시 물체만 바꿈).<br>하이퍼파라미터는 부록. 사진은 실기 평가 장면(위 카메라). 오른쪽 아래 사진은 좌우로 끌어 칸 배치를 비교.</aside>
+</section>
+
+<!-- 10 내부 분석 -->
+<section class="slide" id="probe" data-name="분석">
+  <div class="wrap">
+    <div class="kicker rv">09 · 모델 속 들여다보기</div>
+    <h2 class="rv d1">보는 건 충분하고,<br><em>단어를 물체에 잇는 게</em> 약하다</h2>
+    <div class="qs">
+      <div class="q good rv d2"><span class="n">1</span><h3>물체를 구분하나?</h3><div class="v">AUC 0.98~1.00</div><span class="mk">✓</span></div>
+      <div class="q weak rv d3"><span class="n">2</span><h3>단어가 물체에 붙나?</h3><div class="v">1.3~1.9×<small>같은 색 칸에 더 반응</small></div><span class="mk">✗</span></div>
+    </div>
+    <figure class="attn rv d4" style="margin:0">
+      <img src="assets/attn_strip.png" alt="오른손목 화면 attention — glue stick, red marker, black marker">
+      <figcaption>오른손목 화면 attention — 단어마다 해당 물체의 캡에 붙는다</figcaption>
+    </figure>
+    <div class="then rv d5">→ 언어 모델 학습 층을 늘린다</div>
+  </div>
+  <aside class="note">① 고정된 비전 인코더 출력에 선형 판별기만 붙여 "이 화면에 red marker가 있나"를 맞혀 봄. 학습에 안 쓴 에피소드로 채점(5겹 교차검증). 마커 3색까지 구분.<br>② 같은 화면·같은 관절 상태·같은 노이즈에서 지시문의 물체 단어만 바꿔 넣고 비교. 단어가 물체보다 같은 색 칸에서 더 크게 반응. 방법은 부록.</aside>
+</section>
+
+<!-- 11 4층 → 8층 -->
+<section class="slide" id="layers" data-name="층 확장">
+  <div class="wrap">
+    <div class="kicker rv">10 · 개선</div>
+    <h2 class="rv d1">데이터 보강 + 층 확장을<br><em>함께 할 때</em> 가장 크게 오른다</h2>
+    <div class="layers">
+      <div class="stack16 rv d2">
+        <div class="cols">
+          <div class="col"><b>4층</b><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="arr">→</span>
+          <div class="col"><b style="color:var(--accent)">8층</b><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <p>언어 모델 16층 중 학습하는 층</p>
+      </div>
+      <div class="barbox rv d3">
+        <div class="ttl">지시한 물체를 집은 비율 · 같은 36회 평가</div>
+        <div class="bars wait">
+          <div class="bar"><div>300회 · 4층<small>기본</small></div><div class="track"><div class="fill" style="--w:50%"></div></div><div class="v">50%</div></div>
+          <div class="bar"><div>300회 · 8층<small>층만 확장</small></div><div class="track"><div class="fill" style="--w:61%"></div></div><div class="v">61%</div></div>
+          <div class="gap"></div>
+          <div class="bar"><div>392회 · 4층<small>데이터만 보강</small></div><div class="track"><div class="fill" style="--w:64%"></div></div><div class="v">64%</div></div>
+          <div class="bar pick"><div>392회 · 8층<small>최종 모델</small></div><div class="track"><div class="fill" style="--w:81%"></div></div><div class="v">81%</div></div>
+        </div>
+        <div class="pairline"><b>짝 비교 12 : 1</b><span>(p = 0.003)</span></div>
+      </div>
+    </div>
+  </div>
+  <aside class="note">막대 길이는 0~100% 눈금. 300회 데이터 +11%p, 392회(+대조 92회) +17%p.<br>왜 언어 모델인가: 지시 단어와 화면이 만나는 곳은 언어 모델 안뿐. 비전은 이미 물체를 구분하므로 고정.<br>짝 비교: 기본(300회·4층)이 틀리고 최종(392회·8층)만 맞힌 경우 12회 vs 반대 1회, McNemar p = 0.003.</aside>
+</section>
+
+<!-- 12 결과 -->
+<section class="slide" id="result" data-name="결과">
+  <div class="wrap">
+    <div class="kicker rv">11 · 결과</div>
+    <h2 class="rv d1">모델을 개선할수록 오르고,<br><em>최종 모델</em>이 가장 높다</h2>
+    <div class="result">
+      <div class="rv d2">
+        <div class="metrics">
+          <div><i class="b">1</i><b>물체 집기</b><span>우연 35%</span></div>
+          <div><i>2</i><b>전달</b></div>
+          <div><i>3</i><b>칸 넣기</b><span>우연 25%</span></div>
+          <div><i class="o">4</i><b>완전 성공</b></div>
+        </div>
+        <div class="kpis" style="margin-top:14px">
+          <div class="kpi"><div class="kv"><span class="count" data-to="93">0</span><small>%</small></div><span>최종 · 전달</span></div>
+          <div class="kpi"><div class="kv"><span class="count" data-to="94">0</span><small>%</small></div><span>최종 · 칸 넣기</span></div>
+        </div>
+      </div>
+      <div class="chart rv d3" id="chart">
+        <div class="lg"><span style="--c:var(--blue)">물체 집기</span><span style="--c:var(--accent)">완전 성공</span></div>
+        <svg viewBox="0 0 760 360" role="img" aria-label="모델별 물체 집기와 완전 성공 비율 꺾은선 그래프"></svg>
+        <div class="foot">모든 모델 같은 평가 계획표 (36회 · 최종 모델은 60회)</div>
+      </div>
+    </div>
+  </div>
+  <aside class="note">지표: ① 오른팔이 1~4개 물체 중 지시한 것을 집었나 ② 오른팔이 왼팔에 건네는 데 성공했나 ③ 왼팔이 지시한 색 칸에 넣었나 ④ 맞는 물체를 맞는 칸에.<br>최종 모델은 학습에 없던 칸 배치 24회를 더해 60회(최종 36회만 보면 물체 81% · 완전 성공 67%). 점에 마우스를 올리면 값이 나옴.</aside>
+</section>
+
+<!-- 13 시연 -->
+<section class="slide" id="demo" data-name="시연">
+  <div class="wrap">
+    <div class="kicker rv">12 · 시연</div>
+    <h2 class="rv d1">지시 한 문장,<br><em>두 팔의 분류</em></h2>
+    <div class="video rv d2 has" id="vbox">
+      <video id="vid" controls playsinline preload="metadata" src="../diagrams/anim/infer_trial39.mp4" poster="assets/demo_poster.jpg"></video>
+      <div class="drop">
+        <div class="play" aria-hidden="true"></div>
+        <b>시연 영상</b><span>영상 파일을 여기로 끌어다 놓거나</span>
+        <label for="vfile">파일 선택<input type="file" id="vfile" accept="video/*"></label>
+      </div>
+    </div>
+    <div class="vbar"><span id="vname">실기 평가 영상 — “Put the screwdriver into the black bin” (위 · 왼손목 · 오른손목)</span><button type="button" id="vreset">영상 바꾸기</button></div>
+  </div>
+  <aside class="note">기본으로 실기 평가 영상(최종 모델)이 들어 있음. 발표 당일 촬영한 데모 영상은 「영상 바꾸기」를 누르거나 영상 위로 끌어다 놓으면 바로 재생.</aside>
+</section>
+
+<!-- 14 회고 -->
+<section class="slide" id="retro" data-name="회고">
+  <div class="wrap">
+    <div class="kicker rv">13 · 회고</div>
+    <h2 class="rv d1">배운 것과<br><em>한계</em></h2>
+    <div class="retro">
+      <div>
+        <div class="lesson frag"><b>01</b><span>데이터에서 출발해 모델을 고른다</span></div>
+        <div class="lesson frag"><b>02</b><span>데이터 설계가 성능을 만든다</span></div>
+        <div class="lesson frag"><b>03</b><span>모델 속을 보고 고친다</span></div>
+      </div>
+      <div class="limits frag">
+        <h3>한계</h3>
+        <ul><li>평가 횟수가 작음</li><li>색 단어가 칸에도 붙음</li><li>정면 쏠림 · 재시도 없음</li></ul>
+      </div>
+    </div>
+  </div>
+  <aside class="note">01 선행 연구 데이터 조사로 뽑은 조건 6개가 모델 선택과 이후 실험의 기준.<br>02 같은 장면 · 다른 지시, 칸 배치 교체, 파운데이션 출발, 언어 모델 층 확장.<br>03 어디서 · 언제 막히는지 확인 → 대조 시연 설계 → 물체 50% → 81%.<br>한계: 평가 횟수가 작아 일부 차이는 통계적으로 미확정, 정면 쏠림 · 돌려 놓인 물체 · 실패 후 재시도 없음.</aside>
+</section>
+
+<!-- 15 Q&A -->
+<section class="slide qa" id="qa" data-name="Q&amp;A">
+  <div class="wrap">
+    <div class="big rv">Q<span>&amp;</span>A</div>
+    <p class="thanks rv d1">들어 주셔서 감사합니다</p>
+    <div class="meta rv d2"><span class="pill o">이름 · 이름 · 이름</span><span class="pill">github.com/bbanggang0070/manipulator_ws</span></div>
+  </div>
+  <aside class="note">질문을 받은 뒤 차후 계획(DSRL)으로 넘어감.</aside>
+</section>
+
+<!-- 16 차후 계획 -->
+<section class="slide" id="next" data-name="계획">
+  <div class="wrap">
+    <div class="kicker rv">14 · 차후 계획</div>
+    <h2 class="rv d1">모델은 그대로,<br><em>출발 노이즈만</em> 강화학습으로 고른다</h2>
+    <div class="pipe rv d2">
+      <div><b>관측</b><span>카메라 3대 + 관절 상태</span></div><i>→</i>
+      <div class="learn"><b>노이즈 정책 (SAC)</b><span>작은 신경망 · 학습</span></div><i>→</i>
+      <div class="fixed"><b>GR00T N1.6</b><span>고정 · 노이즈 → 동작</span></div><i>→</i>
+      <div><b>로봇 실행</b><span>보상: 지시한 물체를 집었나</span></div>
+    </div>
+    <p class="loopnote rv d2">↻ 보상으로 노이즈 정책만 갱신 — 출력은 항상 원래 모델이 낼 수 있는 동작</p>
+    <div class="plan rv d3">
+      <div><span>정면 쏠림 (물체 선택)</span><i>→</i><b><em>DSRL로 가능</em> — 정답 동작이 이미 모델 안에 있음</b></div>
+      <div><span>돌려 놓인 물체 파지</span><i>→</i><b><em class="w">잔차 강화학습 필요</em></b></div>
+    </div>
+  </div>
+  <aside class="note">정면 쏠림: 같은 장면에서 맞힐 때도 있다 → 정답 동작이 이미 모델 분포 안. 돌려 놓인 물체: 분포 밖 동작은 노이즈로 만들 수 없다 → 잔차 강화학습 필요.<br>실기 200~400회 규모. 사례: π0 실기 DSRL · ConRFT · π*0.6 RECAP.</aside>
+</section>
+
+<!-- 17 부록 -->
+<section class="slide" id="appendix" data-name="부록">
+  <div class="wrap">
+    <div class="kicker rv">부록</div>
+    <h2 class="rv d1">질문이 오면<br><em>여기서</em> 꺼낸다</h2>
+    <div class="apx">
+      <div class="grid2">
+        <div class="task rv d2"><span class="lbl">A1 · 내부 분석 ①</span><h3>층별 선형 분류기</h3>
+          <p>각 층의 이미지 토큰에 판별기 하나만 붙여 “이 화면에 red marker가 있나”를 맞힌다. 학습에 쓰지 않은 에피소드로 채점(5겹 교차검증 AUC). 단순한 판별기는 정보를 만들어 내지 못하므로, 맞히면 그 층에 정보가 있다.</p></div>
+        <div class="task rv d3"><span class="lbl">A1 · 내부 분석 ②</span><h3>단어 바꾸기</h3>
+          <p>같은 화면 · 같은 관절 상태 · 같은 노이즈 시드 8개에서 지시문의 물체 단어만 바꾼다. attention 지도, 언어 모델 출력 변화(1 − cos), 0.5초 뒤 예측 동작을 비교 — 차이는 오직 단어 때문.</p></div>
+      </div>
+      <div class="task rv d3"><span class="lbl">A2 · 선행 양팔 VLA 데이터셋</span>
+        <div class="scroll-x"><table>
+          <thead><tr><th>프로젝트</th><th>로봇 · 수집</th><th>카메라</th><th>상태 → 동작</th><th>규모</th><th>언어 지시</th><th>포맷</th></tr></thead>
+          <tbody>
+            <tr><td>ALOHA · ACT (2023)</td><td>저가 양팔 6자유도 × 2, 리더-팔로워</td><td>4대 · 위 · 앞 · 손목 2</td><td>관절 14 → 관절 14, 50Hz</td><td>과제당 50회</td><td>없음</td><td>HDF5</td></tr>
+            <tr><td>Mobile ALOHA (2024)</td><td>양팔 + 이동 베이스</td><td>3대 · 앞 1 · 손목 2</td><td>관절 14 + 이동 속도</td><td>과제당 50회 + 공동 학습</td><td>없음</td><td>HDF5</td></tr>
+            <tr><td>RDT-1B (2024)</td><td>양팔 (ALOHA형)</td><td>3대 · 외부 1 · 손목 2</td><td>통합 128차원 동작 공간</td><td>양팔 6천+ 에피소드</td><td>과제 문장</td><td>HDF5</td></tr>
+            <tr><td>π0 (2024)</td><td>단일 · 양팔 등 7종</td><td>2~3대 · 외부 + 손목</td><td>관절 → 50스텝 동작 청크</td><td>사전학습 1만 시간+</td><td>과제 문장</td><td>LeRobot (공개판)</td></tr>
+            <tr><td>GR00T N1.x (2025)</td><td>휴머노이드 · 양팔, 실기 + 시뮬 + 사람 영상</td><td>다시점</td><td>로봇별 상태 · 동작 인코더</td><td>대규모 사전학습 + 소량 미세조정</td><td>과제 문장</td><td>LeRobot v2</td></tr>
+            <tr><td>LeRobot SO-100/101</td><td>단일 · 양팔</td><td>2대 · 위 · 손목</td><td>관절 6/12, 30fps</td><td>과제당 50회 안팎</td><td>과제당 1문장</td><td>parquet + mp4</td></tr>
+            <tr class="ours"><td>우리</td><td>SO-ARM101 양팔, 리더 팔 2대</td><td>3대 · 위 1 · 손목 2</td><td>양팔 12관절, 30fps</td><td>392회</td><td>32종 · 같은 장면 다른 지시</td><td>LeRobot v3</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="task rv d4"><span class="lbl">A3 · 학습 하이퍼파라미터</span>
+        <dl class="hp">
+          <div><dt>손실</dt><dd>flow matching</dd></div>
+          <div><dt>옵티마이저</dt><dd>paged AdamW 8-bit</dd></div>
+          <div><dt>학습률</dt><dd>1e-4 · cosine · warmup 5%</dd></div>
+          <div><dt>weight decay</dt><dd>1e-5</dd></div>
+          <div><dt>배치</dt><dd>64 (2 × 누적 32)</dd></div>
+          <div><dt>분량</dt><dd>10 epoch = 69,000 step</dd></div>
+          <div><dt>동작 청크</dt><dd>16스텝</dd></div>
+          <div><dt>증강</dt><dd>밝기 · 대비 · 채도 + 색조 ±5.4°</dd></div>
+          <div><dt>학습 범위</dt><dd>언어 모델 위 8층 + Action head</dd></div>
+          <div><dt>고정</dt><dd>비전 인코더 · 언어 모델 아래 8층</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+  <aside class="note">A1 내부 분석 방법, A2 선행 데이터셋 비교, A3 하이퍼파라미터. 공개 논문 · 저장소 기준 요약.</aside>
+</section>
+
+<footer>VLA 기반 언어 지시 양팔 물체 분류 · GR00T N1.6 · SO-ARM101 · LeRobot · RTX 5090 / 5070 Ti</footer>
+<div id="hud"><span id="hudNo">01 / 01</span> · <span id="hudTime">00:00</span></div>
+
+<script>
+(function () {
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var slides = [].slice.call(document.querySelectorAll('.slide'));
+
+  // 기능 N 보조: 주소에 #슬라이드가 있으면 먼저 그 장으로 이동 (안 하면 첫 state()가 해시를 #topic으로 덮어씀)
+  var h0 = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (h0 && h0.classList.contains('slide')) { document.documentElement.style.scrollBehavior = 'auto'; scrollTo(0, h0.offsetTop); document.documentElement.style.scrollBehavior = ''; }
+
+  // ===== 기능 A. 목차 + 진행바 =====
+  var nav = document.getElementById('nav');
+  slides.forEach(function (s, i) {
+    var a = document.createElement('a'); a.href = '#' + s.id;
+    a.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b><span>' + s.dataset.name + '</span>';
+    a.setAttribute('aria-label', s.dataset.name); nav.appendChild(a);
+  });
+  var links = nav.querySelectorAll('a');
+  var prog = document.getElementById('progress');
+  var curSlideIdx = 0;
+  function curSlide() { var idx = 0; slides.forEach(function (s, i) { if (s.getBoundingClientRect().top < innerHeight * .45) idx = i; }); return idx; }
+  function state() {
+    var h = document.documentElement.scrollHeight - innerHeight;
+    prog.style.width = (h > 0 ? scrollY / h * 100 : 0) + '%';
+    curSlideIdx = curSlide();
+    links.forEach(function (l, i) { l.classList.toggle('on', i === curSlideIdx); });
+    if (typeof onSlideChange === 'function') onSlideChange(curSlideIdx);
+    if (typeof syncSteps === 'function') syncSteps();
+  }
+
+  // ===== 기능 B. 블럭도 단계 =====
+  var steps = [].slice.call(document.querySelectorAll('.st'));
+  var blks = document.querySelectorAll('.blk'), edges = document.querySelectorAll('.edge'), labs = document.querySelectorAll('.elab');
+  var stepno = document.getElementById('stepno'), curStep = -1;
+  var tot = document.getElementById('steptotal'); if (tot) tot.textContent = String(steps.length - 1).padStart(2, '0');
+  function setStep(i) {
+    if (!steps.length || i === curStep) return; curStep = i;
+    var s = steps[i], all = !!s.dataset.all;
+    var on = (s.dataset.on || '').split(' '), eo = (s.dataset.e || '').split(' '), lo = (s.dataset.l || '').split(' ');
+    blks.forEach(function (b) { b.classList.toggle('on', !all && on.indexOf(b.id) > -1); b.classList.toggle('all', all); });
+    edges.forEach(function (e) { e.classList.toggle('on', eo.indexOf(e.id) > -1); e.classList.toggle('all', all); });
+    labs.forEach(function (l) { l.classList.toggle('on', lo.indexOf(l.id) > -1); });
+    steps.forEach(function (x, j) { x.classList.toggle('on', j === i); });
+    stepno.textContent = String(i).padStart(2, '0');
+    document.getElementById('steptitle').textContent = s.querySelector('.no').textContent.split('·')[1].trim();
+  }
+  function syncSteps() { var si = 0; steps.forEach(function (s, i) { if (s.getBoundingClientRect().top < innerHeight * .55) si = i; }); setStep(si); }
+  setStep(0);
+
+  // ===== 기능 C. 등장 애니메이션 =====
+  var vh = innerHeight;
+  if (!reduce && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.remove('pre'); io.unobserve(e.target); } }); }, { threshold: .12 });
+    document.querySelectorAll('.rv').forEach(function (el) { if (el.getBoundingClientRect().top > vh * .95) { el.classList.add('pre'); io.observe(el); } });
+  }
+
+  // ===== 기능 D. 키보드 진행 (블럭도 단계도 정지점) =====
+  var stops = []; slides.forEach(function (s) { stops.push(s); if (s.id === 'diagram') steps.forEach(function (st) { stops.push(st); }); });
+  function curStop() {
+    var best = 0, mid = innerHeight * .5;
+    stops.forEach(function (s, i) { var r = s.getBoundingClientRect(); var c = s.classList.contains('st') ? r.top + r.height / 2 : r.top + 60; if (c <= mid + 4) best = i; });
+    return best;
+  }
+  function go(i) {
+    var s = stops[i], r = s.getBoundingClientRect();
+    var y = s.classList.contains('st') ? scrollY + r.top + r.height / 2 - innerHeight * .5 : scrollY + r.top;
+    scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+  }
+  addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, video, button, label')) return;
+    var i = curStop(), t = null;
+    if (['ArrowDown', 'PageDown', ' ', 'ArrowRight'].indexOf(e.key) > -1) t = Math.min(i + 1, stops.length - 1);
+    if (['ArrowUp', 'PageUp', 'ArrowLeft'].indexOf(e.key) > -1) t = Math.max(i - 1, 0);
+    if (t !== null) { e.preventDefault(); go(t); }
+  });
+
+  // ===== 기능 E. 막대 채우기 =====
+  document.querySelectorAll('.bars.wait').forEach(function (bars) {
+    if (reduce || !('IntersectionObserver' in window)) { bars.classList.remove('wait'); return; }
+    new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { setTimeout(function () { bars.classList.remove('wait'); }, 350); o.disconnect(); } }, { threshold: .3 }).observe(bars);
+  });
+
+  // ===== 기능 F. 표지 캔버스 — 작업대 위에서 물체 → 전달 → 칸을 도는 그리퍼 =====
+  var cv = document.getElementById('grid');
+  if (cv) {
+    var ctx = cv.getContext('2d'), W, H, t = 0;
+    var size = function () { var d = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
+    var bins = [['#1f2937', .80, .20], ['#22b8cf', .90, .20], ['#f4a6b8', .80, .36], ['#ffffff', .90, .36]];   // black · cyan · pink · white
+    var objs = [[.58, .70], [.64, .80], [.70, .70]];
+    var hand = [.70, .48];
+    var draw = function () {
+      ctx.clearRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(17,24,39,.06)'; ctx.lineWidth = 1;
+      for (var x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (var y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+      var bw = .095 * W, bh = .15 * H;
+      bins.forEach(function (b) { ctx.fillStyle = b[0]; ctx.globalAlpha = .55; ctx.fillRect(b[1] * W - bw / 2, b[2] * H - bh / 2, bw, bh); ctx.globalAlpha = 1; ctx.strokeStyle = 'rgba(17,24,39,.18)'; ctx.strokeRect(b[1] * W - bw / 2, b[2] * H - bh / 2, bw, bh); });
+      var cyc = Math.floor(t / 4), u = (t % 4) / 4;
+      var o = objs[cyc % objs.length], b = bins[cyc % bins.length];
+      var wp = [o, hand, [b[1], b[2]]];
+      objs.forEach(function (p, i) { ctx.fillStyle = p === o ? 'rgba(242,107,29,.9)' : 'rgba(31,111,235,.55)'; ctx.beginPath(); ctx.arc(p[0] * W, p[1] * H, 7, 0, 6.29); ctx.fill(); });
+      ctx.setLineDash([6, 8]); ctx.strokeStyle = 'rgba(31,111,235,.4)'; ctx.lineWidth = 2; ctx.beginPath();
+      wp.forEach(function (p, i) { i ? ctx.lineTo(p[0] * W, p[1] * H) : ctx.moveTo(p[0] * W, p[1] * H); }); ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle = 'rgba(242,107,29,.3)'; ctx.beginPath(); ctx.arc(hand[0] * W, hand[1] * H, 16 + 4 * Math.sin(t * 3), 0, 6.29); ctx.stroke();
+      var k = Math.min(u / .8, 1), seg = k < .5 ? 0 : 1, f = (k - seg * .5) * 2, a = wp[seg], c = wp[seg + 1];
+      var gx = (a[0] + (c[0] - a[0]) * f) * W, gy = (a[1] + (c[1] - a[1]) * f) * H;
+      ctx.fillStyle = 'rgba(242,107,29,.14)'; ctx.beginPath(); ctx.arc(gx, gy, 26, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#111827'; ctx.beginPath(); ctx.arc(gx, gy, 11, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#f26b1d'; ctx.beginPath(); ctx.arc(gx, gy, 4, 0, 6.29); ctx.fill();
+      t += 1 / 60; if (!reduce) requestAnimationFrame(draw);
+    };
+    size(); addEventListener('resize', size); draw();
+  }
+
+  // ===== 기능 G. 시연 영상 =====
+  var vbox = document.getElementById('vbox');
+  if (vbox) {
+    var vid = document.getElementById('vid'), vfile = document.getElementById('vfile'), vname = document.getElementById('vname'), url;
+    var load = function (f) {
+      if (!f || f.type.indexOf('video') !== 0) { vname.textContent = '영상 파일이 아닙니다. mp4 같은 영상 파일을 골라주세요.'; return; }
+      if (url) URL.revokeObjectURL(url); url = URL.createObjectURL(f);
+      vid.src = url; vbox.classList.add('has'); vname.textContent = f.name;
+    };
+    // 영상 비율에 맞춰 상자 비율 조정 (기본 실기 영상은 4:1)
+    var fit = function () { if (vid.videoWidth) vbox.style.aspectRatio = vid.videoWidth + ' / ' + vid.videoHeight; };
+    vid.addEventListener('loadedmetadata', fit); if (vid.readyState >= 1) fit();
+    vfile.addEventListener('change', function () { load(vfile.files[0]); });
+    ['dragenter', 'dragover'].forEach(function (ev) { vbox.addEventListener(ev, function (e) { e.preventDefault(); vbox.classList.add('over'); }); });
+    ['dragleave', 'drop'].forEach(function (ev) { vbox.addEventListener(ev, function (e) { e.preventDefault(); vbox.classList.remove('over'); }); });
+    vbox.addEventListener('drop', function (e) { load(e.dataTransfer.files[0]); });
+    document.getElementById('vreset').addEventListener('click', function () { vid.pause(); vbox.classList.remove('has'); vfile.value = ''; vfile.click(); });
+  }
+
+  // 07 · 08 흐름 영상: 화면에 들어오면 재생, 벗어나면 정지 (모션 줄이기면 컨트롤만)
+  document.querySelectorAll('video.auto').forEach(function (v) {
+    if (reduce || !('IntersectionObserver' in window)) { v.controls = true; return; }
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () { v.controls = true; }); } else v.pause(); }); }, { threshold: .4 }).observe(v);
+  });
+
+  // ===== 12 결과 꺾은선 (SVG 직접 그림) =====
+  var chart = document.getElementById('chart');
+  if (chart) {
+    var svg = chart.querySelector('svg'), NS = 'http://www.w3.org/2000/svg';
+    var X = ['151회', '300회 · 4층', '300회 · 8층', '392회 · 4층', '392회 · 8층'];
+    var S = [['물체 집기', '#1f6feb', [53, 50, 61, 64, 82], -14], ['완전 성공', '#f26b1d', [22, 44, 44, 53, 73], 26]];
+    var L = 50, R = 30, T = 18, B = 62, PW = 760 - L - R, PH = 360 - T - B;
+    var px = function (i) { return L + PW * i / (X.length - 1); }, py = function (v) { return T + PH * (1 - v / 100); };
+    var el = function (tag, at, txt) { var n = document.createElementNS(NS, tag); for (var k in at) n.setAttribute(k, at[k]); if (txt != null) n.textContent = txt; svg.appendChild(n); return n; };
+    el('rect', { x: px(4) - 46, y: T, width: 92, height: PH, rx: 10, fill: '#fff1e8', opacity: .8 });
+    [0, 25, 50, 75, 100].forEach(function (g) { el('line', { class: 'gl', x1: L, x2: L + PW, y1: py(g), y2: py(g) }); el('text', { class: 'ax', x: L - 10, y: py(g) + 4, 'text-anchor': 'end' }, g + '%'); });
+    X.forEach(function (l, i) { el('text', { class: 'xl' + (i === 4 ? ' fin' : ''), x: px(i), y: 360 - B + 26, 'text-anchor': 'middle' }, l); });
+    el('text', { class: 'xl', x: px(0), y: 360 - B + 46, 'text-anchor': 'middle', style: 'font-size:12px' }, '첫 모델');
+    el('text', { class: 'xl fin', x: px(4), y: 360 - B + 46, 'text-anchor': 'middle', style: 'font-size:12px;fill:#f26b1d' }, '최종 모델');
+    var tipC = null;
+    S.forEach(function (s) {
+      var d = s[2].map(function (v, i) { return (i ? 'L' : 'M') + px(i) + ',' + py(v); }).join(' ');
+      var p = el('path', { class: 'ln draw', d: d, stroke: s[1] });
+      var len = p.getTotalLength ? Math.ceil(p.getTotalLength()) : 1000; p.style.setProperty('--len', len);
+      s[2].forEach(function (v, i) {
+        el('circle', { class: 'dot', cx: px(i), cy: py(v), r: i === 4 ? 7 : 5, fill: s[1] });
+        if (i === 0 || i === 4) el('text', { class: 'dl', x: px(i), y: py(v) + s[3], 'text-anchor': 'middle', style: i === 4 ? 'font-size:19px' : '' }, v + '%');
+        var h = el('circle', { class: 'hit', cx: px(i), cy: py(v), r: 16 });
+        h.addEventListener('mouseenter', function () { tipC = s[0] + ' · ' + X[i]; tip.innerHTML = '<b>' + v + '%</b>' + tipC + (i === 4 ? ' (60회)' : ' (36회)'); tip.classList.add('show'); });
+        h.addEventListener('mousemove', function (e) { tip.style.left = Math.min(e.clientX + 14, innerWidth - 280) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; });
+        h.addEventListener('mouseleave', function () { tip.classList.remove('show'); });
+      });
+    });
+    if (reduce || !('IntersectionObserver' in window)) chart.classList.add('go');
+    else new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { chart.classList.add('go'); o.disconnect(); } }, { threshold: .3 }).observe(chart);
+  }
+
+  // ===== 기능 H. 블록 툴팁 + 클릭하면 해당 단계로 =====
+  var tip = document.createElement('div'); tip.className = 'tip'; document.body.appendChild(tip);
+  blks.forEach(function (b) {
+    b.addEventListener('mouseenter', function () { tip.innerHTML = '<b>' + b.querySelector('.t1').textContent + '</b>' + (b.dataset.desc || ''); tip.classList.add('show'); });
+    b.addEventListener('mousemove', function (e) { tip.style.left = Math.min(e.clientX + 14, innerWidth - 280) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; });
+    b.addEventListener('mouseleave', function () { tip.classList.remove('show'); });
+    b.addEventListener('click', function () {
+      var j = steps.findIndex(function (s, k) { return k > 0 && (s.dataset.on || '').split(' ').indexOf(b.id) > -1; });
+      if (j > -1) go(stops.indexOf(steps[j]));
+    });
+  });
+
+  // ===== 기능 I. 숫자 카운트업 =====
+  function countUp(el) {
+    var to = parseFloat(el.dataset.to), dec = +(el.dataset.dec || 0), t0 = null, dur = 1200;
+    function f(ts) { if (!t0) t0 = ts; var p = Math.min((ts - t0) / dur, 1), k = 1 - Math.pow(1 - p, 3); el.textContent = (to * k).toFixed(dec); if (p < 1) requestAnimationFrame(f); }
+    requestAnimationFrame(f);
+  }
+  var counts = document.querySelectorAll('.count');
+  if (reduce || !('IntersectionObserver' in window)) counts.forEach(function (el) { el.textContent = (+el.dataset.to).toFixed(+(el.dataset.dec || 0)); });
+  else { var cio = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { countUp(e.target); cio.unobserve(e.target); } }); }, { threshold: .5 });
+         counts.forEach(function (el) { cio.observe(el); }); }
+
+  // ===== 기능 J. 발표 HUD =====
+  var LIMIT = 15 * 60;                    // 발표 제한 시간(초) — 실제 시간에 맞춰 바꾸기
+  var t0 = Date.now(), hud = document.getElementById('hud');
+  var hudNo = document.getElementById('hudNo'), hudTime = document.getElementById('hudTime');
+  setInterval(function () {
+    var s = Math.floor((Date.now() - t0) / 1000);
+    hudTime.textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+    hud.classList.toggle('over', s > LIMIT);
+  }, 500);
+  var hudSet = function (i) { hudNo.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0'); };
+  addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    if (e.key === 't' || e.key === 'T') t0 = Date.now();
+    if (e.key === 'h' || e.key === 'H') document.body.classList.toggle('no-hud');
+  });
+
+  // ===== 기능 K. 전체화면 =====
+  addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    if (e.key === 'f' || e.key === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+    }
+  });
+
+  // ===== 기능 L. 발표자 노트 =====
+  var notePanel = document.createElement('div'); notePanel.id = 'notePanel'; document.body.appendChild(notePanel);
+  var noteSet = function (i) {
+    var n = slides[i].querySelector('.note');
+    notePanel.innerHTML = '<b>NOTE · ' + slides[i].dataset.name + '</b>' + (n ? n.innerHTML : '(노트 없음)');
+  };
+  addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    if (e.key === 'n' || e.key === 'N') document.body.classList.toggle('notes');
+  });
+
+  // ===== 기능 M. 클릭 단위 등장 =====
+  if (reduce) document.querySelectorAll('.frag').forEach(function (f) { f.classList.add('in'); });
+  addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, video, button, label')) return;
+    var s = slides[curSlide()];
+    var next = ['ArrowDown', 'PageDown', ' ', 'ArrowRight'].indexOf(e.key) > -1;
+    var prev = ['ArrowUp', 'PageUp', 'ArrowLeft'].indexOf(e.key) > -1;
+    if (next) { var h = s.querySelectorAll('.frag:not(.in)'); if (h.length) { h[0].classList.add('in'); e.preventDefault(); e.stopImmediatePropagation(); } }
+    if (prev) { var v = s.querySelectorAll('.frag.in'); if (v.length) { v[v.length - 1].classList.remove('in'); e.preventDefault(); e.stopImmediatePropagation(); } }
+  }, true);
+
+  // ===== 기능 N. URL 해시 =====
+  var hashSet = function (i) { if (history.replaceState) history.replaceState(null, '', '#' + slides[i].id); };
+
+  // ===== 기능 P. 전/후 비교 슬라이더 =====
+  document.querySelectorAll('.ba input').forEach(function (r) {
+    r.addEventListener('input', function () { r.parentNode.style.setProperty('--p', r.value + '%'); });
+  });
+
+  // ===== 훅 연결 =====
+  var lastIdx = -1;
+  function onSlideChange(i) {
+    if (i === lastIdx) return; lastIdx = i;
+    if (typeof hudSet === 'function') hudSet(i);
+    if (typeof noteSet === 'function') noteSet(i);
+    if (typeof hashSet === 'function') hashSet(i);
+    slides.forEach(function (s, k) { if (k < i) s.querySelectorAll('.frag').forEach(function (f) { f.classList.add('in'); }); });
+  }
+
+  // ===== 맨 마지막 줄 =====
+  addEventListener('scroll', state, { passive: true }); state();
+})();
+</script>
+</body>
+</html>
