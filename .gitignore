@@ -19,3 +19,13 @@ inf_video/
 
 # 오케스트레이터 실행 로그(로컬 전용)
 .orchestrate.log
+
+# 발표 자료 중 대용량 — GitHub Release(capstone-final)에 첨부
+docs/slides/capstone_animated.pptx
+demo_video/
+
+# 오피스 잠금 파일
+.~lock.*#
+
+# 계획서 제출본 — 추정 내용이 섞여 있어 배포본에서 제외(c262cd2). 이력: git show ca31bc6:PROPOSAL.md
+PROPOSAL.md

@@ -10,6 +10,18 @@
 > 📘 파이프라인을 다른 태스크에 다시 쓰려면 [PIPELINE.md](PIPELINE.md),
 > 발표·일정은 [PRESENTATION.md](PRESENTATION.md), 스크립트 지도는 [setup/README.md](setup/README.md).
 
+## 최종 결과 (2026-11 캡스톤 발표)
+
+최종 모델 `gr00t_bi_cleanup392_llm8_n16_8bit` — 평가 B 60회(처음 보는 칸 배치 24회 포함)
+
+| 지시한 물체 집기 | 지시한 칸에 넣기 | **완전 성공** | 처음 보는 칸 배치 |
+|---|---|---|---|
+| 82% | 94% | **73%** (44/60, 목표 70%) | 20/24 |
+
+- 발표 자료: [docs/slides/capstone_print.pdf](docs/slides/capstone_print.pdf) (인쇄용) ·
+  애니메이션 포함 발표본(pptx)과 시연 영상은 [Release `capstone-final`](https://github.com/bbanggang0070/manipulator_ws/releases/tag/capstone-final)
+- 남은 과제(실패 16회 중 물체 오선택 8회·놓친 뒤 종료 6회) → 강화학습 보정 계획은 [DSRL_PLAN.md](DSRL_PLAN.md)
+
 ---
 
 ## 프로젝트 흐름 (P1 → P6)
@@ -24,7 +36,7 @@ sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막
 | **P3** 일반화 | 위치·박스 DR(v3) → 블록-상자 근접 보강(v4_200) → 평가 B 15조건, 실기 박스 다양화 co-training v4 | sim OOD 82.5%·실기 80%. 그러나 **지시문을 바꿔도 행동이 같음** — 학습 데이터 지시문이 1종이었음 | cotrain_v4 |
 | **P4** 언어 조건화 (sim) | 같은 장면·다른 지시문으로 수집, 언어 프로브·대응쌍 평가 | 이어학습은 언어를 못 배움 → **파운데이션에서 새로** 학습해야 함 | blocktask_lang |
 | **P5** 실기 분류 단일팔 | 4색 칸 선반·물체 10종, 실기만으로 80 → 250 → 370ep, 앙상블 W 스윕, 칸 위치 교체 검증 | **목적지 96.1% · 물체 90%**. white 를 확신 못 할 때 왼쪽으로 가는 편향 → 칸 배치를 바꿔 가며 수집해야 함 | cleanup_real v3 |
-| **P6** 실기 분류 양팔 | 오른팔 물체 분류 → 전달 → 왼팔 색 분류. 50ep 마다 칸 배치 교체 | 151ep: 전달 92%, 물체·목적지는 우연 수준 → **300ep 학습 중** | bi_cleanup 300ep |
+| **P6** 실기 분류 양팔 | 오른팔 물체 분류 → 전달 → 왼팔 색 분류. 50ep 마다 칸 배치 교체 | 151ep 물체·목적지 우연 수준 → 칸 배치 6종(칸 넣기 97%) → VLM 학습 층 4→8 → 지시문만 바꾼 대조 시연 92ep 추가. 평가 B 60회 **완전 성공 73%**(목표 70%) | bi_cleanup 392ep · VLM 8층 |
 
 | 단계 | 문서 | 코드 |
 |---|---|---|
@@ -150,8 +162,9 @@ sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막
 manipulator_ws/
 ├─ README.md · PIPELINE.md · PRESENTATION.md   # 개요 · 파이프라인 해부(S1~S7) · 발표 자료
 ├─ docs/
-│  ├─ diagrams/                # 아키텍처 다이어그램 (다시 작성 예정, 편집은 Figma)
-│  └─ figures/                 # 결과 그림·영상 (PRESENTATION.md 등에서 사용)
+│  ├─ diagrams/                # 아키텍처 다이어그램 · anim/ 발표용 구조·학습·추론 흐름 애니메이션(생성 스크립트 포함)
+│  ├─ figures/                 # 결과 그림·영상 (PRESENTATION.md 등에서 사용)
+│  └─ slides/                  # 최종 발표 자료 — capstone_print.pdf/pptx, 웹 슬라이드(index.html), 시연 클립
 ├─ manipulator_md/             # 진행 기록 — 프로젝트 흐름 단계별
 │  ├─ STATUS.md                #   전체 진행 현황
 │  ├─ p1_p2_sim_t1/            #   P1·P2 sim T1 → 실기 co-training (plan · A~F · report · report2 · deploy.md)
@@ -242,7 +255,7 @@ cd ../p5_real_cleanup && python3 cleanup_eval.py log && python3 cleanup_eval.py 
 
 | 데이터셋 | 규모 | 모델 (checkpoint) |
 |---|---|---|
-| **`bi_cleanup` (양팔, P6)** | 300ep · 331,455 frames · 지시문 32종 · 칸 배치 6종 | `gr00t_bi_cleanup151_n16_8bit` (151ep, checkpoint-28000) · **`gr00t_bi_cleanup300_n16_8bit`** (300ep, 학습 중) |
+| **`bi_cleanup` (양팔, P6)** | 392ep (300ep + 대조 시연 92ep) · 지시문 32종 · 칸 배치 6종 | **`gr00t_bi_cleanup392_llm8_n16_8bit`** (checkpoint-69000, 최종) · 비교용 `gr00t_bi_cleanup392_n16_8bit`(VLM 4층) · `gr00t_bi_cleanup151_n16_8bit`(checkpoint-28000) |
 | `cleanup_real` (단일팔, P5) | 370ep · 지시문 40종 | `gr00t_cleanup_real_n16_8bit` (checkpoint-30000, v3) |
 | `sim_so101_blocktask_v4_200` + `..._real_v2_57` (T1, P3) | sim 200ep + 실기 57ep | `gr00t_blocktask_cotrain_v4_n16_8bit` (checkpoint-48000) |
 
