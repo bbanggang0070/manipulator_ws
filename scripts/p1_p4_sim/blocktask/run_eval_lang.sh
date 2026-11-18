@@ -1,0 +1,248 @@
+#!/usr/bin/env bash
+# P5 무인 평가 — 언어 조건화 판정. 조건 10개 × 30ep, 사람 0.
+#
+# 무엇을 보나 (language_conditioning_sim_plan.md §7-2·7-3):
+#   **대응쌍**이 전부다. 1↔2(색), 3↔4(이름), 5↔6(목적지)는 같은 배치에서 문장만 다르다.
+#   배치는 같은 계획표 + 같은 seed로 재현되므로, 성공률 차이의 출처가 오직 언어로 특정된다.
+#
+#   판정선 — 후보가 4개이므로 물체 선택의 우연은 25%, 박스 2개인 목적지는 50%다.
+#     물체 선택률 (조건 1~4 합산 120시행)  ≥ 45%
+#     목적지 선택률 (조건 5·6 합산 60시행) ≥ 65%
+#     조건 9(레거시)                      기준선 9/10 대비 −2 이내  ← 기존 성능 보존
+#     조건 10(모호)                       우연 수준이어야 정상
+#
+# 사용:
+#   ./run_eval_lang.sh                       # 전 조건
+#   MODEL=gr00t_blocktask_lang_n16_8bit/checkpoint-25000 ./run_eval_lang.sh
+#   ONLY="1 2 3 4" ./run_eval_lang.sh        # 일부만
+#   NUM=10 ./run_eval_lang.sh                # 예행
+set -uo pipefail
+cd "$(dirname "$0")"
+
+SEED="${SEED:-4242}"
+NUM="${NUM:-30}"
+MODEL="${MODEL:-gr00t_blocktask_lang_n16_8bit/checkpoint-25000}"
+HOST="${HOST:-5090}"
+PLANDIR="${PLANDIR:-$(cd ../../../results/p4_language_sim && pwd)}"
+# RUN 라벨 — 모델이 다르면 결과 폴더도 달라야 한다. 안 나누면 러너가 이전 실행의
+#   scenes.csv를 집어 들어 **다른 모델의 숫자를 보고한다**(출력 이름이 모델을 안 담는다).
+RUN="${RUN:-}"
+DEST="${DEST:-$HOME/manipulator_ws/inf_video/10_eval_lang${RUN:+_$RUN}}"
+ONLY="${ONLY:-}"
+
+# 조건표 — 번호|패널|EVAL_TARGET|EVAL_DEST|지시문
+#   조건 9는 언어 씬이 아니라 **기존 패널**(full + EVAL_PANEL=1)에서 돈다.
+#   기준선 9/10이 그 조건에서 측정됐으므로, 같은 조건이어야 비교가 성립한다.
+CONDS=(
+  "1|P1|red_cube|black|Pick up the red block and place it in the box"
+  "2|P1|blue_cube|black|Pick up the blue block and place it in the box"
+  "3|P1|eraser|black|Pick up the eraser and place it in the box"
+  "4|P1|marker|black|Pick up the marker and place it in the box"
+  "5|P2|yellow_cube|black|Pick up the yellow block and place it in the black box"
+  "6|P2|yellow_cube|brown|Pick up the yellow block and place it in the brown box"
+  "7|P3|green_cube|gray|Put the green block into the gray box"
+  "8|P1|blue_cube|black|Grab the blue cube and put it in the container"
+  "9|LEGACY|||Pick up the block and place it in the box"
+  "10|P1|red_cube|black|Pick up the cube and place it in the box"
+  # ── 일반화 (§7-4). 보너스 지표이고 주 판정선이 아니다 ──
+  #   11~13: 미학습 **색**. 14~17: 미학습 **물체**.
+  #   16·17은 같은 배치의 **대조**다 — 아는 물체를 지시했을 때도 되는지 봐야
+  #   "낯선 것으로만 간다"(신기성 편향)를 반증할 수 있다.
+  #   15의 "pencil"은 학습에 없는 명사다. 같은 화면에 marker(학습됨)가 있어,
+  #   pencil이 육각기둥으로 가는지 marker로 가는지가 의미 근접성의 시험이 된다.
+  "11|P4|white_cube|black|Pick up the white block and place it in the box"
+  "12|P5|red_cube|white|Pick up the red block and place it in the white box"
+  "13|P6|pink_cube|white|Pick up the pink block and place it in the white box"
+  "14|P7|bottle|black|Pick up the bottle and place it in the box"
+  "15|P7|hex_prism|black|Pick up the pencil and place it in the box"
+  "16|P7|red_cube|black|Pick up the red block and place it in the box"
+  "17|P7|marker|black|Pick up the marker and place it in the box"
+  # ── 목적지 단독 (2026-09-30). 물체가 하나뿐이라 성공률이 곧 목적지 정확도다 ──
+  #   기존 조건 5·6·7은 물체 선택과 목적지 선택의 **곱**이라 역산이 필요했다.
+  #   18↔19가 대응쌍이고, 우연은 상자 2개이므로 50%다.
+  "18|P8|yellow_cube|black|Pick up the yellow block and place it in the black box"
+  "19|P8|yellow_cube|brown|Pick up the yellow block and place it in the brown box"
+  # ── 교차 셀 (2026-09-30). **지시문은 그대로 두고 판정 상자만 반대로** 놓는다 ──
+  #   18·19만으로는 닫히지 않는다. 성공률의 합이 83.4%였는데, 이 값이
+  #   "배치 자체를 실패한 비율"인지 "반대 상자로 간 비율"인지 구별되지 않는다.
+  #     a = P(검정|검정 지시), b = P(갈색|갈색 지시), q = 어느 상자엔가 넣은 비율
+  #     q·a = 0.267, q·b = 0.567  →  a + b = 0.834 / q
+  #     a + b > 1 이면 언어를 읽는 것이고, = 1 이면 고정 편향(우연)이다.
+  #   20·21이 각 지시문의 **반대 상자 도달률**을 주므로 행 합이 곧 q이고,
+  #   가정 없이 2×2 혼동행렬이 닫힌다.
+  #     18 검정지시→검정판정   20 검정지시→갈색판정   (합 = q)
+  #     21 갈색지시→검정판정   19 갈색지시→갈색판정   (합 = q)
+  "20|P8|yellow_cube|brown|Pick up the yellow block and place it in the black box"
+  "21|P8|yellow_cube|black|Pick up the yellow block and place it in the brown box"
+  # ── 조건 5·6 분해 (2026-09-30). **방해물이 있는 현실 조건**에서 목적지를 떼어낸다 ──
+  #   조건 5·6은 물체 4개 중 고르고 상자 2개 중 골라 배치까지 성공해야 하는 **곱**이라
+  #   28.3%라는 값이 목적지 능력을 말해 주지 않는다.
+  #   P8(물체 1개)에서 목적지 단독 68.3%를 얻었지만, 그 값이 **물체가 4개일 때도
+  #   유지되는지는 별개 문제**다. 방해물이 늘면 목적지 판단도 흔들릴 수 있다.
+  #   28.3 / 68.3 같은 산술은 하지 않는다 — 항이 조건 간에 옮겨간다고 가정하는 것이
+  #   바로 역산이 틀렸던 이유다(§14).
+  #   22·23이 각 지시문의 **반대 상자 도달률**을 주므로 행 합이 곧 "물체+배치" 항이고,
+  #   목적지 정확도 = 맞은 수 / 행 합 으로 가정 없이 분해된다.
+  #     5  검정지시→검정판정   22 검정지시→갈색판정   (합 = 물체+배치)
+  #     23 갈색지시→검정판정   6  갈색지시→갈색판정   (합 = 물체+배치)
+  "22|P2|yellow_cube|brown|Pick up the yellow block and place it in the black box"
+  "23|P2|yellow_cube|black|Pick up the yellow block and place it in the brown box"
+)
+
+mkdir -p "$DEST"
+echo "▶ P5 언어 조건화 평가 · ${#CONDS[@]}조건 × ${NUM}ep · seed $SEED"
+echo "  모델 $MODEL"
+echo "  예상 $(( ${#CONDS[@]} * NUM * 70 / 60 ))분"
+echo
+
+# 계획표가 없으면 만든다
+for p in P1 P2 P3; do
+  [ -f "$PLANDIR/lang_eval_$p.csv" ] || {
+    echo "  계획표 생성..."; python3 ./gen_lang_eval_plan.py --out-dir "$PLANDIR" --episodes "$NUM" >/dev/null; break; }
+done
+
+# 씬·러너·계획표를 5090으로. 사본이 뒤처지면 조용히 다르게 동작한다 —
+# 전례: 씬을 배포하지 않아 v2 씬에서 측정한 무효 데이터를 만든 적이 있다.
+for f in blocktask_headless_scenes.sh configure_scene.py; do
+  scp -q "$f" "$HOST:~/$f" || { echo "❌ $f 전송 실패"; exit 1; }
+done
+# 씬 코드(mdp)도 보낸다. reset_lang_scene은 수집 때 **로컬에만** 추가했으므로
+# 이것을 빼면 5090에서 ImportError로 죽는다(2026-09-26 실측).
+rsync -a "$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/sim_to_real_so101/mdp/" \
+  "$HOST:~/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/sim_to_real_so101/mdp/" \
+  || { echo "❌ mdp 전송 실패"; exit 1; }
+# USD 자산도 보낸다. 언어 씬은 **매 실행에 카탈로그 전체를 스폰**하므로, 카탈로그에
+# 자산 기반 물체를 하나라도 추가하면 그 파일이 없는 머신에서는 전부 죽는다
+# (2026-09-29 실측: hex_prism.usda 미배포로 곡선 평가 5개 지점이 FileNotFoundError로 날아갔다).
+rsync -a "$HOME/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/sim_to_real_so101/assets/usd/" \
+  "$HOST:~/blocktask_ws/Sim-to-Real-SO-101-Workshop/source/sim_to_real_so101/assets/usd/" \
+  || { echo "❌ usd 자산 전송 실패"; exit 1; }
+ssh "$HOST" "mkdir -p ~/lang_eval_plans && chmod +x ~/blocktask_headless_scenes.sh"
+scp -q "$PLANDIR"/lang_eval_P[0-9].csv "$HOST:~/lang_eval_plans/" || exit 1
+
+T0=$(date +%s)
+for c in "${CONDS[@]}"; do
+  IFS='|' read -r N PAN TGT DST LANG <<< "$c"
+  [ -n "$ONLY" ] && ! grep -qw "$N" <<< "$ONLY" && continue
+  GLOB="hl_*lang${RUN:+_$RUN}_c${N}_s${SEED}"
+  # ── 교차 셀 감지 ──────────────────────────────────────────────────
+  #   지시문이 부르는 상자색과 **판정 상자(DST)가 다른** 조건이 있다(20·21).
+  #   "틀린 상자로 간 비율"을 재려고 일부러 그렇게 만든 것이라, 로봇이 지시를
+  #   제대로 따르면 outcome=fail · steps=900(timeout)으로 기록된다.
+  #   조기 종료는 **판정 상자**에 들어갔을 때만 발동하기 때문이다.
+  #   이 사실이 파일명·로그 어디에도 안 드러나서 두 번 오독됐다(2026-09-30). 표시한다.
+  SAID=""
+  for _col in black brown gray white cyan pink; do
+    grep -qi "\b$_col box\b\|\b$_col bin\b" <<< "$LANG" && SAID="$_col"
+  done
+  CROSS=0
+  [ -n "$SAID" ] && [ -n "$DST" ] && [ "$SAID" != "$DST" ] && CROSS=1
+  printf "  조건 %-2s %-22s " "$N" "${TGT:-legacy}${DST:+ → $DST}"
+  [ "$CROSS" = 1 ] && printf "\n     ⚠️ 교차 셀 — 지시문은 '%s', 판정은 '%s'. 지시를 잘 따르면 fail/timeout이 정상.\n     %-25s " "$SAID" "$DST" ""
+  ex=$(ls -d "$DEST"/$GLOB 2>/dev/null | head -1); [ -n "$ex" ] && [ -f "$ex/scenes.csv" ] && { echo "건너뜀 (이미 있음)"; continue; }
+  t0=$(date +%s)
+
+  if [ "$PAN" = "LEGACY" ]; then
+    # 기존 패널 — 언어 씬을 쓰지 않는다. 기준선이 측정된 바로 그 조건.
+    ENVS="TAG=$(printf %q "lang${RUN:+_$RUN}_c$N") LANG_INSTRUCTION=$(printf %q "$LANG") MODEL=$(printf %q "$MODEL") EVAL_PANEL=1"
+    COND="full"
+  else
+    ENVS="TAG=$(printf %q "lang${RUN:+_$RUN}_c$N") LANG_INSTRUCTION=$(printf %q "$LANG") MODEL=$(printf %q "$MODEL") \
+          EVAL_TARGET=$(printf %q "$TGT") EVAL_DEST=$(printf %q "$DST") \
+          LANG_PLAN=\$HOME/lang_eval_plans/lang_eval_${PAN}.csv"
+    COND="full+lang"
+  fi
+
+  ssh "$HOST" "$ENVS ~/blocktask_headless_scenes.sh $COND $NUM $SEED" \
+    > "/tmp/eval_lang_c${N}.log" 2>&1
+  src="hl_${COND//+/_}_lang_c${N}_s${SEED}"
+  rsync -a "$HOST:~/blocktask_ws/Sim-to-Real-SO-101-Workshop/outputs/hl_${COND}_lang${RUN:+_$RUN}_c${N}_s${SEED}" "$DEST/" 2>/dev/null
+  found=$(ls -d "$DEST"/$GLOB 2>/dev/null | head -1)
+  if [ -n "$found" ] && [ -f "$found/scenes.csv" ]; then
+    chmod -R u+w "$found" 2>/dev/null
+    printf '{"cond":%s,"panel":"%s","target":"%s","dest":"%s","lang":"%s","seed":%s,"episodes":%s,"model":"%s","finished":"%s"}\n' \
+      "$N" "$PAN" "$TGT" "$DST" "$LANG" "$SEED" "$NUM" "$MODEL" "$(date -Is)" > "$found/run.json"
+    if [ "$CROSS" = 1 ]; then
+      # success/fail 이라는 말이 정반대로 읽히는 조건이다. 폴더에 못을 박고 이름을 바꾼다.
+      cat > "$found/README.txt" <<EOF
+⚠️ 교차 셀 조건 $N — success/fail 을 글자 그대로 읽으면 안 됩니다.
+
+  지시문        : "$LANG"          (로봇에게 시킨 것 = $SAID 상자)
+  판정 상자     : $DST              (여기 들어가야 success)
+
+  이 조건은 "$SAID 라고 했는데 $DST 로 간 횟수"를 세려고 만든 것입니다.
+  따라서 로봇이 지시를 **제대로 따르면**(= $SAID 로 가면) 이렇게 기록됩니다:
+
+    outcome = fail · steps = 900 (timeout)
+
+  조기 종료는 판정 상자($DST)에 들어갔을 때만 발동하므로, $SAID 에 정확히
+  넣어도 에피소드는 끝까지 돕니다. 타임아웃은 결함이 아니라 그 구조의 결과입니다.
+
+  영상 이름도 같은 이유로 바꿔 두었습니다:
+    epNN_reached-$DST.mp4      $DST 로 감  (= 지시를 어김)
+    epNN_not-$DST.mp4          $DST 로 안 감 (= 대개 지시를 따름)
+EOF
+      for f in "$found"/ep*_success.mp4; do
+        [ -e "$f" ] && mv "$f" "${f%_success.mp4}_reached-$DST.mp4"
+      done
+      for f in "$found"/ep*_fail.mp4; do
+        [ -e "$f" ] && mv "$f" "${f%_fail.mp4}_not-$DST.mp4"
+      done
+    fi
+    ok=$(awk -F, 'NR>1 && $2=="success"' "$found/scenes.csv" | wc -l)
+    tot=$(($(wc -l < "$found/scenes.csv") - 1))
+    if [ "$CROSS" = 1 ]; then
+      echo "✅ ${ok}/${tot} 이 '$DST'로 감 (지시는 '$SAID' — 낮을수록 좋다)  ($(( ($(date +%s)-t0)/60 ))분)"
+    else
+      echo "✅ ${ok}/${tot}  ($(( ($(date +%s)-t0)/60 ))분)"
+    fi
+  else
+    echo "❌ 실패 — /tmp/eval_lang_c${N}.log 확인"
+  fi
+done
+
+echo
+echo "▶ 총 $(( ($(date +%s)-T0)/60 ))분 · $DEST"
+echo
+python3 - "$DEST" "$SEED" <<'PY'
+import glob, os, sys, csv
+dest, seed = sys.argv[1], sys.argv[2]
+res = {}
+for d in glob.glob(f"{dest}/hl_*_c*_s{seed}"):
+    n = int(os.path.basename(d).rsplit("_c", 1)[1].split("_s")[0])
+    f = f"{d}/scenes.csv"
+    if not os.path.exists(f):
+        continue
+    rows = list(csv.reader(open(f)))[1:]
+    res[n] = (sum(1 for r in rows if len(r) > 1 and r[1] == "success"), len(rows))
+
+def rate(ns):
+    a = sum(res[n][0] for n in ns if n in res); b = sum(res[n][1] for n in ns if n in res)
+    return a, b, (100.0 * a / b if b else 0.0)
+
+print("=" * 70)
+print(" 조건별 성공률")
+print("=" * 70)
+for n in sorted(res):
+    ok, tot = res[n]
+    print(f"  조건 {n:>2}: {ok:>3}/{tot:<3} = {100.0*ok/tot if tot else 0:5.1f}%")
+
+print("\n" + "=" * 70)
+print(" 판정 (§7-3)")
+print("=" * 70)
+a, b, r = rate([1, 2, 3, 4])
+print(f"  물체 선택률  (조건 1~4)  {a}/{b} = {r:5.1f}%   우연 25% · 합격 45%   "
+      f"{'✅' if r >= 45 else '❌'}")
+a, b, r = rate([5, 6])
+print(f"  목적지 선택률(조건 5·6)  {a}/{b} = {r:5.1f}%   우연 50% · 합격 65%   "
+      f"{'✅' if r >= 65 else '❌'}")
+if 9 in res:
+    ok, tot = res[9]
+    print(f"  기존 성능    (조건 9)    {ok}/{tot}         기준선 9/10 대비 −2 이내   "
+          f"{'✅' if ok >= 7 * tot / 10 else '❌'}")
+if 10 in res:
+    ok, tot = res[10]
+    print(f"  모호 대조    (조건 10)   {ok}/{tot} = {100.0*ok/tot if tot else 0:5.1f}%   "
+          f"우연 수준이어야 정상")
+print("\n  ※ scenes.csv의 outcome은 termination 기준이다. 경계값이면 영상으로 재확인할 것.")
+PY

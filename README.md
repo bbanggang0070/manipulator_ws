@@ -11,7 +11,7 @@ NVIDIA GR00T N1.6(3B VLA)을 양팔 12관절·카메라 3대에 맞춰 미세조
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 <p align="center">
-  <img src="docs/figures/bi_demo_full_success.gif" width="760" alt="양팔 분류 시연 — Put the yellow straw into the pink bin">
+  <img src="docs/assets/bi_demo_full_success.gif" width="760" alt="양팔 분류 시연 — Put the yellow straw into the pink bin">
   <br>
   <sub>"Put the yellow straw into the pink bin" — 오른팔이 빨대를 골라 집어 왼팔에 건네고, 왼팔이 분홍 칸에 넣는다 (3배속)</sub>
 </p>
@@ -52,10 +52,12 @@ NVIDIA GR00T N1.6(3B VLA)을 양팔 12관절·카메라 3대에 맞춰 미세조
 
 **이 저장소가 제공하는 것**
 
-- 수집 → 변환 → 학습 → 서빙 → 평가까지 재현 스크립트 (`setup/`)
-- 수집 계획표와 모델별 평가 결과 CSV (`records/`)
-- 최종 발표 자료와 구조·학습·추론 흐름 애니메이션 (`docs/`)
-- 차후 계획 — 강화학습 보정([DSRL_PLAN.md](DSRL_PLAN.md)) · 모델 경량화([LIGHTWEIGHT_PLAN.md](LIGHTWEIGHT_PLAN.md))
+- 수집 → 변환 → 학습 → 서빙 → 평가까지 재현 스크립트 (`scripts/`)
+- 수집 계획표와 모델별 평가 결과 CSV — 결과표의 수치는 모두 여기서 다시 계산된다 (`results/`)
+- 외부 저장소(Sim-to-Real-SO-101-Workshop)에 적용한 패치 (`patches/`)
+- 고정된 실행 환경 — `uv.lock` (`envs/lerobot/`)
+
+데이터셋 · 체크포인트 · 발표 자료는 포함하지 않는다. 발표본과 시연 영상은 [Release `capstone-final`](https://github.com/bbanggang0070/manipulator_ws/releases/tag/capstone-final) 에 있다.
 
 ## 결과
 
@@ -69,20 +71,21 @@ NVIDIA GR00T N1.6(3B VLA)을 양팔 12관절·카메라 3대에 맞춰 미세조
 - 추론 지연: RTX 5070 Ti 에서 청크(16스텝)당 70~90ms, 앞 8스텝 실행 후 다시 계획
 - 남은 실패 16회: 다른 물체를 집음 8 (마커끼리 혼동 5) · 못 집거나 전달 중 놓침 6 · 칸 틀림 2
 
-| 발표 자료 | |
-|---|---|
-| 인쇄용 슬라이드 (PDF) | [docs/slides/capstone_print.pdf](docs/slides/capstone_print.pdf) |
-| 발표본 PPTX (애니메이션·영상 포함) · 시연 영상 50초 | [Release `capstone-final`](https://github.com/bbanggang0070/manipulator_ws/releases/tag/capstone-final) |
-| 웹 슬라이드 (구조·학습·추론 흐름 영상) | [docs/slides/index.html](docs/slides/index.html) |
+결과 다시 계산하기 (로봇 없이 CSV 만으로):
+
+```bash
+cd scripts/p6_bimanual/data
+python3 cleanup_eval_bi.py report --out ~/manipulator_ws/results/p6_bimanual/bi392llm8_eval_B.csv   # 평가 B 집계
+python3 compare_eval_bi.py --eval B                                                                 # 모델 짝 비교 (McNemar)
+```
 
 ## 시스템 구성
 
 ### 모델
 
-<img src="docs/diagrams/anim/groot_n16_architecture.png" width="900" alt="GR00T N1.6 구조와 학습 범위">
+<img src="docs/assets/groot_n16_architecture.png" width="900" alt="GR00T N1.6 구조와 학습 범위">
 
-<sub>주황 = 우리 데이터로 학습한 부분(VLM 위 8층 + Action head), 눈송이 = 사전학습 그대로 고정.
-흐름 영상: [학습](docs/diagrams/anim/train_flow_n16.mp4) · [추론](docs/diagrams/anim/infer_flow_n16.mp4)</sub>
+<sub>주황 = 우리 데이터로 학습한 부분(VLM 위 8층 + Action head), 눈송이 = 사전학습 그대로 고정.</sub>
 
 | 항목 | 값 | 근거 |
 |---|---|---|
@@ -121,14 +124,15 @@ NVIDIA GR00T N1.6(3B VLA)을 양팔 12관절·카메라 3대에 맞춰 미세조
 ### 설치
 
 ```bash
-git clone https://github.com/bbanggang0070/manipulator_ws.git && cd manipulator_ws
+# 스크립트 기본 경로가 ~/manipulator_ws 이므로 홈에 클론한다
+git clone https://github.com/bbanggang0070/manipulator_ws.git ~/manipulator_ws && cd ~/manipulator_ws
 
 # 1. 로봇 제어 환경 (Python 3.10 · lerobot 0.4.4 · torch 2.10 cu128)
 cd envs/lerobot && uv sync && cd ../..
 
 # 2. 장치 경로 고정 — 팔 4대 · 카메라 3대
-setup/hardware/identify_devices.sh                # 식별 정보 확인 → 99-lerobot.rules 에 채움
-sudo cp setup/hardware/99-lerobot.rules /etc/udev/rules.d/
+scripts/hardware/identify_devices.sh                # 식별 정보 확인 → 99-lerobot.rules 에 채움
+sudo cp scripts/hardware/99-lerobot.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
 # 3. 시스템 의존성
@@ -136,8 +140,8 @@ sudo apt install ffmpeg
 
 # 4. 워크숍 저장소 패치 + 서빙 이미지 (최초 1회)
 cd ~/blocktask_ws/Sim-to-Real-SO-101-Workshop
-git apply ~/manipulator_ws/setup/p1_p4_sim/patches/workshop_local_changes.patch          # recorder VRAM 누수 수정
-patch -p0 docker/real/Dockerfile.blackwell < ~/manipulator_ws/setup/p1_p4_sim/patches/dockerfile_blackwell_flashattn.patch
+git apply ~/manipulator_ws/patches/workshop_local_changes.patch          # recorder VRAM 누수 수정
+patch -p0 docker/real/Dockerfile.blackwell < ~/manipulator_ws/patches/dockerfile_blackwell_flashattn.patch
 ./docker/real/build.sh blackwell
 ```
 
@@ -151,12 +155,12 @@ patch -p0 docker/real/Dockerfile.blackwell < ~/manipulator_ws/setup/p1_p4_sim/pa
 ### 1. 수집
 
 ```bash
-cd setup/p6_real_bimanual/data
+cd scripts/p6_bimanual/data
 python3 gen_bi_plan.py --episodes 300 --layout-every 50   # 계획표 — 50ep 마다 칸 색 배치 교체
 ./record_bi.sh                                            # 계획표 순서대로 시연 (중단 후 재실행하면 이어서)
 python3 gen_bi_contrast_plan.py                           # 대조 시연 92ep 계획표 (같은 배치·다른 지시문)
-PLAN=~/manipulator_ws/records/p6_real_bimanual/bi_cleanup_plan_400.csv ./record_bi.sh
-(cd ../../../envs/lerobot && uv run python ../../setup/p6_real_bimanual/data/handoff_events.py --report <데이터셋>)  # 전달 검사
+PLAN=~/manipulator_ws/results/p6_bimanual/bi_cleanup_plan_400.csv ./record_bi.sh
+(cd ../../../envs/lerobot && uv run python ../../scripts/p6_bimanual/data/handoff_events.py --report <데이터셋>)  # 전달 검사
 ```
 
 ### 2. 변환 · 학습
@@ -171,10 +175,10 @@ EPOCHS=10 LLM_TOP_LAYERS=8 OUT_NAME=<이름> ./train_bi_cleanup.sh # 본 학습
 ### 3. 서빙 · 추론 · 평가
 
 ```bash
-cd setup/gr00t && ./serve_local.sh <모델>/checkpoint-<step>    # 로컬 서빙 (원격이면 SERVER_HOST=<5090 IP>)
-cd ../p6_real_bimanual/data
+cd scripts/gr00t && ./serve_local.sh <모델>/checkpoint-<step>    # 로컬 서빙 (원격이면 SERVER_HOST=<5090 IP>)
+cd ../p6_bimanual/data
 python3 cleanup_eval_bi.py log --eval-name <이름> --out <결과.csv> --rerun                       # 평가 A 36회
-python3 cleanup_eval_bi.py log --plan ../../../records/p6_real_bimanual/bi_cleanup_eval_plan_B.csv \
+python3 cleanup_eval_bi.py log --plan ../../../results/p6_bimanual/bi_cleanup_eval_plan_B.csv \
                                --eval-name <이름> --out <결과.csv>                              # 평가 B 60회
 python3 cleanup_eval_bi.py report --out <결과.csv>
 python3 compare_eval_bi.py --eval B                           # 모델 짝 비교 (McNemar)
@@ -187,18 +191,18 @@ python3 compare_eval_bi.py --eval B                           # 모델 짝 비�
 
 ```bash
 # P5 단일팔 분류
-cd setup/p5_real_cleanup
+cd scripts/p5_single_arm
 ./check_setup.sh cams && python3 gen_real_lang_plan.py && ./record_real_lang.sh
 ./prepare_cleanup_real.sh all            # (5090) EPOCHS=8 ./train_cleanup_real.sh
 cd ../gr00t && ./serve_local.sh gr00t_cleanup_real_n16_8bit/checkpoint-30000
-cd ../p5_real_cleanup && python3 cleanup_eval.py log && python3 cleanup_eval.py report
+cd ../p5_single_arm && python3 cleanup_eval.py log && python3 cleanup_eval.py report
 
-# P1~P4 sim 블록 과제 (setup/p1_p4_sim/t1_task)
+# P1~P4 sim 블록 과제 (scripts/p1_p4_sim/blocktask)
 #  P1·P2  blocktask_run.sh record → prepare_blocktask_gr00t.sh → ../train_gr00t_sim_n16_8bit.sh → blocktask_sim_eval.sh
 #         launch_cotrain.py (sim + 실기 co-training)
 #  P3     configure_scene.py · run_evalB.sh (고정 패널 15조건) · train_gr00t_blocktask_cotrain_v4_n16_8bit.sh
 #  P4     gen_lang_collect_plan.py → blocktask_collect_lang.sh → train_gr00t_blocktask_lang_n16_8bit.sh → run_eval_lang.sh
-#         언어 프로브: setup/gr00t/probe_language.py · run_probe_sweep.sh
+#         언어 프로브: scripts/analysis/probe_language.py · run_probe_sweep.sh
 ```
 </details>
 
@@ -215,23 +219,21 @@ cd ../p5_real_cleanup && python3 cleanup_eval.py log && python3 cleanup_eval.py 
 
 ```
 manipulator_ws/
-├─ README.md
-├─ DSRL_PLAN.md · LIGHTWEIGHT_PLAN.md   # 차후 계획 — 강화학습 보정 · 모델 경량화
-├─ setup/                    # 재현 스크립트
+├─ README.md · LICENSE
+├─ scripts/                  # 재현 스크립트 — 단계별 폴더, 각 스크립트 머리말에 사용법
 │  ├─ hardware/              #   udev rules · 장치 식별 · 카메라 점검 · teleop
-│  ├─ gr00t/                 #   정책 서버 · 추론 클라이언트 · 카메라 정렬 · 언어 프로브 (P2~P6 공통)
-│  ├─ p1_p4_sim/             #   Isaac Sim 블록 과제 — 수집·변환·학습·무인 평가 · patches/ (워크숍 저장소 패치)
-│  ├─ p5_real_cleanup/       #   단일팔 분류 — 점검 · 계획표 · 수집 · 검증 · 학습 · 평가
-│  └─ p6_real_bimanual/      #   양팔 분류 — data/ (계획표·수집·전달 검사·평가) · gr00t/ (설정·학습·서빙·추론)
-├─ records/                  # 수집 계획표 · 평가 결과 CSV (스크립트가 읽고 쓰는 위치)
+│  ├─ gr00t/                 #   정책 서버 · 추론 클라이언트 · 카메라 정렬 (P2~P6 공통)
+│  ├─ analysis/              #   층별 프로브(언어·비전·LLM) · 시각화 · 실기 실행 로그 분석
+│  ├─ p1_p4_sim/             #   Isaac Sim 블록 과제 — blocktask/ (수집·변환·학습·무인 평가)
+│  ├─ p5_single_arm/         #   단일팔 분류 — 점검 · 계획표 · 수집 · 검증 · 학습 · 평가
+│  └─ p6_bimanual/           #   양팔 분류 (최종) — data/ (계획표·수집·전달 검사·평가) · gr00t/ (설정·학습·서빙·추론)
+├─ results/                  # 수집 계획표 · 평가 결과 CSV (스크립트가 읽고 쓰는 위치)
 │  ├─ p4_language_sim/       #   sim 언어 평가 P1~P8 · 언어 프로브
-│  ├─ p5_real_cleanup/       #   단일팔 평가 · 칸 교체 검증 · 앙상블 W 스윕
-│  └─ p6_real_bimanual/      #   양팔 계획표 · 평가 A/B (bi392llm8_eval_B.csv = 최종) · 비전 층 프로브
-├─ docs/
-│  ├─ slides/                #   최종 발표 — 인쇄용 pdf/pptx · 웹 슬라이드 · 시연 클립
-│  ├─ diagrams/anim/         #   GR00T N1.6 구조도 · 학습/추론 흐름 영상 · 표지 영상 (생성 스크립트 포함)
-│  └─ figures/               #   README 그림
-└─ envs/lerobot/             # uv 프로젝트 (lerobot 0.4.4 + torch 2.10 cu128)
+│  ├─ p5_single_arm/         #   단일팔 평가 · 칸 교체 검증 · 앙상블 W 스윕
+│  └─ p6_bimanual/           #   양팔 계획표 · 평가 A/B (bi392llm8_eval_B.csv = 최종) · 비전 층 프로브
+├─ patches/                  # Sim-to-Real-SO-101-Workshop 패치 (recorder VRAM 누수 · Blackwell 이미지)
+├─ envs/lerobot/             # uv 프로젝트 (lerobot 0.4.4 + torch 2.10 cu128)
+└─ docs/assets/              # README 그림
 ```
 
 | 단계 | 데이터셋 | 최종 모델 (checkpoint) |
@@ -255,9 +257,9 @@ sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막
 | **P6** 실기 분류 양팔 | 오른팔 물체 → 전달 → 왼팔 색. 칸 배치 교체 · 학습 층 · 대조 시연 | **평가 B 완전 성공 73%** |
 
 <table><tr>
-<td><img src="docs/figures/real_rollout.gif" width="300"><br><sub>P2 — sim + 실기 co-training</sub></td>
-<td><img src="docs/figures/lang_pair4_B6k.gif" width="420"><br><sub>P4 — 같은 배치에서 문장만 바꾸면 다른 물체를 집는다</sub></td>
-<td><img src="docs/figures/cleanup_real_v3_success.gif" width="300"><br><sub>P5 — 단일팔 분류</sub></td>
+<td><img src="docs/assets/real_rollout.gif" width="300"><br><sub>P2 — sim + 실기 co-training</sub></td>
+<td><img src="docs/assets/lang_pair4_B6k.gif" width="420"><br><sub>P4 — 같은 배치에서 문장만 바꾸면 다른 물체를 집는다</sub></td>
+<td><img src="docs/assets/cleanup_real_v3_success.gif" width="300"><br><sub>P5 — 단일팔 분류</sub></td>
 </tr></table>
 
 <details>
@@ -282,8 +284,8 @@ sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막
   시연이 모두 성공 장면이라 **다시 집는 교정 동작을 배운 적이 없다** → [로드맵](#로드맵).
 </details>
 
-> 진행 중 작성한 상세 기록(단계별 계획 · 실행 로그 · 파이프라인 해부 · 발표 구성안)은 정리하며 지웠다.
-> 태그 `capstone-final` 에 남아 있다 — `git show capstone-final:PIPELINE.md`, `git show capstone-final:manipulator_md/STATUS.md`
+> 진행 기록(단계별 계획 · 실행 로그 · 파이프라인 해부) · 발표 자료(슬라이드 · 구조도 애니메이션) · 차후 계획서는 정리하며 지웠다.
+> 태그 `capstone-final` 에 남아 있다 — `git show capstone-final:PIPELINE.md`, `git show capstone-final:DSRL_PLAN.md`, `git checkout capstone-final -- docs/slides`
 
 ## 문제 해결
 
@@ -299,11 +301,11 @@ sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막
 
 ## 로드맵
 
-| 한계 | 계획 | 문서 |
-|---|---|---|
-| 시연이 모두 성공 장면이라 놓친 뒤 다시 집지 못함 (실패 6/16) | **강화학습 보정** — GR00T 를 고정하고 출발 노이즈만 학습하는 DSRL, 파지 구간 잔차 RL | [DSRL_PLAN.md](DSRL_PLAN.md) |
-| 3B 모델을 5090 에서 약 55시간 학습 — 자원 대비 효율 | **경량화** — VLM 양자화, 0.5B급 소형 VLA (SmolVLA · VLA-Adapter), ACT + 텍스트 대조군, GR00T 교사 증류 | [LIGHTWEIGHT_PLAN.md](LIGHTWEIGHT_PLAN.md) |
-| 평가가 모델당 36~60회로 작음 (95% CI ±12%p) | 같은 시행 짝 비교(McNemar)로 모델을 비교 | — |
+| 한계 | 계획 |
+|---|---|
+| 시연이 모두 성공 장면이라 놓친 뒤 다시 집지 못함 (실패 6/16) | **강화학습 보정** — GR00T 를 고정하고 출발 노이즈만 학습하는 DSRL, 파지 구간 잔차 RL |
+| 3B 모델을 5090 에서 약 55시간 학습 — 자원 대비 효율 | **경량화** — VLM 양자화, 0.5B급 소형 VLA (SmolVLA · VLA-Adapter), ACT + 텍스트 대조군, GR00T 교사 증류 |
+| 평가가 모델당 36~60회로 작음 (95% CI ±12%p) | 같은 시행 짝 비교(McNemar)로 모델을 비교 |
 
 ## 참고 자료
 
@@ -319,7 +321,6 @@ sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막
 참고한 [Isaac-GR00T](https://github.com/NVIDIA/Isaac-GR00T) · [LeRobot](https://github.com/huggingface/lerobot) · [SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100) 도 같은 라이선스다.
 
 - GR00T N1.6 가중치는 저장소에 포함하지 않으며 [NVIDIA Open Model License](https://huggingface.co/nvidia/GR00T-N1.6-3B) 를 따른다.
-- `docs/diagrams/anim/fonts/` 의 IBM Plex Sans KR 은 [SIL Open Font License 1.1](https://github.com/IBM/plex/blob/master/LICENSE.txt) 이다.
 
 ---
 

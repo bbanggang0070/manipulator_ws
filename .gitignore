@@ -11,7 +11,7 @@ logs/
 nohup.out
 
 # 카메라 점검 스냅샷
-setup/hardware/snapshots/
+scripts/hardware/snapshots/
 
 
 # 추론 영상(대용량) — repo 제외
@@ -20,8 +20,7 @@ inf_video/
 # 오케스트레이터 실행 로그(로컬 전용)
 .orchestrate.log
 
-# 발표 자료 중 대용량 — GitHub Release(capstone-final)에 첨부
-docs/slides/capstone_animated.pptx
+# 시연 영상(로컬 전용) — 발표 자료·영상은 GitHub Release(capstone-final)에 있다
 demo_video/
 
 # 오피스 잠금 파일
