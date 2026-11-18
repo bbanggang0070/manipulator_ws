@@ -43,9 +43,13 @@ docker_run "docker rm -f $NAME" >/dev/null 2>&1
 #   5090도 같은 이유로 래퍼(serve_blocktask_realclient.py)를 쓴다. 그 래퍼가 평탄 키를
 #   중첩 구조로 바꿔 등록한다("Registered 'get_action' (flat->nested transform)").
 SRV="$HOME/blocktask_srv"
-[ -f "$SRV/serve_blocktask_realclient.py" ] || {
-  echo "❌ 래퍼 없음: $SRV/serve_blocktask_realclient.py"
-  echo "   5090에서 가져오세요: rsync -a 5090:'~/blocktask_srv/' ~/blocktask_srv/"; exit 1; }
+if [ ! -f "$SRV/serve_blocktask_realclient.py" ]; then
+  # 래퍼 정본은 이 저장소에 있다 — 처음 한 번 컨테이너 마운트용 폴더로 복사한다.
+  HERE="$(cd "$(dirname "$0")" && pwd)"
+  mkdir -p "$SRV" && cp "$HERE/serve_blocktask_realclient.py" "$HERE/client/service.py" "$SRV/" \
+    && echo "▶ 서버 래퍼를 $SRV 에 복사했다" \
+    || { echo "❌ 래퍼 복사 실패: $SRV"; exit 1; }
+fi
 
 docker_run "docker run -d --name $NAME --rm --network host --privileged --gpus all \
   -e PYTHONUNBUFFERED=1 \

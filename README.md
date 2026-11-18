@@ -9,6 +9,8 @@ NVIDIA GR00T N1.6(3B VLA)을 양팔 12관절·카메라 3대에 맞춰 미세조
 [![GR00T](https://img.shields.io/badge/NVIDIA-Isaac%20GR00T%20N1.6-76B900?logo=nvidia&logoColor=white)](https://github.com/NVIDIA/Isaac-GR00T)
 [![Release](https://img.shields.io/github/v/release/bbanggang0070/manipulator_ws?label=release)](https://github.com/bbanggang0070/manipulator_ws/releases/tag/capstone-final)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Dataset](https://img.shields.io/badge/🤗%20Dataset-so101--bimanual--sorting-FFD21E)](https://huggingface.co/datasets/heongyu/so101-bimanual-sorting)
+[![Model](https://img.shields.io/badge/🤗%20Model-so101--bimanual--sorting--policy-FFD21E)](https://huggingface.co/heongyu/so101-bimanual-sorting-policy)
 
 <p align="center">
   <img src="docs/assets/bi_demo_full_success.gif" width="760" alt="양팔 분류 시연 — Put the yellow straw into the pink bin">
@@ -57,7 +59,13 @@ NVIDIA GR00T N1.6(3B VLA)을 양팔 12관절·카메라 3대에 맞춰 미세조
 - 외부 저장소(Sim-to-Real-SO-101-Workshop)에 적용한 패치 (`patches/`)
 - 고정된 실행 환경 — `uv.lock` (`envs/lerobot/`)
 
-데이터셋 · 체크포인트 · 발표 자료는 포함하지 않는다. 발표본과 시연 영상은 [Release `capstone-final`](https://github.com/bbanggang0070/manipulator_ws/releases/tag/capstone-final) 에 있다.
+데이터셋과 최종 모델은 Hugging Face 에 있다.
+
+| 자료 | 위치 | 라이선스 |
+|---|---|---|
+| 데이터셋 — 양팔 시연 392회 (LeRobot v3.0, 7.1GB) | [`heongyu/so101-bimanual-sorting`](https://huggingface.co/datasets/heongyu/so101-bimanual-sorting) | CC BY 4.0 |
+| 최종 모델 — checkpoint-69000 (9.6GB) | [`heongyu/so101-bimanual-sorting-policy`](https://huggingface.co/heongyu/so101-bimanual-sorting-policy) — 라이선스 동의 후 내려받기 | NVIDIA License (**비상업 한정**) |
+| 발표본 · 시연 영상 | [Release `capstone-final`](https://github.com/bbanggang0070/manipulator_ws/releases/tag/capstone-final) | — |
 
 ## 결과
 
@@ -145,7 +153,14 @@ patch -p0 docker/real/Dockerfile.blackwell < ~/manipulator_ws/patches/dockerfile
 ./docker/real/build.sh blackwell
 ```
 
-데이터셋과 체크포인트(각 약 9GB)는 저장소에 포함하지 않는다 — `~/blocktask_ws/Sim-to-Real-SO-101-Workshop/datasets/_train/`, `~/gr00tn16_ws/checkpoints/`.
+데이터셋과 최종 모델 내려받기 (스크립트가 찾는 위치로). 모델은 접근 동의 방식이라, [모델 페이지](https://huggingface.co/heongyu/so101-bimanual-sorting-policy) 에서 NVIDIA License(비상업 한정)에 동의하고 `hf auth login` 으로 로그인한 뒤 받는다.
+
+```bash
+hf download heongyu/so101-bimanual-sorting --repo-type dataset \
+  --local-dir ~/blocktask_ws/Sim-to-Real-SO-101-Workshop/datasets/_train/bi_cleanup
+hf download heongyu/so101-bimanual-sorting-policy \
+  --local-dir ~/gr00tn16_ws/checkpoints/gr00t_bi_cleanup392_llm8_n16_8bit/checkpoint-69000
+```
 
 ## 사용법
 
@@ -320,7 +335,9 @@ sim 에서 **물체 하나를 상자 하나에** 넣는 것부터 시작해, 막
 이 저장소의 코드와 문서는 [Apache License 2.0](LICENSE) 을 따른다.
 참고한 [Isaac-GR00T](https://github.com/NVIDIA/Isaac-GR00T) · [LeRobot](https://github.com/huggingface/lerobot) · [SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100) 도 같은 라이선스다.
 
-- GR00T N1.6 가중치는 저장소에 포함하지 않으며 [NVIDIA Open Model License](https://huggingface.co/nvidia/GR00T-N1.6-3B) 를 따른다.
+- GR00T N1.6 가중치와 이를 미세조정한 [최종 모델](https://huggingface.co/heongyu/so101-bimanual-sorting-policy) 은 [NVIDIA License](https://huggingface.co/nvidia/GR00T-N1.6-3B/blob/main/LICENSE) 를 따른다 — **연구 · 평가 목적의 비상업적 사용만** 허용된다.
+- [데이터셋](https://huggingface.co/datasets/heongyu/so101-bimanual-sorting) 은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 이다.
+- `scripts/gr00t/client/service.py` · `eval_lerobot.py` 는 Isaac-GR00T(Apache-2.0)에서 가져온 파일로, 원본 저작권 고지를 유지한다.
 
 ---
 
